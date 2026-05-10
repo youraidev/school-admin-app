@@ -1,13 +1,11 @@
-import ws from 'ws';
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from './schema.js';
-
-// Required for Node.js environments (Vercel serverless); not needed on Edge Runtime
-neonConfig.webSocketConstructor = ws;
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) throw new Error('DATABASE_URL environment variable is required');
 
+// Works with both local Docker PostgreSQL and Neon in production.
+// Vercel runs on Node.js runtime (not Edge), so standard TCP pg connections work fine.
 const pool = new Pool({ connectionString: DATABASE_URL });
 export const db = drizzle(pool, { schema });
