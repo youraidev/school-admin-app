@@ -8,7 +8,7 @@ Full instructions for **SchoolAdmin** — local Docker development and productio
 
 ```
 ┌─────────────────────────── LOCAL DEV ──────────────────────────────┐
-│  Browser → http://localhost:5173  (Vite dev server)                │
+│  Browser → http://localhost:5174  (Vite dev server)                │
 │         → http://localhost:3000   (Express API, tsx watch)         │
 │                └── Docker: PostgreSQL :5433 · Redis :6380          │
 └────────────────────────────────────────────────────────────────────┘
@@ -67,7 +67,7 @@ cp .env.local .env
 DATABASE_URL=postgresql://school:school@localhost:5433/schooldb
 JWT_SECRET=local-dev-secret-do-not-use-in-production-abc123xyz
 NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
+FRONTEND_URL=http://localhost:5174
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
 ```
@@ -109,7 +109,7 @@ npm run dev
 ```
 
 Starts both concurrently:
-- Frontend: `http://localhost:5173`
+- Frontend: `http://localhost:5174`
 - API: `http://localhost:3000`
 
 Hot-reloading is active for both frontend (Vite HMR) and backend (`tsx watch`).
@@ -321,7 +321,7 @@ Vercel runs on **Node.js runtime** (not Edge Runtime), so standard TCP connectio
 | `DATABASE_URL` | `postgresql://school:school@localhost:5433/schooldb` | Neon pooled URL | PostgreSQL connection string |
 | `JWT_SECRET` | any string | 64-char hex secret | JWT signing secret |
 | `NODE_ENV` | `development` | `production` | Runtime mode |
-| `FRONTEND_URL` | `http://localhost:5173` | `https://your-app.vercel.app` | CORS allowed origin |
+| `FRONTEND_URL` | `http://localhost:5174` | `https://your-app.vercel.app` | CORS allowed origin |
 | `UPSTASH_REDIS_REST_URL` | *(empty)* | Upstash REST URL | Rate-limit store |
 | `UPSTASH_REDIS_REST_TOKEN` | *(empty)* | Upstash REST token | Rate-limit store |
 
