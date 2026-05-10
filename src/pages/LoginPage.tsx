@@ -1,14 +1,16 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { loginUser, registerSchool } from '../lib/api';
 
 type Mode = 'login' | 'register';
 
 export default function LoginPage() {
-    const { login } = useAuth();
-    const navigate  = useNavigate();
-    const [mode, setMode]           = useState<Mode>('login');
+    const { login }       = useAuth();
+    const navigate        = useNavigate();
+    const [searchParams]  = useSearchParams();
+    const resetSuccess    = searchParams.get('reset') === '1';
+    const [mode, setMode] = useState<Mode>('login');
     const [schoolName, setSchoolName] = useState('');
     const [email, setEmail]         = useState('');
     const [password, setPassword]   = useState('');
@@ -42,6 +44,12 @@ export default function LoginPage() {
                     {mode === 'login' ? 'Welcome back' : 'Set up your school on SchoolAdmin'}
                 </p>
 
+                {resetSuccess && (
+                    <div className="bg-green-50 border border-green-200 text-green-800 text-sm rounded-lg px-4 py-3 mb-4">
+                        Password reset successfully. You can now sign in.
+                    </div>
+                )}
+
                 {error && (
                     <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
                         {error}
@@ -74,7 +82,14 @@ export default function LoginPage() {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Password</label>
+                        <div className="flex items-center justify-between mb-1">
+                            <label className="block text-sm font-medium">Password</label>
+                            {mode === 'login' && (
+                                <Link to="/forgot-password" className="text-xs text-blue-600 hover:underline">
+                                    Forgot password?
+                                </Link>
+                            )}
+                        </div>
                         <input
                             type="password"
                             value={password}

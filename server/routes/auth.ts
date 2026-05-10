@@ -2,7 +2,8 @@ import { Router } from 'express';
 import * as queries from '../queries.js';
 import { hashPassword, verifyPassword, signToken } from '../auth.js';
 import { authenticate } from '../middleware/authenticate.js';
-import { loginRateLimit } from '../middleware/rateLimit.js';
+import { loginRateLimit, forgotPasswordRateLimit } from '../middleware/rateLimit.js';
+import { sendPasswordResetEmail } from '../email.js';
 
 const router = Router();
 
@@ -68,7 +69,56 @@ router.post('/register', async (req, res, next) => {
     }
 });
 
-// GET /api/auth/me — verify token and return current user info
+// POST /api/auth/forgot-password
+router.post('/forgot-password', forgotPasswordRateLimit, async (req, res, next) => {
+    try {
+        const { email } = req.body;
+
+        // Always respond with 200 to prevent email enumeration
+        if (!email || !EMAIL_RE.test(email)) {
+            return res.json({ message: 'If that email is registered, a reset link has been sent.' });
+        }
+
+        const user = await queries.getUserByEmail(email.toLowerCase().trim());
+        if (user) {
+            const token    = await queries.createPasswordResetToken(user.id);
+            const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
+            await sendPasswordResetEmail(user.email, resetUrl);
+        }
+
+        res.json({ message: 'If that email is registered, a reset link has been sent.' });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// POST /api/auth/reset-password
+router.post('/reset-password', async (req, res, next) => {
+    try {
+        const { token, password } = req.body;
+        if (!token || !password) {
+            return res.status(400).json({ error: 'Token and password are required' });
+        }
+        if (password.length < 8) {
+            return res.status(400).json({ error: 'Password must be at least 8 characters' });
+        }
+        if (password.length > 72) {
+            return res.status(400).json({ error: 'Password must be 72 characters or fewer' });
+        }
+
+        const userId = await queries.validateAndConsumeResetToken(token);
+        if (!userId) {
+            return res.status(400).json({ error: 'This reset link is invalid or has expired.' });
+        }
+
+        await queries.updateUserPassword(userId, await hashPassword(password));
+        res.json({ message: 'Password reset successfully. You can now log in.' });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// GET /api/auth/me
 router.get('/me', authenticate, (req, res) => {
     res.json({ user: req.user });
 });

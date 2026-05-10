@@ -85,6 +85,30 @@ export async function registerSchool(schoolName: string, email: string, password
     return data;
 }
 
+// ===== PASSWORD RESET API =====
+
+export async function forgotPassword(email: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new ApiError(response.status, data.error || 'Request failed');
+    return data;
+}
+
+export async function resetPassword(token: string, password: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new ApiError(response.status, data.error || 'Request failed');
+    return data;
+}
+
 // ===== DASHBOARD API =====
 
 export async function getDashboardStats(): Promise<DashboardStats> {

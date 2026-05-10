@@ -178,6 +178,15 @@ export const complianceDocuments = pgTable('compliance_documents', {
     createdAt:         timestamp('created_at', { mode: 'string' }).defaultNow(),
 });
 
+export const passwordResetTokens = pgTable('password_reset_tokens', {
+    id:        uuid('id').primaryKey().defaultRandom(),
+    userId:    uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    tokenHash: text('token_hash').notNull().unique(),
+    expiresAt: timestamp('expires_at', { mode: 'string' }).notNull(),
+    usedAt:    timestamp('used_at', { mode: 'string' }),
+    createdAt: timestamp('created_at', { mode: 'string' }).defaultNow(),
+});
+
 export const documentSignatures = pgTable('document_signatures', {
     id:         uuid('id').primaryKey().defaultRandom(),
     schoolId:   uuid('school_id').notNull(),

@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID, createHash } from 'crypto';
 import { sql, SQL } from 'drizzle-orm';
 import { db } from './db/index.js';
 import { toCamelCase } from './db/utils.js';
@@ -13,7 +13,7 @@ import type {
 
 type Row = Record<string, unknown>;
 
-// drizzle-orm/neon-http returns { rows: Row[] } on db.execute()
+// drizzle-orm/neon-serverless returns a pg QueryResult; .rows holds the data
 async function qAll(query: SQL): Promise<Row[]> {
     const result = await db.execute(query);
     return (result as unknown as { rows: Row[] }).rows ?? [];
@@ -63,6 +63,42 @@ export async function registerSchoolWithAdmin(data: {
     const school = toCamelCase<School>((await qOne(sql`SELECT * FROM schools WHERE id = ${schoolId}`))!);
     const user   = toCamelCase<User>((await qOne(sql`SELECT * FROM users   WHERE id = ${userId}`))!);
     return { school, user };
+}
+
+// ===== PASSWORD RESET QUERIES =====
+
+export async function createPasswordResetToken(userId: string): Promise<string> {
+    const token     = randomUUID().replace(/-/g, '') + randomUUID().replace(/-/g, ''); // 64 hex chars
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+
+    await db.transaction(async (tx) => {
+        await tx.execute(sql`DELETE FROM password_reset_tokens WHERE user_id = ${userId}`);
+        await tx.execute(sql`
+            INSERT INTO password_reset_tokens (id, user_id, token_hash, expires_at)
+            VALUES (${randomUUID()}, ${userId}, ${tokenHash}, ${expiresAt})
+        `);
+    });
+
+    return token;
+}
+
+// Atomically marks the token as used; returns the userId or null if invalid/expired/used
+export async function validateAndConsumeResetToken(token: string): Promise<string | null> {
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    const row = await qOne(sql`
+        UPDATE password_reset_tokens
+        SET used_at = NOW()
+        WHERE token_hash = ${tokenHash}
+          AND expires_at > NOW()
+          AND used_at IS NULL
+        RETURNING user_id
+    `);
+    return row ? (row.user_id as string) : null;
+}
+
+export async function updateUserPassword(userId: string, passwordHash: string): Promise<void> {
+    await db.execute(sql`UPDATE users SET password_hash = ${passwordHash} WHERE id = ${userId}`);
 }
 
 // ===== DASHBOARD QUERIES =====
