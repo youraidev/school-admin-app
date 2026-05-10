@@ -30,4 +30,6 @@ db/*.db-shm
 db/*.db-wal
 
 # Environment files (may contain secrets)
-.env.private
+.env
+.env.*
+!.env.example

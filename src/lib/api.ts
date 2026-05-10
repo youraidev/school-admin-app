@@ -11,20 +11,73 @@ import type {
     ContractIssue,
     PendingSignature,
     Department,
-} from '../../shared/types';
+    AuthResponse,
+} from '../../shared/types/index.js';
+import { getToken, clearAuth } from './auth';
 
 const API_BASE_URL = '/api';
 
-// Helper function for API calls
+function authHeaders(): HeadersInit {
+    const token = getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+function handleUnauthorized(): never {
+    clearAuth();
+    window.location.href = '/login';
+    throw new Error('Session expired');
+}
+
 async function fetchAPI<T>(endpoint: string): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`);
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.statusText}`);
-    }
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        headers: authHeaders(),
+    });
+    if (response.status === 401) handleUnauthorized();
+    if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
     return response.json();
 }
 
-// Dashboard API
+async function mutateAPI<T>(method: string, endpoint: string, body?: unknown): Promise<T> {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method,
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+    if (response.status === 401) handleUnauthorized();
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error((errorData as any).error || `API Error: ${response.statusText}`);
+    }
+    if (response.status === 204) return undefined as T;
+    return response.json();
+}
+
+// ===== AUTH API =====
+
+export async function loginUser(email: string, password: string): Promise<AuthResponse> {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Login failed');
+    return data;
+}
+
+export async function registerSchool(schoolName: string, email: string, password: string): Promise<AuthResponse> {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ schoolName, email, password }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Registration failed');
+    return data;
+}
+
+// ===== DASHBOARD API =====
+
 export async function getDashboardStats(): Promise<DashboardStats> {
     return fetchAPI<DashboardStats>('/dashboard/stats');
 }
@@ -41,7 +94,8 @@ export async function getPendingSignatures(): Promise<PendingSignature[]> {
     return fetchAPI<PendingSignature[]>('/dashboard/pending-signatures');
 }
 
-// Students API
+// ===== STUDENTS API =====
+
 export async function getAllStudents(): Promise<Student[]> {
     return fetchAPI<Student[]>('/students');
 }
@@ -50,14 +104,13 @@ export async function getStudentById(id: string): Promise<StudentWithDetails | n
     try {
         return await fetchAPI<StudentWithDetails>(`/students/${id}`);
     } catch (error) {
-        if (error instanceof Error && error.message.includes('404')) {
-            return null;
-        }
+        if (error instanceof Error && error.message.includes('404')) return null;
         throw error;
     }
 }
 
-// Staff API
+// ===== STAFF API =====
+
 export async function getAllStaff(): Promise<Staff[]> {
     return fetchAPI<Staff[]>('/staff');
 }
@@ -66,149 +119,44 @@ export async function getStaffById(id: string): Promise<StaffWithDetails | null>
     try {
         return await fetchAPI<StaffWithDetails>(`/staff/${id}`);
     } catch (error) {
-        if (error instanceof Error && error.message.includes('404')) {
-            return null;
-        }
+        if (error instanceof Error && error.message.includes('404')) return null;
         throw error;
-    }
-}
-
-// Compliance API
-export async function getAllComplianceDocuments(): Promise<ComplianceDocumentWithSignatures[]> {
-    return fetchAPI<ComplianceDocumentWithSignatures[]>('/compliance');
-}
-
-export async function getComplianceDocumentById(id: string): Promise<ComplianceDocumentWithSignatures | null> {
-    try {
-        return await fetchAPI<ComplianceDocumentWithSignatures>(`/compliance/${id}`);
-    } catch (error) {
-        if (error instanceof Error && error.message.includes('404')) {
-            return null;
-        }
-        throw error;
-    }
-}
-
-// Helper function to calculate tenure (moved from queries)
-export function calculateTenure(startDate: string): string {
-    const start = new Date(startDate);
-    const now = new Date();
-    const years = now.getFullYear() - start.getFullYear();
-    const months = now.getMonth() - start.getMonth();
-
-    let totalMonths = years * 12 + months;
-    if (now.getDate() < start.getDate()) {
-        totalMonths--;
-    }
-
-    const y = Math.floor(totalMonths / 12);
-    const m = totalMonths % 12;
-
-    if (y === 0) {
-        return `${m} ${m === 1 ? 'mo' : 'mos'}`;
-    } else if (m === 0) {
-        return `${y} ${y === 1 ? 'yr' : 'yrs'}`;
-    } else {
-        return `${y} ${y === 1 ? 'yr' : 'yrs'}, ${m} ${m === 1 ? 'mo' : 'mos'}`;
     }
 }
 
 export async function addStaff(staffData: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: string;
-    department: string;
-    position: string;
-    rank?: string;
-    photoUrl?: string;
-    startDate: string;
-    qualifications?: any[]; // To avoid tight coupling with shared types here, frontend will pass StaffQualification[]
+    firstName: string; lastName: string; email: string; role: string;
+    department: string; position: string; rank?: string; photoUrl?: string;
+    startDate: string; qualifications?: any[];
 }): Promise<Staff> {
-    const response = await fetch(`${API_BASE_URL}/staff`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(staffData),
-    });
-
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.statusText}`);
-    }
-
-    return response.json();
+    return mutateAPI<Staff>('POST', '/staff', staffData);
 }
 
 export async function updateStaff(id: string, staffData: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: string;
-    department: string;
-    position: string;
-    rank?: string;
-    photoUrl?: string;
-    startDate: string;
-    qualifications?: any[];
+    firstName: string; lastName: string; email: string; role: string;
+    department: string; position: string; rank?: string; photoUrl?: string;
+    startDate: string; qualifications?: any[];
 }): Promise<Staff> {
-    const response = await fetch(`${API_BASE_URL}/staff/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(staffData),
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `API Error: ${response.statusText}`);
-    }
-
-    return response.json();
+    return mutateAPI<Staff>('PUT', `/staff/${id}`, staffData);
 }
 
-export async function getQualificationSuggestions(): Promise<{ fields: string[], institutions: string[] }> {
-    return fetchAPI<{ fields: string[], institutions: string[] }>('/staff/qualifications/suggestions');
+export async function getQualificationSuggestions(): Promise<{ fields: string[]; institutions: string[] }> {
+    return fetchAPI('/staff/qualifications/suggestions');
 }
 
 export async function updateCertificates(staffId: string, certificates: {
-    name: string;
-    issuer: string;
-    date: string;
-    fileUrl?: string;
+    name: string; issuer: string; date: string; fileUrl?: string;
 }[]): Promise<Certificate[]> {
-    const response = await fetch(`${API_BASE_URL}/staff/${staffId}/certificates`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ certificates }),
-    });
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `API Error: ${response.statusText}`);
-    }
-    return response.json();
+    return mutateAPI<Certificate[]>('PUT', `/staff/${staffId}/certificates`, { certificates });
 }
 
 export async function updateCourseEvaluations(staffId: string, evaluations: {
-    courseName: string;
-    rating: number;
-    feedback?: string;
-    date: string;
+    courseName: string; rating: number; feedback?: string; date: string;
 }[]): Promise<CourseEvaluation[]> {
-    const response = await fetch(`${API_BASE_URL}/staff/${staffId}/evaluations`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ evaluations }),
-    });
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `API Error: ${response.statusText}`);
-    }
-    return response.json();
+    return mutateAPI<CourseEvaluation[]>('PUT', `/staff/${staffId}/evaluations`, { evaluations });
 }
 
-// Department API
+// ===== DEPARTMENTS API =====
 
 export async function getAllDepartments(): Promise<Department[]> {
     return fetchAPI<Department[]>('/departments');
@@ -218,54 +166,50 @@ export async function getDepartmentById(id: string): Promise<Department | null> 
     try {
         return await fetchAPI<Department>(`/departments/${id}`);
     } catch (error) {
-        if (error instanceof Error && error.message.includes('404')) {
-            return null;
-        }
+        if (error instanceof Error && error.message.includes('404')) return null;
         throw error;
     }
 }
 
 export async function addDepartment(data: { name: string; description?: string }): Promise<Department> {
-    const response = await fetch(`${API_BASE_URL}/departments`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `API Error: ${response.statusText}`);
-    }
-
-    return response.json();
+    return mutateAPI<Department>('POST', '/departments', data);
 }
 
 export async function updateDepartment(id: string, data: { name: string; description?: string }): Promise<Department> {
-    const response = await fetch(`${API_BASE_URL}/departments/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `API Error: ${response.statusText}`);
-    }
-
-    return response.json();
+    return mutateAPI<Department>('PUT', `/departments/${id}`, data);
 }
 
 export async function deleteDepartment(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/departments/${id}`, {
-        method: 'DELETE',
-    });
+    return mutateAPI<void>('DELETE', `/departments/${id}`);
+}
 
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `API Error: ${response.statusText}`);
+// ===== COMPLIANCE API =====
+
+export async function getAllComplianceDocuments(): Promise<ComplianceDocumentWithSignatures[]> {
+    return fetchAPI<ComplianceDocumentWithSignatures[]>('/compliance');
+}
+
+export async function getComplianceDocumentById(id: string): Promise<ComplianceDocumentWithSignatures | null> {
+    try {
+        return await fetchAPI<ComplianceDocumentWithSignatures>(`/compliance/${id}`);
+    } catch (error) {
+        if (error instanceof Error && error.message.includes('404')) return null;
+        throw error;
     }
+}
+
+// ===== UTILITY =====
+
+export function calculateTenure(startDate: string): string {
+    const start = new Date(startDate);
+    const now   = new Date();
+    let totalMonths = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+    if (now.getDate() < start.getDate()) totalMonths--;
+
+    const y = Math.floor(totalMonths / 12);
+    const m = totalMonths % 12;
+
+    if (y === 0) return `${m} ${m === 1 ? 'mo' : 'mos'}`;
+    if (m === 0) return `${y} ${y === 1 ? 'yr' : 'yrs'}`;
+    return `${y} ${y === 1 ? 'yr' : 'yrs'}, ${m} ${m === 1 ? 'mo' : 'mos'}`;
 }

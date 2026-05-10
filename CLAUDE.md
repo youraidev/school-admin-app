@@ -15,13 +15,23 @@ npm start            # Run compiled production server
 
 Vite proxies all `/api/*` requests to `http://localhost:3000`, so the frontend and backend can be developed together with `npm run dev`.
 
+## Environment Variables
+
+| Variable | Required | Default | Purpose |
+|---|---|---|---|
+| `JWT_SECRET` | Production only | `dev-secret-change-in-production` | Signs JWTs — must be set in production |
+| `PORT` | No | `3000` | Server port |
+| `NODE_ENV` | No | — | Set to `production` to serve static files |
+
 ## Architecture
 
-Full-stack TypeScript school administration app:
+Multi-tenant SaaS school administration app:
 
 - **Frontend**: React 18 + Vite, React Router v6, React Query v5, Tailwind CSS, Radix UI components
 - **Backend**: Express v5, better-sqlite3 (WAL mode), tsx for dev
-- **Shared types**: `shared/types/index.ts` is the single source of truth for data models — update this first when adding/changing entities
+- **Auth**: JWT (`jsonwebtoken`) + bcrypt. Token is stored in `localStorage`, sent as `Authorization: Bearer <token>` on every API call. The `authenticate` middleware in `server/middleware/authenticate.ts` injects `req.user = { userId, schoolId, role }`.
+- **Multi-tenancy**: Row-level isolation — every entity table has `school_id`. All queries in `server/queries.ts` accept `schoolId` as the first argument and filter/insert by it. Routes extract `schoolId` from `req.user`.
+- **Shared types**: `shared/types/index.ts` is the single source of truth for data models — update this first when adding/changing entities. `School`, `User`, and `AuthUser` types live here.
 
 ### API Routes
 
@@ -45,4 +55,15 @@ All routes are mounted in `server/server.ts`. Database queries live in `server/q
 
 ### Database
 
-SQLite database at `db/school.db` (auto-created on first server start). Schema is in `db/schema.sql`, sample data in `db/seed.sql`. No migration system — schema changes require manual SQL or re-seeding.
+SQLite database at `db/school.db` (auto-created on first server start). Schema is in `db/schema.sql`, sample data in `db/seed.sql`.
+
+**Migration system**: `db/migrations/` holds numbered `.sql` files (`001_...`, `002_...`). `server/database.ts` runs pending migrations on every startup against existing databases; fresh installs apply `schema.sql` directly and mark all migration files as applied. Add new migrations as numbered files — never edit existing ones.
+
+The seed data belongs to school `00000000-0000-0000-0000-000000000001` ("Default School"). Register a new school via `POST /api/auth/register` to get a JWT for the default school's admin, or create a new school entirely.
+
+### Auth flow
+
+1. `POST /api/auth/register` — creates a `schools` row + `school_admin` user, returns `{ token, user }`
+2. `POST /api/auth/login` — returns `{ token, user }`
+3. All `/api/*` routes (except `/api/auth/*`) require `Authorization: Bearer <token>`
+4. Write operations (POST/PUT/DELETE on staff, departments) require `role = school_admin | super_admin`

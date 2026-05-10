@@ -1,70 +1,51 @@
-import express from 'express';
-import * as queries from '../queries';
+import { Router } from 'express';
+import * as queries from '../queries.js';
+import { requireRole } from '../middleware/authenticate.js';
 
-const router = express.Router();
+const router = Router();
 
-router.get('/', (req, res, next) => {
+router.get('/', async (req, res, next) => {
     try {
-        const departments = queries.getAllDepartments();
-        res.json(departments);
-    } catch (error) {
-        next(error);
-    }
+        res.json(await queries.getAllDepartments(req.user!.schoolId));
+    } catch (error) { next(error); }
 });
 
-router.get('/:id', (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
     try {
-        const department = queries.getDepartmentById(req.params.id);
-        if (!department) {
-            return res.status(404).json({ error: 'Department not found' });
-        }
+        const department = await queries.getDepartmentById(req.user!.schoolId, req.params.id as string);
+        if (!department) return res.status(404).json({ error: 'Department not found' });
         res.json(department);
-    } catch (error) {
-        next(error);
-    }
+    } catch (error) { next(error); }
 });
 
-router.post('/', (req, res, next) => {
+router.post('/', requireRole('school_admin', 'super_admin'), async (req, res, next) => {
     try {
-        const department = queries.addDepartment(req.body);
-        res.status(201).json(department);
+        res.status(201).json(await queries.addDepartment(req.user!.schoolId, req.body));
     } catch (error: any) {
-        if (error.message.includes('already exists')) {
-            return res.status(409).json({ error: error.message });
-        }
-        if (error.message.includes('required') || error.message.includes('exceeds')) {
-            return res.status(400).json({ error: error.message });
-        }
+        if (error.message?.includes('already exists')) return res.status(409).json({ error: error.message });
+        if (error.message?.includes('required') || error.message?.includes('exceeds')) return res.status(400).json({ error: error.message });
         next(error);
     }
 });
 
-router.put('/:id', (req, res, next) => {
+router.put('/:id', requireRole('school_admin', 'super_admin'), async (req, res, next) => {
     try {
-        const department = queries.updateDepartment(req.params.id, req.body);
-        if (!department) {
-            return res.status(404).json({ error: 'Department not found' });
-        }
+        const department = await queries.updateDepartment(req.user!.schoolId, req.params.id as string, req.body);
+        if (!department) return res.status(404).json({ error: 'Department not found' });
         res.json(department);
     } catch (error: any) {
-        if (error.message.includes('already exists')) {
-            return res.status(409).json({ error: error.message });
-        }
-        if (error.message.includes('required') || error.message.includes('exceeds')) {
-            return res.status(400).json({ error: error.message });
-        }
+        if (error.message?.includes('already exists')) return res.status(409).json({ error: error.message });
+        if (error.message?.includes('required') || error.message?.includes('exceeds')) return res.status(400).json({ error: error.message });
         next(error);
     }
 });
 
-router.delete('/:id', (req, res, next) => {
+router.delete('/:id', requireRole('school_admin', 'super_admin'), async (req, res, next) => {
     try {
-        queries.deleteDepartment(req.params.id);
+        await queries.deleteDepartment(req.user!.schoolId, req.params.id as string);
         res.status(204).end();
     } catch (error: any) {
-        if (error.message.includes('Cannot delete department')) {
-            return res.status(409).json({ error: error.message });
-        }
+        if (error.message?.includes('Cannot delete department')) return res.status(409).json({ error: error.message });
         next(error);
     }
 });

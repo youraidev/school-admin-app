@@ -298,6 +298,39 @@ export interface ComplianceDocumentWithSignatures extends ComplianceDocument {
     pendingCount: number;
 }
 
+// ===== TENANT MODULE =====
+
+export type UserRole = 'super_admin' | 'school_admin' | 'staff';
+export type SchoolPlan = 'trial' | 'starter' | 'pro' | 'enterprise';
+
+export interface School {
+    id: string;
+    name: string;
+    slug: string;
+    plan: SchoolPlan;
+    createdAt: string;
+}
+
+export interface User {
+    id: string;
+    schoolId: string;
+    email: string;
+    role: UserRole;
+    createdAt: string;
+}
+
+export interface AuthUser {
+    id: string;
+    email: string;
+    role: UserRole;
+    schoolId: string;
+}
+
+export interface AuthResponse {
+    token: string;
+    user: AuthUser;
+}
+
 // ===== DASHBOARD MODULE =====
 
 export interface DashboardStats {

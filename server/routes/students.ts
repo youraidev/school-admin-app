@@ -1,27 +1,20 @@
 import { Router } from 'express';
-import * as queries from '../queries';
+import * as queries from '../queries.js';
 
 const router = Router();
 
 router.get('/', async (req, res, next) => {
     try {
-        const students = queries.getAllStudents();
-        res.json(students);
-    } catch (error) {
-        next(error);
-    }
+        res.json(await queries.getAllStudents(req.user!.schoolId));
+    } catch (error) { next(error); }
 });
 
 router.get('/:id', async (req, res, next) => {
     try {
-        const student = queries.getStudentById(req.params.id);
-        if (!student) {
-            return res.status(404).json({ error: 'Student not found' });
-        }
+        const student = await queries.getStudentById(req.user!.schoolId, req.params.id as string);
+        if (!student) return res.status(404).json({ error: 'Student not found' });
         res.json(student);
-    } catch (error) {
-        next(error);
-    }
+    } catch (error) { next(error); }
 });
 
 export default router;
