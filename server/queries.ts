@@ -47,10 +47,8 @@ export async function registerSchoolWithAdmin(data: {
     const userId   = randomUUID();
     const slug = data.schoolName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
-    await db.transaction(async tx => {
-        await tx.execute(sql`INSERT INTO schools (id, name, slug) VALUES (${schoolId}, ${data.schoolName}, ${slug})`);
-        await tx.execute(sql`INSERT INTO users (id, school_id, email, password_hash, role) VALUES (${userId}, ${schoolId}, ${data.email}, ${data.passwordHash}, 'school_admin')`);
-    });
+    await db.execute(sql`INSERT INTO schools (id, name, slug) VALUES (${schoolId}, ${data.schoolName}, ${slug})`);
+    await db.execute(sql`INSERT INTO users (id, school_id, email, password_hash, role) VALUES (${userId}, ${schoolId}, ${data.email}, ${data.passwordHash}, 'school_admin')`);
 
     const school = toCamelCase<School>((await qOne(sql`SELECT * FROM schools WHERE id = ${schoolId}`))!);
     const user   = toCamelCase<User>((await qOne(sql`SELECT * FROM users   WHERE id = ${userId}`))!);
@@ -207,20 +205,18 @@ export async function addStaff(schoolId: string, staffData: {
 }): Promise<Staff> {
     const id = randomUUID();
 
-    await db.transaction(async tx => {
-        await tx.execute(sql`
+    await db.execute(sql`
             INSERT INTO staff (id, school_id, first_name, last_name, position, email, role, department, rank, photo_url, start_date)
             VALUES (${id}, ${schoolId}, ${staffData.firstName}, ${staffData.lastName}, ${staffData.position},
                     ${staffData.email}, ${staffData.role}, ${staffData.department},
                     ${staffData.rank ?? null}, ${staffData.photoUrl ?? null}, ${staffData.startDate})
         `);
-        for (const qual of staffData.qualifications ?? []) {
-            await tx.execute(sql`
+    for (const qual of staffData.qualifications ?? []) {
+        await db.execute(sql`
                 INSERT INTO staff_qualifications (staff_id, degree_type, field_of_study, institution, year)
                 VALUES (${id}, ${qual.degreeType}, ${normalizeText(qual.fieldOfStudy)}, ${normalizeText(qual.institution)}, ${qual.year ?? null})
             `);
-        }
-    });
+    }
 
     const row = await qOne(sql`SELECT s.*, d.name as department_name FROM staff s LEFT JOIN departments d ON s.department = d.id WHERE s.id = ${id}`);
     const quals = await qAll(sql`SELECT * FROM staff_qualifications WHERE staff_id = ${id} ORDER BY year DESC NULLS LAST`);
@@ -243,15 +239,13 @@ export async function updateStaff(schoolId: string, id: string, staffData: {
     if (!returning) return null;
 
     if (staffData.qualifications !== undefined) {
-        await db.transaction(async tx => {
-            await tx.execute(sql`DELETE FROM staff_qualifications WHERE staff_id = ${id}`);
-            for (const qual of staffData.qualifications!) {
-                await tx.execute(sql`
+        await db.execute(sql`DELETE FROM staff_qualifications WHERE staff_id = ${id}`);
+        for (const qual of staffData.qualifications!) {
+            await db.execute(sql`
                     INSERT INTO staff_qualifications (staff_id, degree_type, field_of_study, institution, year)
                     VALUES (${id}, ${qual.degreeType}, ${normalizeText(qual.fieldOfStudy)}, ${normalizeText(qual.institution)}, ${qual.year ?? null})
                 `);
-            }
-        });
+        }
     }
 
     const row = await qOne(sql`SELECT s.*, d.name as department_name FROM staff s LEFT JOIN departments d ON s.department = d.id WHERE s.id = ${id}`);
@@ -265,15 +259,13 @@ export async function updateCertificates(schoolId: string, staffId: string, cert
     const exists = await qOne(sql`SELECT id FROM staff WHERE school_id = ${schoolId} AND id = ${staffId}`);
     if (!exists) throw new Error('Staff member not found');
 
-    await db.transaction(async tx => {
-        await tx.execute(sql`DELETE FROM certificates WHERE staff_id = ${staffId}`);
-        for (const cert of certs) {
-            await tx.execute(sql`
+    await db.execute(sql`DELETE FROM certificates WHERE staff_id = ${staffId}`);
+    for (const cert of certs) {
+        await db.execute(sql`
                 INSERT INTO certificates (id, school_id, staff_id, name, issuer, date, file_url)
                 VALUES (${randomUUID()}, ${schoolId}, ${staffId}, ${cert.name.trim()}, ${cert.issuer.trim()}, ${cert.date}, ${cert.fileUrl ?? null})
             `);
-        }
-    });
+    }
 
     return toCamelCase<Certificate[]>(await qAll(sql`SELECT * FROM certificates WHERE staff_id = ${staffId} ORDER BY date DESC`));
 }
@@ -284,15 +276,13 @@ export async function updateCourseEvaluations(schoolId: string, staffId: string,
     const exists = await qOne(sql`SELECT id FROM staff WHERE school_id = ${schoolId} AND id = ${staffId}`);
     if (!exists) throw new Error('Staff member not found');
 
-    await db.transaction(async tx => {
-        await tx.execute(sql`DELETE FROM course_evaluations WHERE staff_id = ${staffId}`);
-        for (const ev of evals) {
-            await tx.execute(sql`
+    await db.execute(sql`DELETE FROM course_evaluations WHERE staff_id = ${staffId}`);
+    for (const ev of evals) {
+        await db.execute(sql`
                 INSERT INTO course_evaluations (id, school_id, staff_id, course_name, rating, feedback, date)
                 VALUES (${randomUUID()}, ${schoolId}, ${staffId}, ${ev.courseName.trim()}, ${Math.min(5, Math.max(0, ev.rating))}, ${ev.feedback?.trim() ?? null}, ${ev.date})
             `);
-        }
-    });
+    }
 
     return toCamelCase<CourseEvaluation[]>(await qAll(sql`SELECT * FROM course_evaluations WHERE staff_id = ${staffId} ORDER BY date DESC`));
 }
