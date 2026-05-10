@@ -1,43 +1,53 @@
 # Deployment Guide
 
-Full instructions for deploying **SchoolAdmin** from scratch to production on Vercel with Neon PostgreSQL and Upstash Redis.
+Full instructions for **SchoolAdmin** — local Docker development and production deployment on Vercel + Neon PostgreSQL + Upstash Redis.
 
 ---
 
 ## Architecture Overview
 
 ```
-Browser
-  └── Vercel (CDN + Serverless Functions)
-        ├── /                  → dist/index.html  (Vite SPA)
-        └── /api/*             → api/index.ts     (Express serverless)
-              └── Neon PostgreSQL  (production database)
-              └── Upstash Redis    (rate limiting)
+┌─────────────────────────── LOCAL DEV ──────────────────────────────┐
+│  Browser → http://localhost:5173  (Vite dev server)                │
+│         → http://localhost:3000   (Express API, tsx watch)         │
+│                └── Docker: PostgreSQL :5433 · Redis :6380          │
+└────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────── PRODUCTION ─────────────────────────────┐
+│  Browser → Vercel CDN                                              │
+│         ├── /          → dist/index.html   (Vite SPA, static)     │
+│         └── /api/*     → api/index.ts      (Express serverless)   │
+│                └── Neon PostgreSQL  (production DB)                │
+│                └── Upstash Redis    (rate limiting)                │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 | Layer | Technology | Notes |
 |-------|-----------|-------|
 | Frontend | React + Vite | Built to `dist/`, served as static files |
-| Backend | Express.js | Runs as a single Vercel serverless function via `api/index.ts` |
-| Database | Neon PostgreSQL | Serverless Postgres; connection via WebSocket Pool |
-| Cache / Rate-limit | Upstash Redis | Sliding-window rate limiting on auth endpoints |
-| ORM | Drizzle ORM | Schema defined in `server/db/schema.ts` |
-| Auth | JWT (jsonwebtoken) | 7-day tokens; secret set via `JWT_SECRET` env var |
+| Backend | Express.js | Single Vercel serverless function via `api/index.ts` |
+| Database | PostgreSQL | Local: Docker · Production: Neon |
+| DB driver | `pg` (node-postgres) | Standard TCP; works with Docker and Neon equally |
+| ORM | Drizzle ORM | Schema in `server/db/schema.ts` |
+| Cache / Rate-limit | Upstash Redis | Sliding-window on auth endpoints; in-memory fallback locally |
+| Auth | JWT (jsonwebtoken) | 7-day tokens, secret via `JWT_SECRET` env var |
 
 ---
 
 ## Prerequisites
 
-- Node.js ≥ 18
-- npm ≥ 9
+- **Docker** (for local dev)
+- Node.js ≥ 18, npm ≥ 9
 - A [GitHub](https://github.com) account
-- A [Vercel](https://vercel.com) account (free Hobby plan is enough)
-- A [Neon](https://neon.tech) account (free tier is enough)
-- A [Upstash](https://upstash.com) account (free tier is enough)
+- A [Vercel](https://vercel.com) account (free Hobby plan)
+- A [Neon](https://neon.tech) account (free tier)
+- A [Upstash](https://upstash.com) account (free tier)
 
 ---
 
-## Step 1 — Clone & Install
+## Part A — Local Development
+
+### A1 — Clone & Install
 
 ```bash
 git clone https://github.com/youraidev/school-admin-app.git
@@ -45,190 +55,189 @@ cd school-admin-app
 npm install
 ```
 
----
-
-## Step 2 — Create the Neon Database
-
-1. Go to [console.neon.tech](https://console.neon.tech) → **New Project**
-2. Choose a region (e.g. `AWS us-east-1` for lowest Vercel latency)
-3. Project name: `school-admin-app` (or anything)
-4. Once created, open the project → **Connection Details**
-5. Select the **Pooled connection** tab
-6. Copy the connection string — it looks like:
-   ```
-   postgresql://neondb_owner:<password>@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require
-   ```
-   > ⚠️ Always use the **pooled** URL (contains `-pooler` in the hostname). It supports WebSocket connections required by `@neondatabase/serverless`.
-
----
-
-## Step 3 — Environment Variables
-
-Create a `.env` file in the project root (never commit this file):
+### A2 — Set Up Local Environment
 
 ```bash
-cp .env.example .env
+cp .env.local .env
 ```
 
-Then fill in the values:
+`.env.local` is pre-configured for Docker and is already in the repo (git-ignored). Its contents:
 
 ```env
-# PostgreSQL — Neon pooled connection string
-DATABASE_URL=postgresql://neondb_owner:<password>@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require
-
-# JWT signing secret — generate with:  node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-JWT_SECRET=your-64-char-hex-secret-here
-
-# Set to 'development' locally, 'production' in Vercel
+DATABASE_URL=postgresql://school:school@localhost:5433/schooldb
+JWT_SECRET=local-dev-secret-do-not-use-in-production-abc123xyz
 NODE_ENV=development
-
-# Your production Vercel URL — used for CORS
-FRONTEND_URL=https://school-app-two-chi.vercel.app
-
-# Upstash Redis — leave empty locally if you don't need rate limiting
+FRONTEND_URL=http://localhost:5173
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
 ```
 
-Generate `JWT_SECRET`:
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
+> ⚠️ `.env` is git-ignored. Never commit it. Only `.env.local` (the template) and `.env.example` (production template) live in the repo.
 
----
-
-## Step 4 — Push Database Schema
-
-This creates all tables in your Neon database using Drizzle:
+### A3 — Start Docker Containers
 
 ```bash
-npm run db:push
+npm run docker:up
 ```
 
-When prompted about adding constraints to existing tables, choose **"No, add the constraint without truncating the table"**.
+This starts two containers:
 
-> If the interactive prompt gets stuck, apply constraints manually:
-> ```bash
-> node --env-file=.env -e "
-> const { neon } = require('@neondatabase/serverless');
-> const sql = neon(process.env.DATABASE_URL);
-> sql\`ALTER TABLE staff ADD CONSTRAINT staff_school_email_unique UNIQUE (school_id, email)\`
->   .then(() => console.log('done')).catch(e => console.log(e.message));
-> "
-> ```
+| Container | Image | Host Port | Purpose |
+|-----------|-------|-----------|---------|
+| `school-app-postgres` | `postgres:16-alpine` | `5433` | Primary database |
+| `school-app-redis` | `redis:7-alpine` | `6380` | Rate-limit store |
 
----
+> Ports `5433` and `6380` are used because `5432` and `6379` may already be occupied by other local services (e.g. other Docker projects).
 
-## Step 5 — Seed Demo Data (Optional)
+### A4 — Push Schema & Seed Data
 
-Populates the database with a demo school, 5 staff, 4 students, compliance documents, etc.:
+On first run only:
 
 ```bash
-npm run db:seed
+npm run db:push    # creates all tables in the local Docker database
+npm run db:seed    # loads demo school, staff, students, compliance docs
 ```
 
-Demo login credentials after seeding:
+Demo login after seeding:
 - **Email:** `admin@school.edu`
 - **Password:** `Admin1234!`
 
----
-
-## Step 6 — Run Locally
+### A5 — Start Dev Server
 
 ```bash
 npm run dev
 ```
 
-This starts:
-- Vite dev server at `http://localhost:5173` (frontend)
-- Express server at `http://localhost:3000` (API)
+Starts both concurrently:
+- Frontend: `http://localhost:5173`
+- API: `http://localhost:3000`
+
+Hot-reloading is active for both frontend (Vite HMR) and backend (`tsx watch`).
+
+### A6 — Daily Workflow
+
+```bash
+npm run docker:up   # ensure containers are running (safe to run repeatedly)
+npm run dev         # start frontend + backend
+```
+
+### A7 — Docker Commands Reference
+
+| Command | Description |
+|---------|-------------|
+| `npm run docker:up` | Start containers in background |
+| `npm run docker:down` | Stop containers (data persisted in Docker volume) |
+| `npm run docker:reset` | Wipe database volume and start fresh |
+
+After `docker:reset`, re-run `db:push` and `db:seed`.
 
 ---
 
-## Step 7 — GitHub Repository
+## Part B — Production Deployment (Vercel + Neon)
+
+### B1 — Create the Neon Database
+
+1. Go to [console.neon.tech](https://console.neon.tech) → **New Project**
+2. Choose a region (e.g. `AWS us-east-1` for lowest Vercel latency)
+3. Once created, open the project → **Connection Details**
+4. Copy the **pooled** connection string (contains `-pooler` in the hostname):
+   ```
+   postgresql://neondb_owner:<password>@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require
+   ```
+   > The plain `pg` driver connects to Neon via standard TCP+SSL — no special WebSocket driver needed.
+
+### B2 — Push Schema to Production
+
+Switch `.env` to point at Neon, then run:
 
 ```bash
-git init   # (skip if already a git repo)
+npm run db:push
+```
+
+When prompted about adding a unique constraint to an existing table, choose  
+**"No, add the constraint without truncating the table"**.
+
+> If the interactive prompt gets stuck, apply the constraint directly via SQL:
+> ```bash
+> node --env-file=.env -e "
+> const { Pool } = require('pg');
+> const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+> pool.query('ALTER TABLE staff ADD CONSTRAINT staff_school_email_unique UNIQUE (school_id, email)')
+>   .then(() => { console.log('done'); pool.end(); })
+>   .catch(e => { console.log(e.message); pool.end(); });
+> "
+> ```
+
+### B3 — GitHub Repository
+
+```bash
+git init   # skip if already a repo
 git remote add origin https://github.com/<your-username>/school-admin-app.git
 git add -A
 git commit -m "Initial commit"
 git push -u origin main
 ```
 
-> ⚠️ Make sure `.env` is in `.gitignore` **before** pushing. It already is in this project, but double-check with `git status`.
-
----
-
-## Step 8 — Create Vercel Project
+### B4 — Create Vercel Project
 
 1. Go to [vercel.com/new](https://vercel.com/new)
 2. Import your GitHub repository
-3. **Framework Preset:** select **Other** (not Vite — the API needs a custom build)
+3. **Framework Preset:** select **Other** (not Vite)
 4. **Build & Output Settings:**
    - Build Command: `npm run build`
    - Output Directory: `dist`
    - Install Command: `npm install`
-5. Click **Deploy** (it will fail the first time — that's fine, we add env vars next)
+5. Click **Deploy** (first deploy may fail — env vars come next)
 
----
+### B5 — Add Environment Variables to Vercel
 
-## Step 9 — Add Environment Variables to Vercel
-
-Go to your Vercel project → **Settings → Environment Variables** and add:
+Go to **Settings → Environment Variables** and add:
 
 | Key | Value | Environments |
 |-----|-------|-------------|
-| `DATABASE_URL` | Your Neon pooled connection string | Production, Preview |
-| `JWT_SECRET` | Your generated hex secret | Production, Preview |
-| `NODE_ENV` | `production` | Production |
+| `DATABASE_URL` | Neon pooled connection string | Production, Preview |
+| `JWT_SECRET` | 64-char hex secret (see below) | Production, Preview |
+| `NODE_ENV` | `production` | Production only |
 | `FRONTEND_URL` | `https://your-app.vercel.app` | Production, Preview |
-| `UPSTASH_REDIS_REST_URL` | From Upstash (Step 10) | Production, Preview |
-| `UPSTASH_REDIS_REST_TOKEN` | From Upstash (Step 10) | Production, Preview |
+| `UPSTASH_REDIS_REST_URL` | From Upstash (Step B6) | Production, Preview |
+| `UPSTASH_REDIS_REST_TOKEN` | From Upstash (Step B6) | Production, Preview |
 
-> 💡 Find your Vercel app URL at: Project → Overview → Domains section.
+Generate `JWT_SECRET`:
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
 
-After adding env vars, Vercel shows a **"Redeploy"** toast — click it to apply.
+> 💡 Find your Vercel URL at: Project → Overview → Domains section.
 
----
-
-## Step 10 — Create Upstash Redis (Rate Limiting)
+### B6 — Create Upstash Redis
 
 1. Go to [console.upstash.com](https://console.upstash.com) → **Create Database**
-2. Settings:
-   - **Type:** Regional
-   - **Region:** `us-east-1` (or nearest to your Vercel region)
-   - **Name:** `school-app-redis`
-   - **Plan:** Free
-3. After creation, scroll to the **REST API** section
-4. Copy:
-   - `UPSTASH_REDIS_REST_URL` (starts with `https://`)
-   - `UPSTASH_REDIS_REST_TOKEN` (long string)
-5. Add both to Vercel env vars (as shown in Step 9)
+2. Settings: **Regional**, region `us-east-1`, name `school-app-redis`, **Free** plan
+3. After creation, scroll to **REST API** and copy:
+   - `UPSTASH_REDIS_REST_URL`
+   - `UPSTASH_REDIS_REST_TOKEN`
+4. Add both to Vercel env vars (step B5)
 
-> **Alternatively:** Use the Vercel ↔ Upstash integration (Vercel → Storage → Create → Upstash for Redis) which auto-creates the database and injects env vars. Just make sure the injected variable names match exactly (`UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`) — Vercel's integration may use different names like `KV_URL`. If so, add the correctly named vars manually pointing to the same values.
+> **Shortcut:** Use the Vercel ↔ Upstash integration (Vercel → Integrations → Upstash) which auto-creates the DB and injects env vars. If the injected names differ (e.g. `KV_URL`), add the correctly named vars (`UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`) manually with the same values.
 
----
+### B7 — Redeploy
 
-## Step 11 — Redeploy
-
-After all env vars are set, trigger a fresh deployment:
+Vercel auto-deploys on every `git push`. To trigger manually:
 
 ```bash
 git commit --allow-empty -m "trigger redeploy"
 git push
 ```
 
-Or use the Vercel dashboard → **Deployments → Redeploy**.
+Or: Vercel dashboard → **Deployments → Redeploy**.
 
 ---
 
 ## Build System
 
-### How the build works
-
 ```
 npm run build
-  ├── tsc -p tsconfig.server.json   → compiles server TypeScript to dist-server/
+  ├── tsc -p tsconfig.server.json   → type-checks server TypeScript
   └── vite build                    → bundles React SPA to dist/
 ```
 
@@ -243,30 +252,35 @@ npm run build
 }
 ```
 
-- `/api/*` requests → `api/index.ts` (Express serverless function)
-- All other requests → `dist/index.html` (SPA client-side routing)
+- `/api/*` → `api/index.ts` (Express serverless function)
+- Everything else → `dist/index.html` (SPA client-side routing)
 
 ---
 
-## Database Driver Notes
+## Database Driver
 
-The project uses `drizzle-orm/neon-serverless` with `Pool` (WebSocket mode):
+The project uses the standard `pg` (node-postgres) driver:
 
 ```ts
 // server/db/index.ts
-import ws from 'ws';
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-
-neonConfig.webSocketConstructor = ws; // required for Node.js (Vercel serverless)
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 export const db = drizzle(pool, { schema });
 ```
 
-**Why WebSocket mode?** The `neon-http` driver (HTTP mode) does **not** support `db.transaction()`. The WebSocket mode (`neon-serverless` + `Pool`) supports full PostgreSQL transactions.
+**Why plain `pg` and not `@neondatabase/serverless`?**
 
-**Why `ws` package?** Vercel serverless runs on Node.js, which doesn't have a native browser `WebSocket` global. The `ws` package fills that gap. If you migrate to **Vercel Edge Runtime**, remove `neonConfig.webSocketConstructor = ws` since Edge has native WebSockets.
+| Driver | Transactions | Local Docker | Neon | Edge Runtime |
+|--------|-------------|-------------|------|-------------|
+| `neon-http` | ❌ | ❌ | ✅ | ✅ |
+| `neon-serverless` + `ws` | ✅ | ❌ | ✅ | ✅ |
+| **`pg` (this project)** | ✅ | ✅ | ✅ | ❌ |
+
+Vercel runs on **Node.js runtime** (not Edge Runtime), so standard TCP connections work fine with both Docker and Neon. The `pg` driver is the simplest choice that supports all environments.
+
+> If you ever migrate to **Vercel Edge Runtime**, switch to `drizzle-orm/neon-serverless` + `@neondatabase/serverless` Pool.
 
 ---
 
@@ -274,67 +288,72 @@ export const db = drizzle(pool, { schema });
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start local dev server (Vite + Express) |
-| `npm run build` | Build for production (tsc + vite) |
-| `npm run db:push` | Push schema changes to database (interactive) |
+| `npm run dev` | Start local dev (Vite HMR + Express tsx watch) |
+| `npm run build` | Production build (tsc + vite) |
+| `npm run db:push` | Push schema to whichever DB is in `.env` |
 | `npm run db:generate` | Generate Drizzle migration files |
-| `npm run db:seed` | Seed demo data into the database |
+| `npm run db:seed` | Seed demo data into the current DB |
+| `npm run docker:up` | Start local Docker containers |
+| `npm run docker:down` | Stop local Docker containers |
+| `npm run docker:reset` | Wipe DB volume and restart fresh |
 | `npm run lint` | Run ESLint |
 
 ---
 
 ## TypeScript Configuration
 
-The project has separate TypeScript configs for frontend and backend:
-
 | File | Purpose |
 |------|---------|
-| `tsconfig.json` | Root config — references app + node + server configs |
+| `tsconfig.json` | Root — references app, node, and server configs |
 | `tsconfig.app.json` | Frontend (React) — targets `src/` |
 | `tsconfig.node.json` | Vite config file |
 | `tsconfig.server.json` | Backend — targets `server/` + `api/` |
-| `api/tsconfig.json` | Extends `tsconfig.server.json` — tells Vercel's type checker to use server types |
+| `api/tsconfig.json` | Extends `tsconfig.server.json` — critical for Vercel's isolated type-check |
 
-The `api/tsconfig.json` is critical: without it, Vercel's isolated type-check of `api/index.ts` won't see `server/express.d.ts` and will error on `req.user`.
+> `api/tsconfig.json` is essential: without it, Vercel's type-check of `api/index.ts` won't see `server/express.d.ts` and will error on `req.user`.
 
 ---
 
 ## Environment Variable Reference
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | ✅ | Neon pooled PostgreSQL connection string |
-| `JWT_SECRET` | ✅ | Secret for signing JWT tokens (min 32 chars) |
-| `NODE_ENV` | ✅ | `production` on Vercel, `development` locally |
-| `FRONTEND_URL` | ✅ | CORS origin (your Vercel app URL) |
-| `UPSTASH_REDIS_REST_URL` | ⚠️ optional | Upstash Redis REST URL for rate limiting |
-| `UPSTASH_REDIS_REST_TOKEN` | ⚠️ optional | Upstash Redis REST token for rate limiting |
+| Variable | Local | Production | Description |
+|----------|-------|-----------|-------------|
+| `DATABASE_URL` | `postgresql://school:school@localhost:5433/schooldb` | Neon pooled URL | PostgreSQL connection string |
+| `JWT_SECRET` | any string | 64-char hex secret | JWT signing secret |
+| `NODE_ENV` | `development` | `production` | Runtime mode |
+| `FRONTEND_URL` | `http://localhost:5173` | `https://your-app.vercel.app` | CORS allowed origin |
+| `UPSTASH_REDIS_REST_URL` | *(empty)* | Upstash REST URL | Rate-limit store |
+| `UPSTASH_REDIS_REST_TOKEN` | *(empty)* | Upstash REST token | Rate-limit store |
 
-> If `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` are not set, the rate-limit middleware falls back to `express-rate-limit` (in-memory). This is fine for a single serverless instance but won't share state across instances.
+> When `UPSTASH_REDIS_REST_URL` is empty, rate limiting falls back to in-memory (`express-rate-limit`). Suitable for local dev; not shared across serverless instances in production.
 
 ---
 
 ## Common Issues & Fixes
 
+### `password authentication failed` connecting to local Docker DB
+**Cause:** Port mismatch or stale `.env` still pointing at Neon.  
+**Fix:** Ensure `.env` has `DATABASE_URL=postgresql://school:school@localhost:5433/schooldb` (copy from `.env.local`).
+
 ### `No transactions support in neon-http driver`
 **Cause:** Using `drizzle-orm/neon-http` with `db.transaction()`.  
-**Fix:** Switch to `drizzle-orm/neon-serverless` with `Pool` (see Database Driver Notes above).
+**Fix:** Already resolved — project uses `pg` + `drizzle-orm/node-postgres`.
 
 ### `Property 'user' does not exist on type 'Request'`
 **Cause:** Vercel type-checks `api/index.ts` without seeing `server/express.d.ts`.  
 **Fix:** `api/tsconfig.json` extending `tsconfig.server.json` is already in place.
 
-### `Internal server error` on register/login
-**Cause:** Tables don't exist yet. Run `npm run db:push` first.  
-**Fix:** `npm run db:push`
+### `Internal server error` on register/login (production)
+**Cause:** Tables don't exist in the Neon database yet.  
+**Fix:** Point `.env` at Neon and run `npm run db:push`.
 
 ### CORS errors in production
 **Cause:** `FRONTEND_URL` env var not set or incorrect.  
 **Fix:** Set `FRONTEND_URL=https://your-app.vercel.app` in Vercel env vars.
 
 ### Build fails with TypeScript errors
-**Cause:** Frontend has strict `noUnusedLocals`/`noUnusedParameters` rules.  
-**Fix:** The Vercel build only runs `vite build` (frontend) — server TS errors won't block it. Check `tsconfig.server.json` for server-only strictness.
+**Cause:** `tsconfig.app.json` has strict `noUnusedLocals`/`noUnusedParameters`.  
+**Fix:** The Vercel build only type-checks the server (`tsc -p tsconfig.server.json`); frontend errors don't block Vercel's `vite build`. Fix unused imports in `src/` to keep the codebase clean.
 
 ---
 
