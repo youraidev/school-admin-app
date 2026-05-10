@@ -1,28 +1,25 @@
 import { Router } from 'express';
-import rateLimit from 'express-rate-limit';
 import * as queries from '../queries.js';
 import { hashPassword, verifyPassword, signToken } from '../auth.js';
 import { authenticate } from '../middleware/authenticate.js';
+import { loginRateLimit } from '../middleware/rateLimit.js';
 
 const router = Router();
 
-const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10,
-    message: { error: 'Too many login attempts. Please try again later.' },
-    standardHeaders: true,
-    legacyHeaders: false,
-});
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // POST /api/auth/login
-router.post('/login', loginLimiter, async (req, res, next) => {
+router.post('/login', loginRateLimit, async (req, res, next) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
+        if (!EMAIL_RE.test(email)) {
+            return res.status(400).json({ error: 'Invalid email format' });
+        }
 
-        const user = await queries.getUserByEmail(email);
+        const user = await queries.getUserByEmail(email.toLowerCase().trim());
         if (!user || !(await verifyPassword(password, user.passwordHash))) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -41,23 +38,32 @@ router.post('/register', async (req, res, next) => {
         if (!schoolName || !email || !password) {
             return res.status(400).json({ error: 'School name, email, and password are required' });
         }
+        if (!EMAIL_RE.test(email)) {
+            return res.status(400).json({ error: 'Invalid email format' });
+        }
         if (password.length < 8) {
             return res.status(400).json({ error: 'Password must be at least 8 characters' });
         }
+        if (password.length > 72) {
+            return res.status(400).json({ error: 'Password must be 72 characters or fewer' });
+        }
 
-        if (await queries.getUserByEmail(email)) {
+        if (await queries.getUserByEmail(email.toLowerCase().trim())) {
             return res.status(409).json({ error: 'Email already registered' });
         }
 
         const { school, user } = await queries.registerSchoolWithAdmin({
-            schoolName,
-            email,
+            schoolName: schoolName.trim(),
+            email: email.toLowerCase().trim(),
             passwordHash: await hashPassword(password),
         });
 
         const token = signToken({ userId: user.id, schoolId: school.id, role: user.role });
         res.status(201).json({ token, user: { id: user.id, email: user.email, role: user.role, schoolId: school.id } });
-    } catch (error) {
+    } catch (error: any) {
+        if (error.message === 'SLUG_CONFLICT') {
+            return res.status(409).json({ error: 'A school with that name already exists' });
+        }
         next(error);
     }
 });

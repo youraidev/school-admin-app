@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { sql, SQL } from 'drizzle-orm';
 import { db } from './db/index.js';
-import { toCamelCase, convertBooleans } from './db/utils.js';
+import { toCamelCase } from './db/utils.js';
 import type {
     Student, StudentWithDetails, Allergy, EmergencyContact,
     DocumentChecklist, Agreement, AuthorizedPerson,
@@ -13,13 +13,12 @@ import type {
 
 type Row = Record<string, unknown>;
 
-// Execute a SQL query and return all rows
+// drizzle-orm/neon-http returns { rows: Row[] } on db.execute()
 async function qAll(query: SQL): Promise<Row[]> {
     const result = await db.execute(query);
     return (result as unknown as { rows: Row[] }).rows ?? [];
 }
 
-// Execute a SQL query and return one row or null
 async function qOne(query: SQL): Promise<Row | null> {
     const rows = await qAll(query);
     return rows[0] ?? null;
@@ -29,6 +28,10 @@ function normalizeText(text: string): string {
     if (!text) return text;
     return text.trim().replace(/\s+/g, ' ')
         .split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+function isUniqueViolation(err: unknown): boolean {
+    return typeof err === 'object' && err !== null && (err as { code?: string }).code === '23505';
 }
 
 // ===== AUTH QUERIES =====
@@ -47,8 +50,15 @@ export async function registerSchoolWithAdmin(data: {
     const userId   = randomUUID();
     const slug = data.schoolName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
-    await db.execute(sql`INSERT INTO schools (id, name, slug) VALUES (${schoolId}, ${data.schoolName}, ${slug})`);
-    await db.execute(sql`INSERT INTO users (id, school_id, email, password_hash, role) VALUES (${userId}, ${schoolId}, ${data.email}, ${data.passwordHash}, 'school_admin')`);
+    try {
+        await db.transaction(async (tx) => {
+            await tx.execute(sql`INSERT INTO schools (id, name, slug) VALUES (${schoolId}, ${data.schoolName}, ${slug})`);
+            await tx.execute(sql`INSERT INTO users (id, school_id, email, password_hash, role) VALUES (${userId}, ${schoolId}, ${data.email}, ${data.passwordHash}, 'school_admin')`);
+        });
+    } catch (err: unknown) {
+        if (isUniqueViolation(err)) throw new Error('SLUG_CONFLICT');
+        throw err;
+    }
 
     const school = toCamelCase<School>((await qOne(sql`SELECT * FROM schools WHERE id = ${schoolId}`))!);
     const user   = toCamelCase<User>((await qOne(sql`SELECT * FROM users   WHERE id = ${userId}`))!);
@@ -65,10 +75,10 @@ export async function getDashboardStats(schoolId: string): Promise<DashboardStat
         qOne(sql`SELECT COUNT(DISTINCT ds.document_id) as count FROM document_signatures ds JOIN compliance_documents cd ON ds.document_id = cd.id WHERE cd.school_id = ${schoolId} AND ds.status = 'pending'`),
     ]);
     return {
-        totalStudents:    Number((ts as Row).count),
-        totalStaff:       Number((tf as Row).count),
-        pendingContracts: Number((pc as Row).count),
-        pendingSignatures:Number((ps as Row).count),
+        totalStudents:     Number((ts as Row).count),
+        totalStaff:        Number((tf as Row).count),
+        pendingContracts:  Number((pc as Row).count),
+        pendingSignatures: Number((ps as Row).count),
     };
 }
 
@@ -142,7 +152,7 @@ export async function getStudentById(schoolId: string, id: string): Promise<Stud
 
 // ===== QUALIFICATION SUGGESTIONS =====
 
-export async function getQualificationSuggestions(schoolId: string) {
+export async function getQualificationSuggestions(schoolId: string): Promise<{ fields: string[]; institutions: string[] }> {
     const [fields, institutions] = await Promise.all([
         qAll(sql`SELECT DISTINCT sq.field_of_study FROM staff_qualifications sq JOIN staff s ON sq.staff_id = s.id WHERE s.school_id = ${schoolId} ORDER BY sq.field_of_study`),
         qAll(sql`SELECT DISTINCT sq.institution    FROM staff_qualifications sq JOIN staff s ON sq.staff_id = s.id WHERE s.school_id = ${schoolId} ORDER BY sq.institution`),
@@ -155,11 +165,24 @@ export async function getQualificationSuggestions(schoolId: string) {
 
 // ===== STAFF QUERIES =====
 
-async function attachQualifications(staffRows: Row[]): Promise<Staff[]> {
-    return Promise.all(staffRows.map(async row => {
-        const staffCamel = toCamelCase<Staff>(row);
-        const quals = await qAll(sql`SELECT * FROM staff_qualifications WHERE staff_id = ${staffCamel.id} ORDER BY year DESC NULLS LAST`);
-        return { ...staffCamel, qualifications: toCamelCase<StaffQualification[]>(quals) };
+// Batch-fetches all qualifications for a set of staff rows in 1 query (avoids N+1)
+async function attachQualifications(schoolId: string, staffRows: Row[]): Promise<Staff[]> {
+    if (staffRows.length === 0) return [];
+    const allQuals = await qAll(sql`
+        SELECT sq.* FROM staff_qualifications sq
+        JOIN staff s ON sq.staff_id = s.id
+        WHERE s.school_id = ${schoolId}
+        ORDER BY sq.year DESC NULLS LAST
+    `);
+    const qualsByStaff = new Map<string, StaffQualification[]>();
+    for (const q of allQuals) {
+        const sid = q.staff_id as string;
+        if (!qualsByStaff.has(sid)) qualsByStaff.set(sid, []);
+        qualsByStaff.get(sid)!.push(toCamelCase<StaffQualification>(q));
+    }
+    return staffRows.map(row => ({
+        ...toCamelCase<Staff>(row),
+        qualifications: qualsByStaff.get(row.id as string) ?? [],
     }));
 }
 
@@ -169,7 +192,7 @@ export async function getAllStaff(schoolId: string): Promise<Staff[]> {
         LEFT JOIN departments d ON s.department = d.id
         WHERE s.school_id = ${schoolId} ORDER BY s.first_name, s.last_name
     `);
-    return attachQualifications(rows);
+    return attachQualifications(schoolId, rows);
 }
 
 export async function getStaffById(schoolId: string, id: string): Promise<StaffWithDetails | null> {
@@ -205,17 +228,24 @@ export async function addStaff(schoolId: string, staffData: {
 }): Promise<Staff> {
     const id = randomUUID();
 
-    await db.execute(sql`
-            INSERT INTO staff (id, school_id, first_name, last_name, position, email, role, department, rank, photo_url, start_date)
-            VALUES (${id}, ${schoolId}, ${staffData.firstName}, ${staffData.lastName}, ${staffData.position},
-                    ${staffData.email}, ${staffData.role}, ${staffData.department},
-                    ${staffData.rank ?? null}, ${staffData.photoUrl ?? null}, ${staffData.startDate})
-        `);
-    for (const qual of staffData.qualifications ?? []) {
-        await db.execute(sql`
-                INSERT INTO staff_qualifications (staff_id, degree_type, field_of_study, institution, year)
-                VALUES (${id}, ${qual.degreeType}, ${normalizeText(qual.fieldOfStudy)}, ${normalizeText(qual.institution)}, ${qual.year ?? null})
+    try {
+        await db.transaction(async (tx) => {
+            await tx.execute(sql`
+                INSERT INTO staff (id, school_id, first_name, last_name, position, email, role, department, rank, photo_url, start_date)
+                VALUES (${id}, ${schoolId}, ${staffData.firstName}, ${staffData.lastName}, ${staffData.position},
+                        ${staffData.email}, ${staffData.role}, ${staffData.department},
+                        ${staffData.rank ?? null}, ${staffData.photoUrl ?? null}, ${staffData.startDate})
             `);
+            for (const qual of staffData.qualifications ?? []) {
+                await tx.execute(sql`
+                    INSERT INTO staff_qualifications (staff_id, degree_type, field_of_study, institution, year)
+                    VALUES (${id}, ${qual.degreeType}, ${normalizeText(qual.fieldOfStudy)}, ${normalizeText(qual.institution)}, ${qual.year ?? null})
+                `);
+            }
+        });
+    } catch (err: unknown) {
+        if (isUniqueViolation(err)) throw new Error('A staff member with this email already exists in this school');
+        throw err;
     }
 
     const row = await qOne(sql`SELECT s.*, d.name as department_name FROM staff s LEFT JOIN departments d ON s.department = d.id WHERE s.id = ${id}`);
@@ -228,24 +258,39 @@ export async function updateStaff(schoolId: string, id: string, staffData: {
     department: string; position: Position; rank?: Rank; photoUrl?: string;
     startDate: string; qualifications?: StaffQualification[];
 }): Promise<Staff | null> {
-    const returning = await qOne(sql`
-        UPDATE staff SET first_name = ${staffData.firstName}, last_name = ${staffData.lastName},
-            position = ${staffData.position}, email = ${staffData.email}, role = ${staffData.role},
-            department = ${staffData.department}, rank = ${staffData.rank ?? null},
-            photo_url = ${staffData.photoUrl ?? null}, start_date = ${staffData.startDate}
-        WHERE school_id = ${schoolId} AND id = ${id}
-        RETURNING id
-    `);
-    if (!returning) return null;
+    // Step 1: update the staff row itself
+    let staffFound = false;
+    try {
+        const returning = await qOne(sql`
+            UPDATE staff SET
+                first_name = ${staffData.firstName}, last_name = ${staffData.lastName},
+                position = ${staffData.position}, email = ${staffData.email}, role = ${staffData.role},
+                department = ${staffData.department}, rank = ${staffData.rank ?? null},
+                photo_url = ${staffData.photoUrl ?? null}, start_date = ${staffData.startDate},
+                updated_at = NOW()
+            WHERE school_id = ${schoolId} AND id = ${id}
+            RETURNING id
+        `);
+        if (!returning) return null;
+        staffFound = true;
+    } catch (err: unknown) {
+        if (isUniqueViolation(err)) throw new Error('A staff member with this email already exists in this school');
+        throw err;
+    }
 
+    if (!staffFound) return null;
+
+    // Step 2: atomically replace qualifications
     if (staffData.qualifications !== undefined) {
-        await db.execute(sql`DELETE FROM staff_qualifications WHERE staff_id = ${id}`);
-        for (const qual of staffData.qualifications!) {
-            await db.execute(sql`
+        await db.transaction(async (tx) => {
+            await tx.execute(sql`DELETE FROM staff_qualifications WHERE staff_id = ${id}`);
+            for (const qual of staffData.qualifications!) {
+                await tx.execute(sql`
                     INSERT INTO staff_qualifications (staff_id, degree_type, field_of_study, institution, year)
                     VALUES (${id}, ${qual.degreeType}, ${normalizeText(qual.fieldOfStudy)}, ${normalizeText(qual.institution)}, ${qual.year ?? null})
                 `);
-        }
+            }
+        });
     }
 
     const row = await qOne(sql`SELECT s.*, d.name as department_name FROM staff s LEFT JOIN departments d ON s.department = d.id WHERE s.id = ${id}`);
@@ -259,13 +304,15 @@ export async function updateCertificates(schoolId: string, staffId: string, cert
     const exists = await qOne(sql`SELECT id FROM staff WHERE school_id = ${schoolId} AND id = ${staffId}`);
     if (!exists) throw new Error('Staff member not found');
 
-    await db.execute(sql`DELETE FROM certificates WHERE staff_id = ${staffId}`);
-    for (const cert of certs) {
-        await db.execute(sql`
+    await db.transaction(async (tx) => {
+        await tx.execute(sql`DELETE FROM certificates WHERE staff_id = ${staffId}`);
+        for (const cert of certs) {
+            await tx.execute(sql`
                 INSERT INTO certificates (id, school_id, staff_id, name, issuer, date, file_url)
                 VALUES (${randomUUID()}, ${schoolId}, ${staffId}, ${cert.name.trim()}, ${cert.issuer.trim()}, ${cert.date}, ${cert.fileUrl ?? null})
             `);
-    }
+        }
+    });
 
     return toCamelCase<Certificate[]>(await qAll(sql`SELECT * FROM certificates WHERE staff_id = ${staffId} ORDER BY date DESC`));
 }
@@ -276,13 +323,15 @@ export async function updateCourseEvaluations(schoolId: string, staffId: string,
     const exists = await qOne(sql`SELECT id FROM staff WHERE school_id = ${schoolId} AND id = ${staffId}`);
     if (!exists) throw new Error('Staff member not found');
 
-    await db.execute(sql`DELETE FROM course_evaluations WHERE staff_id = ${staffId}`);
-    for (const ev of evals) {
-        await db.execute(sql`
+    await db.transaction(async (tx) => {
+        await tx.execute(sql`DELETE FROM course_evaluations WHERE staff_id = ${staffId}`);
+        for (const ev of evals) {
+            await tx.execute(sql`
                 INSERT INTO course_evaluations (id, school_id, staff_id, course_name, rating, feedback, date)
                 VALUES (${randomUUID()}, ${schoolId}, ${staffId}, ${ev.courseName.trim()}, ${Math.min(5, Math.max(0, ev.rating))}, ${ev.feedback?.trim() ?? null}, ${ev.date})
             `);
-    }
+        }
+    });
 
     return toCamelCase<CourseEvaluation[]>(await qAll(sql`SELECT * FROM course_evaluations WHERE staff_id = ${staffId} ORDER BY date DESC`));
 }
@@ -351,40 +400,35 @@ export async function deleteDepartment(schoolId: string, id: string): Promise<bo
 
 export async function getAllComplianceDocuments(schoolId: string): Promise<ComplianceDocumentWithSignatures[]> {
     const docs = await qAll(sql`SELECT * FROM compliance_documents WHERE school_id = ${schoolId} ORDER BY upload_date DESC`);
-    return Promise.all(docs.map(async doc => {
-        const docCamel = toCamelCase<ComplianceDocument>(doc);
-        const sigs = toCamelCase<DocumentSignature[]>(
-            await qAll(sql`SELECT * FROM document_signatures WHERE document_id = ${docCamel.id} ORDER BY signed_at DESC NULLS LAST, staff_name`)
-        );
-        return { ...docCamel, signatures: sigs, totalSignatures: sigs.length, signedCount: sigs.filter(s => s.status === 'signed').length, pendingCount: sigs.filter(s => s.status === 'pending').length };
-    }));
+    if (docs.length === 0) return [];
+
+    // Batch-fetch all signatures for the school in 1 query (avoids N+1)
+    const allSigs = await qAll(sql`
+        SELECT ds.* FROM document_signatures ds
+        JOIN compliance_documents cd ON ds.document_id = cd.id
+        WHERE cd.school_id = ${schoolId}
+        ORDER BY ds.signed_at DESC NULLS LAST, ds.staff_name
+    `);
+    const sigsByDoc = new Map<string, DocumentSignature[]>();
+    for (const sig of allSigs) {
+        const docId = sig.document_id as string;
+        if (!sigsByDoc.has(docId)) sigsByDoc.set(docId, []);
+        sigsByDoc.get(docId)!.push(toCamelCase<DocumentSignature>(sig));
+    }
+
+    return docs.map(doc => {
+        const d = toCamelCase<ComplianceDocument>(doc);
+        const sigs = sigsByDoc.get(d.id) ?? [];
+        return { ...d, signatures: sigs, totalSignatures: sigs.length, signedCount: sigs.filter(s => s.status === 'signed').length, pendingCount: sigs.filter(s => s.status === 'pending').length };
+    });
 }
 
 export async function getComplianceDocumentById(schoolId: string, id: string): Promise<ComplianceDocumentWithSignatures | null> {
     const doc = await qOne(sql`SELECT * FROM compliance_documents WHERE school_id = ${schoolId} AND id = ${id}`);
     if (!doc) return null;
-    const docCamel = toCamelCase<ComplianceDocument>(doc);
+    const d = toCamelCase<ComplianceDocument>(doc);
     const sigs = toCamelCase<DocumentSignature[]>(
         await qAll(sql`SELECT * FROM document_signatures WHERE document_id = ${id} ORDER BY signed_at DESC NULLS LAST, staff_name`)
     );
-    return { ...docCamel, signatures: sigs, totalSignatures: sigs.length, signedCount: sigs.filter(s => s.status === 'signed').length, pendingCount: sigs.filter(s => s.status === 'pending').length };
-}
-
-// ===== UTILITY =====
-
-export function calculateTenure(startDate: string): string {
-    const start = new Date(startDate);
-    const now   = new Date();
-    let totalMonths = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
-    if (now.getDate() < start.getDate()) totalMonths--;
-    const y = Math.floor(totalMonths / 12);
-    const m = totalMonths % 12;
-    if (y === 0) return `${m} ${m === 1 ? 'mo' : 'mos'}`;
-    if (m === 0) return `${y} ${y === 1 ? 'yr' : 'yrs'}`;
-    return `${y} ${y === 1 ? 'yr' : 'yrs'}, ${m} ${m === 1 ? 'mo' : 'mos'}`;
-}
-
-function isUniqueViolation(err: unknown): boolean {
-    // PostgreSQL unique constraint violation code
-    return typeof err === 'object' && err !== null && (err as { code?: string }).code === '23505';
+    return { ...d, signatures: sigs, totalSignatures: sigs.length, signedCount: sigs.filter(s => s.status === 'signed').length, pendingCount: sigs.filter(s => s.status === 'pending').length };
 }

@@ -14,7 +14,10 @@ if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(',').map(s => s.trim())
+    : ['http://localhost:5173'];
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 app.use('/api/auth', authRouter);

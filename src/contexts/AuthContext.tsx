@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { getUser, setAuth, clearAuth, type AuthUser } from '../lib/auth';
 
 interface AuthContextValue {
@@ -21,6 +21,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearAuth();
         setUser(null);
     }, []);
+
+    // Handle 401 responses dispatched by the API layer — clears state so
+    // RequireAuth picks up the null user and navigates to /login via React Router
+    useEffect(() => {
+        window.addEventListener('auth:unauthorized', logout);
+        return () => window.removeEventListener('auth:unauthorized', logout);
+    }, [logout]);
 
     return (
         <AuthContext.Provider value={{ user, login, logout }}>

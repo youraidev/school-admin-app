@@ -53,7 +53,9 @@ export const staff = pgTable('staff', {
     rank:              text('rank'),
     createdAt:         timestamp('created_at', { mode: 'string' }).defaultNow(),
     updatedAt:         timestamp('updated_at', { mode: 'string' }).defaultNow(),
-});
+}, (t) => ({
+    schoolEmailUnique: unique('staff_school_email_unique').on(t.schoolId, t.email),
+}));
 
 export const staffQualifications = pgTable('staff_qualifications', {
     id:           serial('id').primaryKey(),

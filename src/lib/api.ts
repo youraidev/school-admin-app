@@ -12,10 +12,18 @@ import type {
     PendingSignature,
     Department,
     AuthResponse,
+    StaffQualification,
 } from '../../shared/types/index.js';
 import { getToken, clearAuth } from './auth';
 
 const API_BASE_URL = '/api';
+
+export class ApiError extends Error {
+    constructor(public readonly status: number, message: string) {
+        super(message);
+        this.name = 'ApiError';
+    }
+}
 
 function authHeaders(): HeadersInit {
     const token = getToken();
@@ -24,8 +32,9 @@ function authHeaders(): HeadersInit {
 
 function handleUnauthorized(): never {
     clearAuth();
-    window.location.href = '/login';
-    throw new Error('Session expired');
+    // Dispatch event so AuthContext can clear user state and let RequireAuth navigate to /login
+    window.dispatchEvent(new Event('auth:unauthorized'));
+    throw new ApiError(401, 'Session expired');
 }
 
 async function fetchAPI<T>(endpoint: string): Promise<T> {
@@ -33,7 +42,7 @@ async function fetchAPI<T>(endpoint: string): Promise<T> {
         headers: authHeaders(),
     });
     if (response.status === 401) handleUnauthorized();
-    if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+    if (!response.ok) throw new ApiError(response.status, `API Error: ${response.statusText}`);
     return response.json();
 }
 
@@ -46,7 +55,7 @@ async function mutateAPI<T>(method: string, endpoint: string, body?: unknown): P
     if (response.status === 401) handleUnauthorized();
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error((errorData as any).error || `API Error: ${response.statusText}`);
+        throw new ApiError(response.status, (errorData as { error?: string }).error || `API Error: ${response.statusText}`);
     }
     if (response.status === 204) return undefined as T;
     return response.json();
@@ -61,7 +70,7 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
         body: JSON.stringify({ email, password }),
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Login failed');
+    if (!response.ok) throw new ApiError(response.status, data.error || 'Login failed');
     return data;
 }
 
@@ -72,7 +81,7 @@ export async function registerSchool(schoolName: string, email: string, password
         body: JSON.stringify({ schoolName, email, password }),
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Registration failed');
+    if (!response.ok) throw new ApiError(response.status, data.error || 'Registration failed');
     return data;
 }
 
@@ -104,7 +113,7 @@ export async function getStudentById(id: string): Promise<StudentWithDetails | n
     try {
         return await fetchAPI<StudentWithDetails>(`/students/${id}`);
     } catch (error) {
-        if (error instanceof Error && error.message.includes('404')) return null;
+        if (error instanceof ApiError && error.status === 404) return null;
         throw error;
     }
 }
@@ -119,7 +128,7 @@ export async function getStaffById(id: string): Promise<StaffWithDetails | null>
     try {
         return await fetchAPI<StaffWithDetails>(`/staff/${id}`);
     } catch (error) {
-        if (error instanceof Error && error.message.includes('404')) return null;
+        if (error instanceof ApiError && error.status === 404) return null;
         throw error;
     }
 }
@@ -127,7 +136,7 @@ export async function getStaffById(id: string): Promise<StaffWithDetails | null>
 export async function addStaff(staffData: {
     firstName: string; lastName: string; email: string; role: string;
     department: string; position: string; rank?: string; photoUrl?: string;
-    startDate: string; qualifications?: any[];
+    startDate: string; qualifications?: StaffQualification[];
 }): Promise<Staff> {
     return mutateAPI<Staff>('POST', '/staff', staffData);
 }
@@ -135,7 +144,7 @@ export async function addStaff(staffData: {
 export async function updateStaff(id: string, staffData: {
     firstName: string; lastName: string; email: string; role: string;
     department: string; position: string; rank?: string; photoUrl?: string;
-    startDate: string; qualifications?: any[];
+    startDate: string; qualifications?: StaffQualification[];
 }): Promise<Staff> {
     return mutateAPI<Staff>('PUT', `/staff/${id}`, staffData);
 }
@@ -166,7 +175,7 @@ export async function getDepartmentById(id: string): Promise<Department | null> 
     try {
         return await fetchAPI<Department>(`/departments/${id}`);
     } catch (error) {
-        if (error instanceof Error && error.message.includes('404')) return null;
+        if (error instanceof ApiError && error.status === 404) return null;
         throw error;
     }
 }
@@ -193,7 +202,7 @@ export async function getComplianceDocumentById(id: string): Promise<ComplianceD
     try {
         return await fetchAPI<ComplianceDocumentWithSignatures>(`/compliance/${id}`);
     } catch (error) {
-        if (error instanceof Error && error.message.includes('404')) return null;
+        if (error instanceof ApiError && error.status === 404) return null;
         throw error;
     }
 }
