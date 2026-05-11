@@ -117,3 +117,26 @@ The project uses `drizzle-kit push` (schema push without versioned migrations). 
 - **R-ARCH-03:** All database access MUST go through `server/queries/` (or `queries.ts` until split). Routes must not import `db` directly.
 - **R-ARCH-04:** Authentication state is managed exclusively through `AuthContext` on the frontend. Components must not read from `localStorage` directly.
 - **R-ARCH-05:** All authenticated API routes MUST pass through the `authenticate` middleware before reaching route handlers.
+
+---
+
+## 7. Stable Decisions — Do Not Change Without Explicit Approval
+
+The following architectural decisions are **locked**. They must not be altered, replaced, or removed without the user explicitly approving the change in advance.
+
+| Decision | What it covers |
+|----------|---------------|
+| **Folder structure** | `server/`, `src/`, `shared/`, `api/`, `spec/` layout and file placement rules |
+| **Domain boundaries** | Staff, Students, Compliance, Departments — one route file, one query section, one component folder each |
+| **Naming conventions** | File, function, type, column, and route naming as defined in `naming-conventions.md` |
+| **API contract style** | REST patterns, status codes, error shape `{ "error": "..." }`, tenant isolation via JWT |
+| **Permission model** | Role-based (`super_admin`, `school_admin`, `staff`); enforced via `requireRole()` middleware; `schoolId` always from JWT |
+| **Database driver** | `pg` (node-postgres) Pool + `drizzle-orm/node-postgres` — no switching to edge/serverless drivers without approval |
+| **Authentication mechanism** | JWT Bearer tokens, 7-day expiry, bcrypt cost 12 — no switching to sessions or OAuth without approval |
+| **Tech stack** | See `spec/tech-stack.md` — no new frameworks or libraries without approval |
+
+> If Antigravity identifies a compelling reason to change any of the above, it must:
+> 1. Raise it under **"Suggested Improvements"** in its response
+> 2. Explain the benefit and the migration path
+> 3. Wait for explicit written approval before touching anything
+
