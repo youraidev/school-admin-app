@@ -42,9 +42,10 @@ async function seed() {
     `);
 
     // Admin user  (email: admin@school.edu  password: Admin1234!)
+    const adminHash = await hashPassword('Admin1234!');
     await db.execute(sql`
         INSERT INTO users (id, school_id, email, password_hash, role) VALUES
-        (${IDS.admin}, ${IDS.school}, 'admin@school.edu', ${hashPassword('Admin1234!')}, 'school_admin')
+        (${IDS.admin}, ${IDS.school}, 'admin@school.edu', ${adminHash}, 'school_admin')
         ON CONFLICT (id) DO NOTHING
     `);
 
