@@ -1,7 +1,6 @@
 # Project Philosophy & Design Principles
 
-Core values that guide every decision in this project.  
-These apply to all contributors, including AI agents.
+Core values that guide every decision in this project. These apply to all contributors.
 
 ---
 
@@ -50,40 +49,9 @@ Stability        > Innovation    (unless explicitly requested)
 - Overly generic or "smart" abstractions that hide complexity
 - Tight coupling between domain modules
 - Mixing domain logic with UI or API layers
-- Introducing new libraries without approval
-
----
-
-## Evolution & Change
-
-- **Architectural changes** require explicit approval before implementation
-- **Refactors** must preserve domain boundaries and follow the spec
-- **New features** must comply with existing spec and principles
-- **The `/spec` folder is the authoritative source of truth** — if the codebase conflicts with it, the spec wins
 
 ---
 
 ## Long-Term Vision
 
-This system is designed to:
-
-- Scale across multiple organisations
-- Maintain strict permission boundaries and tenant isolation
-- Support predictable, auditable data access patterns
-- Be easy to extend without breaking existing behaviour
-- Remain maintainable as the team and codebase grow
-- Avoid architectural drift over time
-
----
-
-## AI Agent Responsibilities
-
-An AI agent working on this project must:
-
-- Follow all principles in this document and all rules in `/spec`
-- Maintain consistency across the codebase
-- Avoid introducing unnecessary complexity
-- Ask for approval before architectural or structural changes
-- List improvement suggestions under **"Suggested Improvements"** — never apply them automatically
-- Surface spec conflicts clearly — never deviate silently
-- Explain reasoning transparently
+This system is designed to scale across multiple organisations, maintain strict tenant isolation, remain easy to extend without breaking existing behaviour, and avoid architectural drift over time.
