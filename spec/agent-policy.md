@@ -69,5 +69,6 @@ For non-trivial tasks:
 
 ## 7. Git Policy
 
-- `git add` + `git commit` are allowed to checkpoint work
-- **`git push` must never run automatically** — only when explicitly instructed
+- **No automatic git operations.** Do not run `git add`, `git commit`, or `git push` automatically.
+- All git operations are the developer's responsibility.
+- Only run git commands when explicitly instructed (e.g. "commit this", "push", "stage these files").

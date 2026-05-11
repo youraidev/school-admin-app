@@ -13,7 +13,7 @@ school-admin-app/
 │   ├── server.ts                Express app factory — middleware + route mounting
 │   ├── index.ts                 Local dev entry (starts Express on :3000)
 │   ├── auth.ts                  JWT + bcrypt helpers
-│   ├── email.ts                 Resend email service integration
+│   ├── email.ts                 MailerSend email service integration
 │   ├── express.d.ts             Module augmentation: req.user typings
 │   │
 │   ├── db/

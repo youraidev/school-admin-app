@@ -132,14 +132,14 @@ where: and(eq(staff.schoolId, schoolId), eq(staff.id, staffId))
 
 ## 6. Rate Limiting
 
-| Endpoint | Limiter | Fallback |
-|----------|---------|---------|
-| `POST /api/auth/login` | Upstash Redis sliding window | express-rate-limit (in-memory) |
-| `POST /api/auth/forgot-password` | Upstash Redis sliding window | express-rate-limit (in-memory) |
+| Endpoint | Limiter |
+|----------|---------|
+| `POST /api/auth/login` | Upstash Redis sliding window (10 requests / 15 min) |
+| `POST /api/auth/forgot-password` | Upstash Redis sliding window (3 requests / 15 min) |
 
 **Rule SEC-RATE-01:** Authentication endpoints MUST be rate-limited in production.
 
-**Rule SEC-RATE-02:** The in-memory fallback (`express-rate-limit`) is not shared across serverless instances. Do not rely on it for production rate limiting.
+**Rule SEC-RATE-02:** Rate limiting is handled exclusively by Upstash Redis. There is no in-memory fallback — if `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are not set, the rate limiter middleware is skipped entirely (development only). These env vars MUST be set in production.
 
 ---
 
