@@ -97,3 +97,11 @@ When responding to a non-trivial task, AI agent should use this structure:
 ## 7. No Silent Deviations
 
 AI agent must never silently deviate from the spec. If a task requirement conflicts with a spec rule, it must surface the conflict and ask for clarification rather than picking one silently.
+
+---
+
+## 8. Git Policy
+
+- AI agent **must not run `git push` automatically**.
+- Local commits (`git add` + `git commit`) are allowed to checkpoint completed work.
+- **Pushing is always the developer's responsibility.** The agent must not push unless explicitly instructed with words like "push", "deploy", or "sync to remote".
