@@ -1,6 +1,6 @@
 # Agent Policy
 
-This document defines how Antigravity must behave when working on this project.  
+This document defines how AI agent must behave when working on this project.  
 These rules are binding and take precedence over general assistant behaviour.
 
 ---
@@ -9,7 +9,7 @@ These rules are binding and take precedence over general assistant behaviour.
 
 The `/spec` directory is the **authoritative source of truth** for all project decisions.
 
-Before planning or writing any code, Antigravity must:
+Before planning or writing any code, AI agent must:
 1. Check the relevant spec file(s) for existing rules
 2. Follow those rules without deviation
 3. Flag any conflict between the spec and the existing codebase
@@ -18,7 +18,7 @@ Before planning or writing any code, Antigravity must:
 
 ## 2. Refactor Suggestions Policy
 
-If Antigravity identifies an opportunity to improve, refactor, simplify, or modernise the project, it **must**:
+If AI agent identifies an opportunity to improve, refactor, simplify, or modernise the project, it **must**:
 
 1. Complete the primary task as requested first
 2. List any suggestions at the end of its response under a section titled **"Suggested Improvements"**
@@ -28,20 +28,20 @@ If Antigravity identifies an opportunity to improve, refactor, simplify, or mode
    - What the migration path or risk would be
 4. **Wait for explicit written approval** before applying any suggested change
 
-Antigravity must **never** apply a structural improvement automatically, even if it is confident the change is correct.
+AI agent must **never** apply a structural improvement automatically, even if it is confident the change is correct.
 
 ---
 
 ## 3. New Libraries and Dependencies
 
-Antigravity must **not** introduce any new npm package or library without approval.
+AI agent must **not** introduce any new npm package or library without approval.
 
 Exceptions — these are **pre-approved** and may be added without asking:
 - `@tanstack/react-query` (data fetching refactor)
 - `zod` (validation layer)
 - `vitest`, `supertest`, `@testing-library/react`, `playwright` (testing stack)
 
-For any other package, Antigravity must:
+For any other package, AI agent must:
 1. Name the package
 2. Explain why an existing tool cannot fulfil the need
 3. Wait for approval before installing
@@ -68,7 +68,7 @@ See `spec/architecture.md` §7 for the full locked-decisions table.
 
 ## 5. Spec Conflicts
 
-If Antigravity discovers that the existing codebase **violates** a spec rule, it must:
+If AI agent discovers that the existing codebase **violates** a spec rule, it must:
 
 1. Point out the conflict clearly under a **"Spec Conflicts Found"** section
 2. Describe which spec rule is being violated
@@ -79,7 +79,7 @@ If Antigravity discovers that the existing codebase **violates** a spec rule, it
 
 ## 6. Response Structure for Complex Tasks
 
-When responding to a non-trivial task, Antigravity should use this structure:
+When responding to a non-trivial task, AI agent should use this structure:
 
 ```
 ## Plan
@@ -96,4 +96,4 @@ When responding to a non-trivial task, Antigravity should use this structure:
 
 ## 7. No Silent Deviations
 
-Antigravity must never silently deviate from the spec. If a task requirement conflicts with a spec rule, it must surface the conflict and ask for clarification rather than picking one silently.
+AI agent must never silently deviate from the spec. If a task requirement conflicts with a spec rule, it must surface the conflict and ask for clarification rather than picking one silently.
