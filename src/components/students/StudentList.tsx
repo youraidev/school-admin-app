@@ -1,15 +1,17 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, UserPlus, Filter, AlertCircle } from 'lucide-react';
+import { Search, UserPlus, AlertCircle } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { StatusBadge } from '../ui/status-badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import * as api from '../../lib/api';
 import type { Student } from '../../../shared/types';
 
 export default function StudentList() {
     const [searchTerm, setSearchTerm] = React.useState('');
+    const [classFilter, setClassFilter] = React.useState('all');
     const [students, setStudents] = React.useState<Student[]>([]);
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
@@ -29,10 +31,16 @@ export default function StudentList() {
         loadStudents();
     }, []);
 
-    const filteredStudents = students.filter(student =>
-        student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.className.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const classOptions = React.useMemo(() => {
+        const classes = Array.from(new Set(students.map(s => s.className))).sort();
+        return classes;
+    }, [students]);
+
+    const filteredStudents = students.filter(student => {
+        const matchesName = student.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesClass = classFilter === 'all' || student.className === classFilter;
+        return matchesName && matchesClass;
+    });
 
     if (loading) {
         return (
@@ -79,16 +87,23 @@ export default function StudentList() {
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                        placeholder="Search by name or class..."
+                        placeholder="Search by name..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-9"
                     />
                 </div>
-                <Button variant="outline">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filters
-                </Button>
+                <Select value={classFilter} onValueChange={setClassFilter}>
+                    <SelectTrigger className="w-44">
+                        <SelectValue placeholder="All classes" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All classes</SelectItem>
+                        {classOptions.map(cls => (
+                            <SelectItem key={cls} value={cls}>{cls}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
             {/* Student Grid */}
