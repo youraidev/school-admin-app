@@ -133,6 +133,19 @@ export async function getAllStudents(): Promise<Student[]> {
     return fetchAPI<Student[]>('/students');
 }
 
+export interface StudentStats {
+    totalStudents: number;
+    missingDocuments: number;
+    specialNeeds: number;
+    withAllergies: number;
+    perClass: { className: string; count: number }[];
+    newEnrollments: number;
+}
+
+export async function getStudentStats(): Promise<StudentStats> {
+    return fetchAPI<StudentStats>('/students/stats');
+}
+
 export async function getStudentById(id: string): Promise<StudentWithDetails | null> {
     try {
         return await fetchAPI<StudentWithDetails>(`/students/${id}`);

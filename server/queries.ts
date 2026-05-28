@@ -159,6 +159,61 @@ export async function getPendingSignatures(schoolId: string): Promise<PendingSig
 
 // ===== STUDENT QUERIES =====
 
+export interface StudentStats {
+    totalStudents: number;
+    missingDocuments: number;
+    specialNeeds: number;
+    withAllergies: number;
+    perClass: { className: string; count: number }[];
+    newEnrollments: number;
+}
+
+export async function getStudentStats(schoolId: string): Promise<StudentStats> {
+    const [
+        totalRow,
+        missingDocsRow,
+        specialNeedsRow,
+        allergiesRow,
+        perClassRows,
+        newEnrollmentsRow,
+    ] = await Promise.all([
+        qOne(sql`SELECT COUNT(*) AS count FROM students WHERE school_id = ${schoolId}`),
+        qOne(sql`
+            SELECT COUNT(DISTINCT dc.student_id) AS count
+            FROM document_checklist dc
+            JOIN students s ON s.id = dc.student_id
+            WHERE s.school_id = ${schoolId} AND dc.is_complete = false
+        `),
+        qOne(sql`
+            SELECT COUNT(*) AS count FROM students
+            WHERE school_id = ${schoolId}
+              AND (special_education_needs IS NOT NULL AND special_education_needs <> '')
+        `),
+        qOne(sql`
+            SELECT COUNT(DISTINCT student_id) AS count FROM allergies
+            WHERE school_id = ${schoolId}
+        `),
+        qAll(sql`
+            SELECT class_name, COUNT(*) AS count FROM students
+            WHERE school_id = ${schoolId}
+            GROUP BY class_name ORDER BY class_name
+        `),
+        qOne(sql`
+            SELECT COUNT(*) AS count FROM students
+            WHERE school_id = ${schoolId} AND contract_status = 'pending'
+        `),
+    ]);
+
+    return {
+        totalStudents:   Number((totalRow as { count: string | number })?.count ?? 0),
+        missingDocuments:Number((missingDocsRow as { count: string | number })?.count ?? 0),
+        specialNeeds:    Number((specialNeedsRow as { count: string | number })?.count ?? 0),
+        withAllergies:   Number((allergiesRow as { count: string | number })?.count ?? 0),
+        perClass:        (perClassRows as { class_name: string; count: string | number }[]).map(r => ({ className: r.class_name, count: Number(r.count) })),
+        newEnrollments:  Number((newEnrollmentsRow as { count: string | number })?.count ?? 0),
+    };
+}
+
 export async function getAllStudents(schoolId: string): Promise<Student[]> {
     const rows = await qAll(sql`SELECT * FROM students WHERE school_id = ${schoolId} ORDER BY name`);
     return rows.map(r => toCamelCase<Student>(r));

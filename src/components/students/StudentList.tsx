@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, UserPlus, AlertCircle } from 'lucide-react';
+import { Search, UserPlus, AlertCircle, Users, FileWarning, Brain, Leaf, BookOpen, UserCheck } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
@@ -8,11 +8,13 @@ import { StatusBadge } from '../ui/status-badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import * as api from '../../lib/api';
 import type { Student } from '../../../shared/types';
+import type { StudentStats } from '../../lib/api';
 
 export default function StudentList() {
     const [searchTerm, setSearchTerm] = React.useState('');
     const [classFilter, setClassFilter] = React.useState('all');
     const [students, setStudents] = React.useState<Student[]>([]);
+    const [stats, setStats] = React.useState<StudentStats | null>(null);
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
 
@@ -20,8 +22,12 @@ export default function StudentList() {
         async function loadStudents() {
             try {
                 setLoading(true);
-                const data = await api.getAllStudents();
+                const [data, statsData] = await Promise.all([
+                    api.getAllStudents(),
+                    api.getStudentStats(),
+                ]);
                 setStudents(data);
+                setStats(statsData);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load students');
             } finally {
@@ -81,6 +87,113 @@ export default function StudentList() {
                     Add Student
                 </Button>
             </div>
+
+            {/* Statistics */}
+            {stats && (
+                <div className="space-y-3">
+                    {/* Top row: 3 primary stats */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <Card className="card-elevated">
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-primary/10">
+                                    <Users className="w-4 h-4 text-primary" />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold leading-none">{stats.totalStudents}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Total students</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="card-elevated">
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-destructive/10">
+                                    <FileWarning className="w-4 h-4 text-destructive" />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold leading-none">{stats.missingDocuments}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Missing docs</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="card-elevated">
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-blue-500/10">
+                                    <Brain className="w-4 h-4 text-blue-500" />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold leading-none">{stats.specialNeeds}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Special needs</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="card-elevated">
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-orange-500/10">
+                                    <Leaf className="w-4 h-4 text-orange-500" />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold leading-none">{stats.withAllergies}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">With allergies</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="card-elevated">
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-violet-500/10">
+                                    <BookOpen className="w-4 h-4 text-violet-500" />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold leading-none">{stats.perClass.length}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Classes</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="card-elevated">
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-green-500/10">
+                                    <UserCheck className="w-4 h-4 text-green-500" />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-bold leading-none">{stats.newEnrollments}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">New enrollments</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Per-class breakdown */}
+                    {stats.perClass.length > 0 && (
+                        <Card className="card-elevated">
+                            <CardContent className="p-4">
+                                <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wide">Students per class</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {stats.perClass.map(({ className, count }) => (
+                                        <button
+                                            key={className}
+                                            onClick={() => setClassFilter(classFilter === className ? 'all' : className)}
+                                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                                                classFilter === className
+                                                    ? 'bg-primary text-primary-foreground border-primary'
+                                                    : 'bg-muted/50 text-foreground border-border hover:bg-muted'
+                                            }`}
+                                        >
+                                            {className}
+                                            <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
+                                                classFilter === className ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
+                                            }`}>{count}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+            )}
 
             {/* Search and Filters */}
             <div className="flex items-center gap-4">

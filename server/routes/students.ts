@@ -3,6 +3,12 @@ import * as queries from '../queries.js';
 
 const router = Router();
 
+router.get('/stats', async (req, res, next) => {
+    try {
+        res.json(await queries.getStudentStats(req.user!.schoolId));
+    } catch (error) { next(error); }
+});
+
 router.get('/', async (req, res, next) => {
     try {
         res.json(await queries.getAllStudents(req.user!.schoolId));
