@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, UserPlus, AlertCircle, Users, FileWarning, Brain, Leaf, BookOpen, UserCheck } from 'lucide-react';
+import { Search, UserPlus, AlertCircle, Users, FileWarning, Brain, Leaf, BookOpen, UserCheck, CheckCircle2, TriangleAlert, XCircle } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
@@ -222,7 +222,6 @@ export default function StudentList() {
             {/* Student Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredStudents.map((student, index) => {
-                    // Get initials for avatar
                     const initials = student.name
                         .split(' ')
                         .map(n => n[0])
@@ -230,9 +229,46 @@ export default function StudentList() {
                         .toUpperCase()
                         .slice(0, 2);
 
-                    // Check for critical allergies (you can enhance this with actual data)
-                    const hasAllergyAlert = student.contractStatus === 'active' && index === 0; // Example logic
-                    const hasUnpaidStatus = !student.isPaid;
+                    // Derive card health status
+                    const hasImportantProblem =
+                        !student.isPaid ||
+                        student.contractStatus === 'terminated' ||
+                        student.contractStatus === 'expired' ||
+                        !!student.medicalSupport;
+                    const hasMissingDoc =
+                        !hasImportantProblem &&
+                        (student.contractStatus === 'pending' ||
+                            student.healthStatus === 'needs_review');
+
+                    type CardStatus = 'problem' | 'missing' | 'ok';
+                    const cardStatus: CardStatus = hasImportantProblem
+                        ? 'problem'
+                        : hasMissingDoc
+                        ? 'missing'
+                        : 'ok';
+
+                    const statusConfig: Record<CardStatus, { label: string; icon: React.ReactNode; classes: string; borderClass: string }> = {
+                        problem: {
+                            label: 'Important problem',
+                            icon: <XCircle className="w-3.5 h-3.5" />,
+                            classes: 'bg-destructive/10 text-destructive border-destructive/25',
+                            borderClass: 'border-destructive/30',
+                        },
+                        missing: {
+                            label: 'Miss document',
+                            icon: <TriangleAlert className="w-3.5 h-3.5" />,
+                            classes: 'bg-amber-500/10 text-amber-600 border-amber-400/30',
+                            borderClass: 'border-amber-400/40',
+                        },
+                        ok: {
+                            label: 'All well',
+                            icon: <CheckCircle2 className="w-3.5 h-3.5" />,
+                            classes: 'bg-green-500/10 text-green-600 border-green-400/30',
+                            borderClass: 'border-green-400/30',
+                        },
+                    };
+
+                    const status = statusConfig[cardStatus];
 
                     return (
                         <Link
@@ -241,7 +277,7 @@ export default function StudentList() {
                             className="block"
                             style={{ animationDelay: `${index * 50}ms` }}
                         >
-                            <Card className="card-elevated hover:shadow-lg transition-all cursor-pointer animate-slide-in">
+                            <Card className={`card-elevated hover:shadow-lg transition-all cursor-pointer animate-slide-in border ${status.borderClass}`}>
                                 <CardContent className="p-6">
                                     <div className="flex items-start gap-4">
                                         {/* Avatar */}
@@ -251,35 +287,42 @@ export default function StudentList() {
 
                                         {/* Student Info */}
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="font-semibold text-base mb-1 truncate">
-                                                {student.name}
-                                            </h3>
+                                            <div className="flex items-start justify-between gap-2 mb-1">
+                                                <h3 className="font-semibold text-base truncate">
+                                                    {student.name}
+                                                </h3>
+                                                {/* Health status pill */}
+                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-medium whitespace-nowrap flex-shrink-0 ${status.classes}`}>
+                                                    {status.icon}
+                                                    {status.label}
+                                                </span>
+                                            </div>
                                             <p className="text-sm text-muted-foreground mb-3">
                                                 {student.className}
                                             </p>
 
-                                            {/* Status Badges */}
+                                            {/* Detail badges */}
                                             <div className="flex flex-wrap gap-2">
                                                 <StatusBadge variant={student.contractStatus}>
                                                     {student.contractStatus}
                                                 </StatusBadge>
 
-                                                {hasAllergyAlert && (
+                                                {student.medicalSupport && (
                                                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border bg-destructive/10 text-destructive border-destructive/20 text-xs font-medium">
                                                         <AlertCircle className="w-3 h-3" />
-                                                        Allergy Alert
+                                                        Medical
                                                     </span>
                                                 )}
 
-                                                {student.contractStatus === 'pending' && (
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full border bg-warning/10 text-warning border-warning/20 text-xs font-medium">
-                                                        Pending
-                                                    </span>
-                                                )}
-
-                                                {hasUnpaidStatus && (
+                                                {!student.isPaid && (
                                                     <span className="inline-flex items-center px-2 py-0.5 rounded-full border bg-destructive/10 text-destructive border-destructive/20 text-xs font-medium">
                                                         Unpaid
+                                                    </span>
+                                                )}
+
+                                                {student.specialEducationNeeds && (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full border bg-blue-500/10 text-blue-600 border-blue-300/30 text-xs font-medium">
+                                                        Special needs
                                                     </span>
                                                 )}
                                             </div>
