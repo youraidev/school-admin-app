@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, UserPlus, AlertCircle, Users, FileWarning, Brain, Leaf, BookOpen, UserCheck, CheckCircle2, TriangleAlert, XCircle } from 'lucide-react';
+import { Search, UserPlus, AlertCircle, Users, FileWarning, Brain, Leaf, BookOpen, UserCheck } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
@@ -247,24 +247,21 @@ export default function StudentList() {
                         ? 'missing'
                         : 'ok';
 
-                    const statusConfig: Record<CardStatus, { label: string; icon: React.ReactNode; classes: string; borderClass: string }> = {
+                    const statusConfig: Record<CardStatus, { label: string; dotClass: string; leftBorderClass: string }> = {
                         problem: {
                             label: 'Important problem',
-                            icon: <XCircle className="w-3.5 h-3.5" />,
-                            classes: 'bg-destructive/10 text-destructive border-destructive/25',
-                            borderClass: 'border-destructive/30',
+                            dotClass: 'bg-destructive',
+                            leftBorderClass: 'border-l-4 border-l-destructive',
                         },
                         missing: {
                             label: 'Miss document',
-                            icon: <TriangleAlert className="w-3.5 h-3.5" />,
-                            classes: 'bg-amber-500/10 text-amber-600 border-amber-400/30',
-                            borderClass: 'border-amber-400/40',
+                            dotClass: 'bg-amber-500',
+                            leftBorderClass: 'border-l-4 border-l-amber-400',
                         },
                         ok: {
                             label: 'All well',
-                            icon: <CheckCircle2 className="w-3.5 h-3.5" />,
-                            classes: 'bg-green-500/10 text-green-600 border-green-400/30',
-                            borderClass: 'border-green-400/30',
+                            dotClass: 'bg-green-500',
+                            leftBorderClass: 'border-l-4 border-l-green-500',
                         },
                     };
 
@@ -277,32 +274,25 @@ export default function StudentList() {
                             className="block"
                             style={{ animationDelay: `${index * 50}ms` }}
                         >
-                            <Card className={`card-elevated hover:shadow-lg transition-all cursor-pointer animate-slide-in border ${status.borderClass}`}>
-                                <CardContent className="p-6">
+                            <Card className={`card-elevated hover:shadow-lg transition-all cursor-pointer animate-slide-in overflow-hidden ${status.leftBorderClass}`}>
+                                <CardContent className="p-5">
                                     <div className="flex items-start gap-4">
                                         {/* Avatar */}
-                                        <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center text-foreground font-semibold text-lg flex-shrink-0">
+                                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-foreground font-semibold text-sm flex-shrink-0">
                                             {initials}
                                         </div>
 
                                         {/* Student Info */}
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-start justify-between gap-2 mb-1">
-                                                <h3 className="font-semibold text-base truncate">
-                                                    {student.name}
-                                                </h3>
-                                                {/* Health status pill */}
-                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-medium whitespace-nowrap flex-shrink-0 ${status.classes}`}>
-                                                    {status.icon}
-                                                    {status.label}
-                                                </span>
-                                            </div>
+                                            <h3 className="font-semibold text-base truncate mb-0.5">
+                                                {student.name}
+                                            </h3>
                                             <p className="text-sm text-muted-foreground mb-3">
                                                 {student.className}
                                             </p>
 
                                             {/* Detail badges */}
-                                            <div className="flex flex-wrap gap-2">
+                                            <div className="flex flex-wrap gap-1.5">
                                                 <StatusBadge variant={student.contractStatus}>
                                                     {student.contractStatus}
                                                 </StatusBadge>
@@ -325,6 +315,12 @@ export default function StudentList() {
                                                         Special needs
                                                     </span>
                                                 )}
+                                            </div>
+
+                                            {/* Subtle status footer */}
+                                            <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-border/50">
+                                                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${status.dotClass}`} />
+                                                <span className="text-xs text-muted-foreground">{status.label}</span>
                                             </div>
                                         </div>
                                     </div>
