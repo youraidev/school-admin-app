@@ -160,6 +160,7 @@ export const authorizedPickup = pgTable('authorized_pickup', {
     name:      text('name').notNull(),
     phone:     text('phone').notNull(),
     relation:  text('relation').notNull(),
+    notes:     text('notes'),
 });
 
 // ===== COMPLIANCE MODULE =====

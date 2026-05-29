@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, ExternalLink, User } from 'lucide-react';
+import { ArrowLeft, Phone, ExternalLink, User, AlertTriangle } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -319,7 +319,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                     const badgeClass = relationColors[relation] ?? 'bg-muted text-muted-foreground border-border';
 
                                     return (
-                                        <div key={person.id} className="p-4 rounded-xl border bg-card hover:shadow-sm transition-shadow">
+                                        <div key={person.id} className="p-4 rounded-xl border bg-card hover:shadow-sm transition-shadow flex flex-col gap-3">
                                             <div className="flex items-start gap-3">
                                                 {/* Avatar circle */}
                                                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
@@ -343,6 +343,14 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                                     </a>
                                                 </div>
                                             </div>
+
+                                            {/* Important notes */}
+                                            {person.notes && (
+                                                <div className="flex items-start gap-2.5 rounded-lg border border-amber-300/60 bg-amber-50/70 dark:border-amber-700/40 dark:bg-amber-950/30 px-3 py-2.5">
+                                                    <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                                                    <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed font-medium">{person.notes}</p>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}
