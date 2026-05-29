@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone } from 'lucide-react';
+import { ArrowLeft, Phone, ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -89,20 +89,36 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                     {student.isPaid ? 'Paid' : 'Unpaid'}
                                 </StatusBadge>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                                <div>
-                                    <span className="data-label">Grade:</span> <span className="data-value">{student.className}</span>
-                                </div>
-                                <div>
-                                    <span className="data-label">Born:</span> <span className="data-value">{format(new Date(student.birthDate), 'MMMM d, yyyy')}</span>
-                                </div>
-                                {primaryContact && (
-                                    <div className="flex items-center gap-2">
-                                        <Phone className="w-4 h-4 text-muted-foreground" />
-                                        <span className="data-value">{primaryContact.name} ({primaryContact.relation})</span>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                                        <div>
+                                            <span className="data-label">Grade:</span> <span className="data-value">{student.className}</span>
+                                        </div>
+                                        <div>
+                                            <span className="data-label">Born:</span> <span className="data-value">{format(new Date(student.birthDate), 'MMMM d, yyyy')}</span>
+                                        </div>
+                                        {primaryContact && (
+                                            <div className="flex items-center gap-2">
+                                                <Phone className="w-4 h-4 text-muted-foreground" />
+                                                <span className="data-value">{primaryContact.name} ({primaryContact.relation})</span>
+                                            </div>
+                                        )}
+                                        <div className="flex items-center gap-2">
+                                            <span className="data-label">Tamo ID:</span>
+                                            {student.tamoId ? (
+                                                <a
+                                                    href={`https://tamo.eu/student/${student.tamoId}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1 text-primary hover:underline font-mono text-xs"
+                                                >
+                                                    {student.tamoId}
+                                                    <ExternalLink className="w-3 h-3 opacity-60" />
+                                                </a>
+                                            ) : (
+                                                <span className="text-muted-foreground text-xs italic">Not linked</span>
+                                            )}
+                                        </div>
                                     </div>
-                                )}
-                            </div>
                         </div>
                     </div>
                 </CardContent>

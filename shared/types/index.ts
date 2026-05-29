@@ -12,6 +12,7 @@ export interface Student {
     className: string;
     birthDate: string;
     photoUrl?: string;
+    tamoId?: string;
     specialEducationNeeds?: string;
     healthStatus: string;
     medicalSupport?: string;

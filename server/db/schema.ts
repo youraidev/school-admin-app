@@ -105,6 +105,7 @@ export const students = pgTable('students', {
     specialEducationNeeds: text('special_education_needs'),
     healthStatus:          text('health_status').default('Good'),
     medicalSupport:        text('medical_support'),
+    tamoId:                text('tamo_id'),
     contractStatus:        text('contract_status').default('active'),
     contractStartDate:     text('contract_start_date'),
     contractEndDate:       text('contract_end_date'),
