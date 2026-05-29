@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Phone, ExternalLink, User } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -193,22 +193,46 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {student.emergencyContacts.map(contact => (
-                                    <div key={contact.id} className="p-4 rounded-lg border bg-card">
-                                        <div className="flex items-start justify-between mb-2">
-                                            <div>
-                                                <p className="font-medium flex items-center gap-2">
-                                                    📞 {contact.name}
-                                                    {contact.isPrimary && (
-                                                        <StatusBadge variant="info">Primary</StatusBadge>
-                                                    )}
-                                                </p>
-                                                <p className="text-sm text-muted-foreground">{contact.relation}</p>
+                                {student.emergencyContacts.map(contact => {
+                                    const relation = contact.relation?.toLowerCase() ?? '';
+                                    const relationColors: Record<string, string> = {
+                                        father:  'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800',
+                                        mother:  'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800',
+                                        guardian:'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800',
+                                        sibling: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800',
+                                    };
+                                    const badgeClass = relationColors[relation] ?? 'bg-muted text-muted-foreground border-border';
+
+                                    return (
+                                        <div key={contact.id} className="p-4 rounded-xl border bg-card hover:shadow-sm transition-shadow">
+                                            <div className="flex items-start gap-3">
+                                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                                                    <User className="w-5 h-5 text-muted-foreground" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap mb-2">
+                                                        <span className="font-semibold text-sm leading-tight">{contact.name}</span>
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md border text-xs font-semibold tracking-wide ${badgeClass}`}>
+                                                            {contact.relation}
+                                                        </span>
+                                                        {contact.isPrimary && (
+                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-md border bg-primary/10 text-primary border-primary/20 text-xs font-semibold">
+                                                                Primary
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <a
+                                                        href={`tel:${contact.phone}`}
+                                                        className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                                                    >
+                                                        <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                                                        {contact.phone}
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
-                                        <p className="text-sm font-mono">{contact.phone}</p>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </CardContent>
                     </Card>
@@ -284,13 +308,44 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {student.authorizedPickup.map(person => (
-                                    <div key={person.id} className="p-4 rounded-lg border bg-card">
-                                        <p className="font-medium">{person.name}</p>
-                                        <p className="text-sm text-muted-foreground mb-2">{person.relation}</p>
-                                        <p className="text-sm font-mono">{person.phone}</p>
-                                    </div>
-                                ))}
+                                {student.authorizedPickup.map(person => {
+                                    const relation = person.relation?.toLowerCase() ?? '';
+                                    const relationColors: Record<string, string> = {
+                                        father:  'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800',
+                                        mother:  'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800',
+                                        guardian:'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800',
+                                        sibling: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800',
+                                    };
+                                    const badgeClass = relationColors[relation] ?? 'bg-muted text-muted-foreground border-border';
+
+                                    return (
+                                        <div key={person.id} className="p-4 rounded-xl border bg-card hover:shadow-sm transition-shadow">
+                                            <div className="flex items-start gap-3">
+                                                {/* Avatar circle */}
+                                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                                                    <User className="w-5 h-5 text-muted-foreground" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    {/* Name + relation badge on same row */}
+                                                    <div className="flex items-center gap-2 flex-wrap mb-2">
+                                                        <span className="font-semibold text-sm leading-tight">{person.name}</span>
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md border text-xs font-semibold tracking-wide ${badgeClass}`}>
+                                                            {person.relation}
+                                                        </span>
+                                                    </div>
+                                                    {/* Phone — prominent */}
+                                                    <a
+                                                        href={`tel:${person.phone}`}
+                                                        className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                                                    >
+                                                        <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                                                        {person.phone}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </CardContent>
                     </Card>
