@@ -23,4 +23,24 @@ router.get('/:id', async (req, res, next) => {
     } catch (error) { next(error); }
 });
 
+router.patch('/:studentId/pickup/:pickupId', async (req, res, next) => {
+    try {
+        const { notes } = req.body as { notes?: unknown };
+        if (typeof notes !== 'string') {
+            return res.status(400).json({ error: 'notes must be a string' });
+        }
+        if (notes.length > 500) {
+            return res.status(400).json({ error: 'notes must be 500 characters or fewer' });
+        }
+        const updated = await queries.updatePickupNotes(
+            req.user!.schoolId,
+            req.params.studentId,
+            req.params.pickupId,
+            notes,
+        );
+        if (!updated) return res.status(404).json({ error: 'Pickup record not found' });
+        res.json({ notes });
+    } catch (error) { next(error); }
+});
+
 export default router;

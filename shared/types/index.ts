@@ -65,6 +65,7 @@ export interface AuthorizedPerson {
     name: string;
     phone: string;
     relation: string;
+    notes?: string;
 }
 
 // Student with related data

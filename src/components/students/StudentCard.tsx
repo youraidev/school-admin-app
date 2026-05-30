@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, ExternalLink, User, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Phone, ExternalLink, User } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { StatusBadge } from '../ui/status-badge';
 import { SeverityBadge } from '../ui/severity-badge';
-import { Separator } from '../ui/separator';
+import { PickupPersonCard } from './PickupPersonCard';
 import * as api from '../../lib/api';
 import { format } from 'date-fns';
 import type { StudentWithDetails } from '../../../shared/types';
@@ -308,52 +308,13 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {student.authorizedPickup.map(person => {
-                                    const relation = person.relation?.toLowerCase() ?? '';
-                                    const relationColors: Record<string, string> = {
-                                        father:  'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800',
-                                        mother:  'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800',
-                                        guardian:'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800',
-                                        sibling: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800',
-                                    };
-                                    const badgeClass = relationColors[relation] ?? 'bg-muted text-muted-foreground border-border';
-
-                                    return (
-                                        <div key={person.id} className="p-4 rounded-xl border bg-card hover:shadow-sm transition-shadow flex flex-col gap-3">
-                                            <div className="flex items-start gap-3">
-                                                {/* Avatar circle */}
-                                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                                                    <User className="w-5 h-5 text-muted-foreground" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    {/* Name + relation badge on same row */}
-                                                    <div className="flex items-center gap-2 flex-wrap mb-2">
-                                                        <span className="font-semibold text-sm leading-tight">{person.name}</span>
-                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md border text-xs font-semibold tracking-wide ${badgeClass}`}>
-                                                            {person.relation}
-                                                        </span>
-                                                    </div>
-                                                    {/* Phone — prominent */}
-                                                    <a
-                                                        href={`tel:${person.phone}`}
-                                                        className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary transition-colors"
-                                                    >
-                                                        <Phone className="w-3.5 h-3.5 text-muted-foreground" />
-                                                        {person.phone}
-                                                    </a>
-                                                </div>
-                                            </div>
-
-                                            {/* Important notes */}
-                                            {person.notes && (
-                                                <div className="flex items-start gap-2.5 rounded-lg border border-amber-300/60 bg-amber-50/70 dark:border-amber-700/40 dark:bg-amber-950/30 px-3 py-2.5">
-                                                    <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                                                    <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed font-medium">{person.notes}</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
+                                {student.authorizedPickup.map(person => (
+                                    <PickupPersonCard
+                                        key={person.id}
+                                        person={person}
+                                        studentId={student.id}
+                                    />
+                                ))}
                             </div>
                         </CardContent>
                     </Card>

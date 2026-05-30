@@ -155,6 +155,14 @@ export async function getStudentById(id: string): Promise<StudentWithDetails | n
     }
 }
 
+export async function updatePickupNotes(
+    studentId: string,
+    pickupId: string,
+    notes: string,
+): Promise<{ notes: string }> {
+    return mutateAPI<{ notes: string }>('PATCH', `/students/${studentId}/pickup/${pickupId}`, { notes });
+}
+
 // ===== STAFF API =====
 
 export async function getAllStaff(): Promise<Staff[]> {

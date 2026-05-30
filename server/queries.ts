@@ -514,6 +514,23 @@ export async function getAllComplianceDocuments(schoolId: string): Promise<Compl
     });
 }
 
+export async function updatePickupNotes(
+    schoolId: string,
+    studentId: string,
+    pickupId: string,
+    notes: string,
+): Promise<boolean> {
+    const result = await qOne(sql`
+        UPDATE authorized_pickup
+        SET notes = ${notes}
+        WHERE id          = ${pickupId}
+          AND student_id  = ${studentId}
+          AND school_id   = ${schoolId}
+        RETURNING id
+    `);
+    return result !== null;
+}
+
 export async function getComplianceDocumentById(schoolId: string, id: string): Promise<ComplianceDocumentWithSignatures | null> {
     const doc = await qOne(sql`SELECT * FROM compliance_documents WHERE school_id = ${schoolId} AND id = ${id}`);
     if (!doc) return null;
