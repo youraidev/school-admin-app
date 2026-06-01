@@ -6,7 +6,7 @@ import type { AuthorizedPerson } from '../../../shared/types';
 
 const NOTES_MAX = 500;
 
-const RELATION_COLORS: Record<string, string> = {
+export const RELATION_COLORS: Record<string, string> = {
     father:   'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800',
     mother:   'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800',
     guardian: 'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800',
@@ -27,6 +27,15 @@ export function PickupPersonCard({ person, studentId }: Props) {
     const [draftValue, setDraftValue] = React.useState(person.notes ?? '');
     const [isSaving, setIsSaving]     = React.useState(false);
     const [saveError, setSaveError]   = React.useState<string | null>(null);
+
+    // Sync note when the parent re-renders this card with a different person
+    // (e.g. after a student detail refetch or if person.id changes).
+    React.useEffect(() => {
+        setSavedNote(person.notes ?? '');
+        setDraftValue(person.notes ?? '');
+        setIsEditing(false);
+        setSaveError(null);
+    }, [person.id, person.notes]);
 
     function openEdit() {
         setDraftValue(savedNote);

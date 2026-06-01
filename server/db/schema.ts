@@ -155,7 +155,7 @@ export const agreements = pgTable('agreements', {
 
 export const authorizedPickup = pgTable('authorized_pickup', {
     id:        uuid('id').primaryKey().defaultRandom(),
-    schoolId:  uuid('school_id').notNull(),
+    schoolId:  uuid('school_id').notNull().references(() => schools.id, { onDelete: 'cascade' }),
     studentId: uuid('student_id').notNull().references(() => students.id, { onDelete: 'cascade' }),
     name:      text('name').notNull(),
     phone:     text('phone').notNull(),

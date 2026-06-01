@@ -200,7 +200,8 @@ export async function getStudentStats(schoolId: string): Promise<StudentStats> {
         `),
         qOne(sql`
             SELECT COUNT(*) AS count FROM students
-            WHERE school_id = ${schoolId} AND contract_status = 'pending'
+            WHERE school_id = ${schoolId}
+              AND created_at >= NOW() - INTERVAL '30 days'
         `),
     ]);
 

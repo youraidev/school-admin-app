@@ -42,11 +42,14 @@ export default function StudentList() {
         return classes;
     }, [students]);
 
-    const filteredStudents = students.filter(student => {
-        const matchesName = student.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesClass = classFilter === 'all' || student.className === classFilter;
-        return matchesName && matchesClass;
-    });
+    const filteredStudents = React.useMemo(() =>
+        students.filter(student => {
+            const matchesName = student.name.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesClass = classFilter === 'all' || student.className === classFilter;
+            return matchesName && matchesClass;
+        }),
+        [students, searchTerm, classFilter]
+    );
 
     if (loading) {
         return (

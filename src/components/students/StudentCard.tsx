@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { StatusBadge } from '../ui/status-badge';
 import { SeverityBadge } from '../ui/severity-badge';
-import { PickupPersonCard } from './PickupPersonCard';
+import { PickupPersonCard, RELATION_COLORS } from './PickupPersonCard';
 import * as api from '../../lib/api';
 import { format } from 'date-fns';
 import type { StudentWithDetails } from '../../../shared/types';
@@ -19,12 +19,15 @@ export default function StudentCard({ studentId }: StudentCardProps) {
     const navigate = useNavigate();
     const [student, setStudent] = React.useState<StudentWithDetails | null>(null);
     const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
         async function loadStudent() {
             try {
                 const data = await api.getStudentById(studentId);
                 setStudent(data);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to load student');
             } finally {
                 setLoading(false);
             }
@@ -42,6 +45,22 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                 <Card className="card-elevated">
                     <CardContent className="p-12 text-center">
                         <p className="text-muted-foreground">Loading...</p>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="space-y-6 animate-fade-in">
+                <Button variant="ghost" onClick={() => navigate('/students')}>
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Students
+                </Button>
+                <Card className="card-elevated">
+                    <CardContent className="p-12 text-center">
+                        <p className="text-destructive">{error}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -195,13 +214,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {student.emergencyContacts.map(contact => {
                                     const relation = contact.relation?.toLowerCase() ?? '';
-                                    const relationColors: Record<string, string> = {
-                                        father:  'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800',
-                                        mother:  'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800',
-                                        guardian:'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800',
-                                        sibling: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800',
-                                    };
-                                    const badgeClass = relationColors[relation] ?? 'bg-muted text-muted-foreground border-border';
+                                    const badgeClass = RELATION_COLORS[relation] ?? 'bg-muted text-muted-foreground border-border';
 
                                     return (
                                         <div key={contact.id} className="p-4 rounded-xl border bg-card hover:shadow-sm transition-shadow">

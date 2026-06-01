@@ -29,17 +29,18 @@ router.patch('/:studentId/pickup/:pickupId', async (req, res, next) => {
         if (typeof notes !== 'string') {
             return res.status(400).json({ error: 'notes must be a string' });
         }
-        if (notes.length > 500) {
+        const trimmedNotes = notes.trim();
+        if (trimmedNotes.length > 500) {
             return res.status(400).json({ error: 'notes must be 500 characters or fewer' });
         }
         const updated = await queries.updatePickupNotes(
             req.user!.schoolId,
             req.params.studentId,
             req.params.pickupId,
-            notes,
+            trimmedNotes,
         );
         if (!updated) return res.status(404).json({ error: 'Pickup record not found' });
-        res.json({ notes });
+        res.json({ notes: trimmedNotes });
     } catch (error) { next(error); }
 });
 
