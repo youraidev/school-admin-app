@@ -195,7 +195,21 @@ export default function NotificationsPage() {
     ];
 
     return (
-        <div className="space-y-6">
+        <div className="relative">
+        {/* Not implemented overlay */}
+        <div className="absolute inset-0 z-10 rounded-xl flex flex-col items-center justify-center bg-background/60 backdrop-blur-[2px] pointer-events-auto select-none"
+             aria-label="Feature not yet implemented">
+            <div className="flex flex-col items-center gap-3 px-8 py-6 rounded-2xl border border-border/60 bg-background/80 shadow-lg text-center max-w-sm">
+                <div className="w-11 h-11 rounded-full bg-muted flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-semibold text-foreground tracking-wide uppercase">Coming soon</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                    The notifications feature is not yet implemented. This is a preview of the planned interface.
+                </p>
+            </div>
+        </div>
+        <div className="space-y-6 pointer-events-none select-none opacity-60">
             {/* Header */}
             <div className="flex items-start justify-between">
                 <div>
@@ -353,6 +367,7 @@ export default function NotificationsPage() {
                     })}
                 </div>
             )}
+        </div>
         </div>
     );
 }
