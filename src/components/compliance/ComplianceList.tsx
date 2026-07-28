@@ -113,7 +113,7 @@ export default function ComplianceList() {
                         ? Math.round((doc.signedCount / doc.totalSignatures) * 100)
                         : 0;
                     const isOverdue = doc.dueDate && new Date(doc.dueDate) < new Date() && doc.pendingCount > 0;
-                    const isComplete = progressPercent === 100;
+                    const isComplete = doc.totalSignatures > 0 && doc.signedCount === doc.totalSignatures;
 
                     return (
                         <div
