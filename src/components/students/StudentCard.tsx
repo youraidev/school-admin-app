@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, ExternalLink, User, CheckCircle2, Clock, CalendarDays, FileText } from 'lucide-react';
+import { ArrowLeft, Phone, ExternalLink, User, CheckCircle2, Clock, CalendarDays, FileText, HeartPulse, ShieldAlert, Stethoscope, BookOpen, PhoneCall } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -155,72 +155,123 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                 {/* Medical & Health Tab */}
                 <TabsContent value="medical">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
                         {/* Allergies */}
-                        <Card className="card-elevated">
-                            <CardHeader>
-                                <CardTitle className="text-lg">Allergies</CardTitle>
+                        <Card className="card-elevated overflow-hidden">
+                            <CardHeader className="pb-4 border-b border-border/60">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
+                                        <ShieldAlert className="w-4 h-4 text-red-500" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-base">Allergies</CardTitle>
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                            {student.allergies.length === 0 ? 'No known allergies' : `${student.allergies.length} recorded`}
+                                        </p>
+                                    </div>
+                                </div>
                             </CardHeader>
-                            <CardContent className="space-y-3">
+                            <CardContent className="p-0">
                                 {student.allergies.length === 0 ? (
-                                    <p className="text-sm text-muted-foreground">No known allergies</p>
+                                    <div className="px-5 py-8 text-center text-sm text-muted-foreground">No known allergies on record</div>
                                 ) : (
-                                    student.allergies.map(allergy => (
-                                        <div key={allergy.id} className="p-3 rounded-lg border bg-card space-y-2">
-                                            <div className="flex items-center gap-2">
-                                                <SeverityBadge severity={allergy.severity}>{allergy.name}</SeverityBadge>
-                                                <span className="text-sm font-medium capitalize">{allergy.severity}</span>
-                                            </div>
-                                            {allergy.notes && (
-                                                <p className="text-sm text-muted-foreground">{allergy.notes}</p>
-                                            )}
-                                        </div>
-                                    ))
+                                    <div className="divide-y divide-border/50">
+                                        {student.allergies.map(allergy => {
+                                            const isLifeThreatening = allergy.severity === 'life-threatening';
+                                            return (
+                                                <div key={allergy.id} className={`px-5 py-3.5 flex flex-col gap-1.5 ${isLifeThreatening ? 'bg-red-50/50 dark:bg-red-950/10' : ''}`}>
+                                                    <div className="flex items-center gap-2.5">
+                                                        <SeverityBadge severity={allergy.severity}>{allergy.name}</SeverityBadge>
+                                                        <span className="text-xs text-muted-foreground capitalize font-medium">{allergy.severity.replace('-', ' ')}</span>
+                                                    </div>
+                                                    {allergy.notes && (
+                                                        <p className="text-sm text-muted-foreground leading-relaxed">{allergy.notes}</p>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 )}
                             </CardContent>
                         </Card>
 
                         {/* Health Status */}
-                        <Card className="card-elevated">
-                            <CardHeader>
-                                <CardTitle className="text-lg">Health Status</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div>
-                                    <p className="data-label mb-1">Overall Health</p>
-                                    <p className="data-value">{student.healthStatus}</p>
+                        <Card className="card-elevated overflow-hidden">
+                            <CardHeader className="pb-4 border-b border-border/60">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                        <HeartPulse className="w-4 h-4 text-primary" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-base">Health Status</CardTitle>
+                                        <p className="text-xs text-muted-foreground mt-0.5">General health overview</p>
+                                    </div>
                                 </div>
-                                {student.medicalSupport && (
-                                    <div>
-                                        <p className="data-label mb-1">Medical Support</p>
-                                        <p className="data-value">{student.medicalSupport}</p>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <div className="divide-y divide-border/50">
+                                    <div className="px-5 py-3.5 flex items-start gap-3">
+                                        <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <Stethoscope className="w-3.5 h-3.5 text-muted-foreground" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">Overall Health</p>
+                                            <p className="text-sm font-semibold text-foreground">{student.healthStatus}</p>
+                                        </div>
                                     </div>
-                                )}
-                                {student.specialEducationNeeds && (
-                                    <div>
-                                        <p className="data-label mb-1">Special Education Needs</p>
-                                        <p className="data-value">{student.specialEducationNeeds}</p>
-                                    </div>
-                                )}
+                                    {student.medicalSupport && (
+                                        <div className="px-5 py-3.5 flex items-start gap-3">
+                                            <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <ShieldAlert className="w-3.5 h-3.5 text-muted-foreground" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">Medical Support</p>
+                                                <p className="text-sm font-semibold text-foreground">{student.medicalSupport}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {student.specialEducationNeeds && (
+                                        <div className="px-5 py-3.5 flex items-start gap-3">
+                                            <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">Special Education Needs</p>
+                                                <p className="text-sm font-semibold text-foreground">{student.specialEducationNeeds}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </CardContent>
                         </Card>
                     </div>
 
                     {/* Emergency Contacts */}
-                    <Card className="card-elevated mt-6">
-                        <CardHeader>
-                            <CardTitle className="text-lg">Emergency Contacts</CardTitle>
+                    <Card className="card-elevated mt-6 overflow-hidden">
+                        <CardHeader className="pb-4 border-b border-border/60">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center">
+                                    <PhoneCall className="w-4 h-4 text-orange-500" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-base">Emergency Contacts</CardTitle>
+                                    <p className="text-xs text-muted-foreground mt-0.5">{student.emergencyContacts.length} contact{student.emergencyContacts.length !== 1 ? 's' : ''} on file</p>
+                                </div>
+                            </div>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="pt-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {student.emergencyContacts.map(contact => {
                                     const relation = contact.relation?.toLowerCase() ?? '';
                                     const badgeClass = RELATION_COLORS[relation] ?? 'bg-muted text-muted-foreground border-border';
+                                    const initials = contact.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
 
                                     return (
-                                        <div key={contact.id} className="p-4 rounded-xl border bg-card hover:shadow-sm transition-shadow">
+                                        <div key={contact.id} className="p-4 rounded-xl border bg-card hover:shadow-sm transition-shadow flex flex-col gap-3">
                                             <div className="flex items-start gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                                                    <User className="w-5 h-5 text-muted-foreground" />
+                                                {/* Avatar with initials */}
+                                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                                    <span className="text-xs font-bold text-primary">{initials}</span>
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2 flex-wrap mb-2">
