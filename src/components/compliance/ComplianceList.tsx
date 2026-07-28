@@ -1,12 +1,52 @@
 import * as React from 'react';
-import { Upload, Search } from 'lucide-react';
+import { Upload, Search, FileText, CheckCircle2, Clock, Bell, Users, AlertCircle, CalendarDays, Tag } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Progress } from '../ui/progress';
 import * as api from '../../lib/api';
 import { format } from 'date-fns';
 import type { ComplianceDocumentWithSignatures } from '../../../shared/types';
+
+function SignerChip({ staffName, status, signedAt }: { staffName: string; status: string; signedAt?: string | null }) {
+    const initials = staffName
+        .split(' ')
+        .map(n => n[0])
+        .slice(0, 2)
+        .join('');
+    const signed = status === 'signed';
+
+    return (
+        <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border text-xs transition-colors ${
+            signed
+                ? 'bg-emerald-50 border-emerald-200/70 dark:bg-emerald-950/30 dark:border-emerald-800/50'
+                : 'bg-muted/40 border-border/60'
+        }`}>
+            {/* Avatar */}
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${
+                signed ? 'bg-emerald-500 text-white' : 'bg-muted-foreground/20 text-muted-foreground'
+            }`}>
+                {initials}
+            </div>
+            <div className="min-w-0">
+                <p className={`font-medium truncate leading-none mb-0.5 ${signed ? 'text-emerald-800 dark:text-emerald-300' : 'text-muted-foreground'}`}>
+                    {staffName.split(' ')[0]}
+                </p>
+                {signedAt ? (
+                    <p className="text-muted-foreground leading-none">{format(new Date(signedAt), 'MMM d')}</p>
+                ) : (
+                    <p className="text-muted-foreground/60 leading-none italic">Pending</p>
+                )}
+            </div>
+            {/* Status icon */}
+            <div className="ml-auto flex-shrink-0">
+                {signed
+                    ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    : <Clock className="w-3.5 h-3.5 text-muted-foreground/50" />
+                }
+            </div>
+        </div>
+    );
+}
 
 export default function ComplianceList() {
     const [searchTerm, setSearchTerm] = React.useState('');
@@ -49,114 +89,144 @@ export default function ComplianceList() {
                     <h1 className="text-3xl font-semibold tracking-tight">Internal Compliance</h1>
                     <p className="text-muted-foreground mt-1">Manage internal rules and acknowledgments</p>
                 </div>
-                <Button>
-                    <Upload className="w-4 h-4 mr-2" />
+                <Button className="gap-2">
+                    <Upload className="w-4 h-4" />
                     Upload Document
                 </Button>
             </div>
 
             {/* Search */}
-            <div className="flex items-center gap-4">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search documents..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-9"
-                    />
-                </div>
+            <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                    placeholder="Search documents..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 h-10 bg-background"
+                />
             </div>
 
             {/* Document List */}
             <div className="space-y-4">
                 {filteredDocuments.map((doc, index) => {
-                    const progressPercent = (doc.signedCount / doc.totalSignatures) * 100;
+                    const progressPercent = doc.totalSignatures > 0
+                        ? Math.round((doc.signedCount / doc.totalSignatures) * 100)
+                        : 0;
                     const isOverdue = doc.dueDate && new Date(doc.dueDate) < new Date() && doc.pendingCount > 0;
+                    const isComplete = progressPercent === 100;
 
                     return (
-                        <Card
+                        <div
                             key={doc.id}
-                            className="card-elevated animate-slide-in"
+                            className="rounded-xl border bg-card shadow-sm hover:shadow-md transition-shadow animate-slide-in overflow-hidden"
                             style={{ animationDelay: `${index * 50}ms` }}
                         >
-                            <CardHeader>
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <CardTitle className="text-xl flex items-center gap-2 mb-2">
-                                            📄 {doc.title}
+                            {/* Top accent line */}
+                            <div className={`h-0.5 w-full ${isComplete ? 'bg-emerald-500' : isOverdue ? 'bg-destructive' : 'bg-primary/30'}`} />
+
+                            <div className="p-5">
+                                {/* Card Header */}
+                                <div className="flex items-start gap-4 mb-4">
+                                    {/* File icon box */}
+                                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                                        isComplete ? 'bg-emerald-50 dark:bg-emerald-950/40' : isOverdue ? 'bg-destructive/8' : 'bg-primary/8'
+                                    }`}>
+                                        <FileText className={`w-5 h-5 ${
+                                            isComplete ? 'text-emerald-600' : isOverdue ? 'text-destructive' : 'text-primary'
+                                        }`} />
+                                    </div>
+
+                                    <div className="flex-1 min-w-0">
+                                        {/* Title row */}
+                                        <div className="flex items-center gap-2.5 flex-wrap mb-1.5">
+                                            <h2 className="text-base font-semibold leading-tight">{doc.title}</h2>
                                             {isOverdue && (
-                                                <span className="px-2.5 py-0.5 rounded-full border bg-destructive/10 text-destructive border-destructive/20 text-xs font-semibold">
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-destructive/10 text-destructive border border-destructive/20 text-xs font-semibold">
+                                                    <AlertCircle className="w-3 h-3" />
                                                     Overdue
                                                 </span>
                                             )}
-                                        </CardTitle>
-                                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                            <span>{doc.version}</span>
-                                            <span>·</span>
-                                            <span>Uploaded {format(new Date(doc.uploadDate), 'MMM d')}</span>
-                                            <span>·</span>
-                                            <span className="capitalize">{doc.targetAudience === 'all' ? 'All Staff' : doc.targetAudience}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p className="text-sm text-muted-foreground mt-2">{doc.description}</p>
-                            </CardHeader>
-
-                            <CardContent className="space-y-4">
-                                {/* Progress Bar */}
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="font-medium">Progress:</span>
-                                        <span className="text-muted-foreground">
-                                            {doc.signedCount} of {doc.totalSignatures} signed ({Math.round(progressPercent)}%)
-                                        </span>
-                                    </div>
-                                    <Progress value={progressPercent} className="h-2" />
-                                </div>
-
-                                {/* Signatures Grid */}
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                                    {doc.signatures.map(signature => (
-                                        <div
-                                            key={signature.id}
-                                            className={`p-2 rounded-lg border text-xs ${signature.status === 'signed'
-                                                ? 'bg-success/5 border-success/20'
-                                                : 'bg-muted/50 border-muted'
-                                                }`}
-                                        >
-                                            <div className="flex items-center gap-1.5 mb-1">
-                                                <span className="text-base">
-                                                    {signature.status === 'signed' ? '✅' : '⏳'}
+                                            {isComplete && (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/70 text-xs font-semibold dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-800">
+                                                    <CheckCircle2 className="w-3 h-3" />
+                                                    Complete
                                                 </span>
-                                                <span className="font-medium truncate">{signature.staffName.split(' ')[0]}</span>
-                                            </div>
-                                            {signature.signedAt && (
-                                                <p className="text-muted-foreground">
-                                                    {format(new Date(signature.signedAt), 'MMM d')}
-                                                </p>
                                             )}
                                         </div>
+
+                                        {/* Meta pills */}
+                                        <div className="flex items-center gap-3 flex-wrap">
+                                            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                                                <Tag className="w-3 h-3" />
+                                                {doc.version}
+                                            </span>
+                                            <span className="text-muted-foreground/40 text-xs">·</span>
+                                            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                                                <CalendarDays className="w-3 h-3" />
+                                                Uploaded {format(new Date(doc.uploadDate), 'MMM d')}
+                                            </span>
+                                            <span className="text-muted-foreground/40 text-xs">·</span>
+                                            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                                                <Users className="w-3 h-3" />
+                                                {doc.targetAudience === 'all' ? 'All Staff' : doc.targetAudience}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Description */}
+                                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{doc.description}</p>
+
+                                {/* Progress */}
+                                <div className="mb-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Signatures</span>
+                                        <span className={`text-xs font-semibold ${isComplete ? 'text-emerald-600' : 'text-foreground'}`}>
+                                            {doc.signedCount} / {doc.totalSignatures} &nbsp;
+                                            <span className="font-normal text-muted-foreground">({progressPercent}%)</span>
+                                        </span>
+                                    </div>
+                                    <div className="relative h-2 rounded-full bg-muted overflow-hidden">
+                                        <div
+                                            className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${
+                                                isComplete ? 'bg-emerald-500' : isOverdue ? 'bg-destructive' : 'bg-primary'
+                                            }`}
+                                            style={{ width: `${progressPercent}%` }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Signers grid */}
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-4">
+                                    {doc.signatures.map(sig => (
+                                        <SignerChip
+                                            key={sig.id}
+                                            staffName={sig.staffName}
+                                            status={sig.status}
+                                            signedAt={sig.signedAt}
+                                        />
                                     ))}
                                 </div>
 
-                                {/* Remind Button */}
+                                {/* Remind button */}
                                 {doc.pendingCount > 0 && (
-                                    <Button variant="outline" size="sm" className="w-full">
-                                        📧 Remind Pending Users
-                                    </Button>
+                                    <button className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-border/60 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-border transition-colors">
+                                        <Bell className="w-3.5 h-3.5" />
+                                        Remind {doc.pendingCount} pending {doc.pendingCount === 1 ? 'user' : 'users'}
+                                    </button>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     );
                 })}
 
                 {filteredDocuments.length === 0 && (
-                    <Card className="card-elevated">
-                        <CardContent className="p-12 text-center">
-                            <p className="text-muted-foreground">No compliance documents found</p>
-                        </CardContent>
-                    </Card>
+                    <div className="rounded-xl border bg-card p-16 flex flex-col items-center gap-3 text-center">
+                        <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                            <FileText className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                        <p className="text-sm text-muted-foreground">No compliance documents found</p>
+                    </div>
                 )}
             </div>
         </div>
