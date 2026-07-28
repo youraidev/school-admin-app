@@ -319,6 +319,7 @@ export default function NotificationsPage() {
                                                 <button
                                                     onClick={() => markRead(notification.id)}
                                                     title="Mark as read"
+                                                    aria-label="Mark as read"
                                                     className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                                                 >
                                                     <Check className="w-4 h-4" />
@@ -327,12 +328,14 @@ export default function NotificationsPage() {
                                             <button
                                                 onClick={() => dismiss(notification.id)}
                                                 title="Dismiss"
+                                                aria-label="Dismiss"
                                                 className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                                             >
                                                 <X className="w-4 h-4" />
                                             </button>
                                             <button
                                                 title="View student"
+                                                aria-label="View student"
                                                 className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                                             >
                                                 <ChevronRight className="w-4 h-4" />
