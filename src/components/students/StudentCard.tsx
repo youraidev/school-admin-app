@@ -125,7 +125,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                             <span className="data-label">Tamo ID:</span>
                                             {student.tamoId ? (
                                                 <a
-                                                    href={`https://tamo.eu/student/${student.tamoId}`}
+                                                    href={`https://tamo.eu/student/${encodeURIComponent(student.tamoId)}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="inline-flex items-center gap-1 text-primary hover:underline font-mono text-xs"
