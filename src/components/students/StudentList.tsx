@@ -54,6 +54,22 @@ export default function StudentList() {
         [students, searchTerm, classFilter]
     );
 
+    // Classes that have at least one student requiring attention
+    const classesWithAttention = React.useMemo(() => {
+        const set = new Set<string>();
+        students.forEach(s => {
+            const needsAttention =
+                !s.isPaid ||
+                s.contractStatus === 'terminated' ||
+                s.contractStatus === 'expired' ||
+                s.contractStatus === 'pending' ||
+                !!s.medicalSupport ||
+                s.healthStatus === 'needs_review';
+            if (needsAttention) set.add(s.className);
+        });
+        return set;
+    }, [students]);
+
     if (loading) {
         return (
             <div className="space-y-6 animate-fade-in">
@@ -178,24 +194,32 @@ export default function StudentList() {
                             </CardHeader>
                             <CardContent className="p-4">
                                 <div className="flex flex-wrap gap-2">
-                                    {stats.perClass.map(({ className, count }) => (
-                                        <button
-                                            key={className}
-                                            onClick={() => setClassFilter(classFilter === className ? 'all' : className)}
-                                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                                                classFilter === className
-                                                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-                                                    : 'bg-muted/40 text-foreground border-border hover:bg-muted hover:border-border/80'
-                                            }`}
-                                        >
-                                            {className}
-                                            <span className={`text-[11px] px-1.5 py-0.5 rounded-full font-bold ${
-                                                classFilter === className
-                                                    ? 'bg-white/20 text-primary-foreground'
-                                                    : 'bg-muted-foreground/15 text-muted-foreground'
-                                            }`}>{count}</span>
-                                        </button>
-                                    ))}
+                                    {stats.perClass.map(({ className, count }) => {
+                                        const hasAttention = classesWithAttention.has(className);
+                                        const isActive = classFilter === className;
+                                        return (
+                                            <button
+                                                key={className}
+                                                onClick={() => setClassFilter(isActive ? 'all' : className)}
+                                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                                                    isActive
+                                                        ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                                                        : 'bg-muted/40 text-foreground border-border hover:bg-muted hover:border-border/80'
+                                                }`}
+                                            >
+                                                {/* Attention dot */}
+                                                {hasAttention && (
+                                                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? 'bg-white/80' : 'bg-destructive'}`} />
+                                                )}
+                                                {className}
+                                                <span className={`text-[11px] px-1.5 py-0.5 rounded-full font-bold ${
+                                                    isActive
+                                                        ? 'bg-white/20 text-primary-foreground'
+                                                        : 'bg-muted-foreground/15 text-muted-foreground'
+                                                }`}>{count}</span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </CardContent>
                         </Card>
@@ -294,13 +318,13 @@ export default function StudentList() {
                             style={{ animationDelay: `${index * 50}ms` }}
                         >
                             <Card className="card-elevated hover:shadow-md transition-all cursor-pointer animate-slide-in overflow-hidden flex flex-col">
-                                {/* Top accent bar */}
-                                <div className={`h-0.5 w-full ${status.accentClass}`} />
+                                {/* Top accent bar — neutral for all cards */}
+                                <div className="h-0.5 w-full bg-border" />
 
                                 <CardContent className="p-5 flex-1 flex flex-col gap-4">
                                     {/* Header row: avatar + name + chevron */}
                                     <div className="flex items-start gap-3">
-                                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 ${status.avatarBg} ${status.avatarText}`}>
+                                        <div className="w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 bg-muted text-foreground/70">
                                             {initials}
                                         </div>
                                         <div className="flex-1 min-w-0">
