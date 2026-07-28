@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, ExternalLink, User } from 'lucide-react';
+import { ArrowLeft, Phone, ExternalLink, User, CheckCircle2, Clock, CalendarDays, FileText } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -253,25 +253,63 @@ export default function StudentCard({ studentId }: StudentCardProps) {
 
                 {/* Documents Tab */}
                 <TabsContent value="documents">
-                    <Card className="card-elevated">
-                        <CardHeader>
-                            <CardTitle className="text-lg">Document Checklist</CardTitle>
+                    <Card className="card-elevated overflow-hidden">
+                        <CardHeader className="pb-4 border-b border-border/60">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                        <FileText className="w-4 h-4 text-primary" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-base">Document Checklist</CardTitle>
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                            {student.documentChecklist.filter(d => d.isComplete).length} of {student.documentChecklist.length} complete
+                                        </p>
+                                    </div>
+                                </div>
+                                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                                    student.documentChecklist.every(d => d.isComplete)
+                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70'
+                                        : 'bg-amber-50 text-amber-700 border border-amber-200/70'
+                                }`}>
+                                    {student.documentChecklist.every(d => d.isComplete) ? 'All complete' : 'Pending items'}
+                                </span>
+                            </div>
                         </CardHeader>
-                        <CardContent>
-                            <div className="space-y-2">
+                        <CardContent className="p-0">
+                            <div className="divide-y divide-border/50">
                                 {student.documentChecklist.map(doc => (
-                                    <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg border bg-card">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${doc.isComplete ? 'bg-success border-success' : 'border-muted'
-                                                }`}>
-                                                {doc.isComplete && <span className="text-white text-xs">✓</span>}
-                                            </div>
-                                            <span className="font-medium">{doc.name}</span>
+                                    <div key={doc.id} className={`flex items-center gap-4 px-5 py-3.5 transition-colors ${
+                                        doc.isComplete ? 'bg-emerald-50/40 dark:bg-emerald-950/10' : 'bg-card hover:bg-muted/30'
+                                    }`}>
+                                        {/* Status icon */}
+                                        <div className="flex-shrink-0">
+                                            {doc.isComplete
+                                                ? <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                                : <Clock className="w-5 h-5 text-muted-foreground/40" />
+                                            }
                                         </div>
+
+                                        {/* Name */}
+                                        <span className={`flex-1 text-sm font-medium ${doc.isComplete ? 'text-foreground' : 'text-foreground/80'}`}>
+                                            {doc.name}
+                                        </span>
+
+                                        {/* Status chip */}
+                                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${
+                                            doc.isComplete
+                                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
+                                                : 'bg-muted text-muted-foreground'
+                                        }`}>
+                                            {doc.isComplete ? 'Submitted' : 'Pending'}
+                                        </span>
+
+                                        {/* Due date */}
                                         {doc.dueDate && (
-                                            <span className="text-sm text-muted-foreground">
-                                                Due: {format(new Date(doc.dueDate), 'MMM d, yyyy')}
-                                            </span>
+                                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-[110px] justify-end">
+                                                <CalendarDays className="w-3.5 h-3.5 flex-shrink-0" />
+                                                <span>{format(new Date(doc.dueDate), 'MMM d, yyyy')}</span>
+                                            </div>
                                         )}
                                     </div>
                                 ))}
