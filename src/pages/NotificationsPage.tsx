@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Bell, FileText, FileSignature, AlertTriangle, Clock, Check, X, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
@@ -15,6 +16,7 @@ interface Notification {
     title: string;
     description: string;
     student: string;
+    studentId?: string;
     studentClass: string;
     daysRemaining?: number;
     createdAt: string;
@@ -158,6 +160,7 @@ function DaysChip({ days }: { days: number }) {
 type FilterTab = 'all' | 'unread' | 'critical' | 'high';
 
 export default function NotificationsPage() {
+    const navigate = useNavigate();
     const [notifications, setNotifications] = React.useState<Notification[]>(MOCK_NOTIFICATIONS);
     const [activeTab, setActiveTab] = React.useState<FilterTab>('all');
 
@@ -334,9 +337,11 @@ export default function NotificationsPage() {
                                                 <X className="w-4 h-4" />
                                             </button>
                                             <button
+                                                onClick={() => notification.studentId && navigate(`/students/${notification.studentId}`)}
                                                 title="View student"
                                                 aria-label="View student"
-                                                className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                                                disabled={!notification.studentId}
+                                                className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                             >
                                                 <ChevronRight className="w-4 h-4" />
                                             </button>
