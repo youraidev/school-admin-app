@@ -163,6 +163,7 @@ export default function NotificationsPage() {
 
     const unreadCount = notifications.filter(n => !n.read).length;
     const criticalCount = notifications.filter(n => n.priority === 'critical').length;
+    const highCount = notifications.filter(n => n.priority === 'critical' || n.priority === 'high').length;
 
     const filtered = notifications.filter(n => {
         if (activeTab === 'unread') return !n.read;
@@ -214,7 +215,7 @@ export default function NotificationsPage() {
                     { label: 'Total', value: notifications.length, icon: <Bell className="w-4 h-4 text-primary" />, iconBg: 'bg-primary/10' },
                     { label: 'Unread', value: unreadCount, icon: <Bell className="w-4 h-4 text-blue-500" />, iconBg: 'bg-blue-500/10' },
                     { label: 'Critical', value: criticalCount, icon: <AlertTriangle className="w-4 h-4 text-red-500" />, iconBg: 'bg-red-500/10' },
-                    { label: 'High priority', value: notifications.filter(n => n.priority === 'high').length, icon: <AlertTriangle className="w-4 h-4 text-orange-500" />, iconBg: 'bg-orange-500/10' },
+                    { label: 'High priority', value: highCount, icon: <AlertTriangle className="w-4 h-4 text-orange-500" />, iconBg: 'bg-orange-500/10' },
                 ].map(stat => (
                     <Card key={stat.label} className="card-elevated">
                         <CardContent className="p-4 flex items-center gap-3">
