@@ -257,7 +257,7 @@ export default function StudentList() {
                             leftBorderClass: 'border-l-4 border-l-destructive',
                         },
                         missing: {
-                            label: 'Miss document',
+                            label: 'Missing documents',
                             dotClass: 'bg-amber-500',
                             leftBorderClass: 'border-l-4 border-l-amber-400',
                         },
