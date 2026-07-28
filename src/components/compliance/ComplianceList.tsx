@@ -89,7 +89,7 @@ export default function ComplianceList() {
                     <h1 className="text-3xl font-semibold tracking-tight">Internal Compliance</h1>
                     <p className="text-muted-foreground mt-1">Manage internal rules and acknowledgments</p>
                 </div>
-                <Button className="gap-2">
+                <Button className="gap-2" disabled title="Coming soon — upload is not yet implemented">
                     <Upload className="w-4 h-4" />
                     Upload Document
                 </Button>
@@ -210,7 +210,11 @@ export default function ComplianceList() {
 
                                 {/* Remind button */}
                                 {doc.pendingCount > 0 && (
-                                    <button className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-border/60 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-border transition-colors">
+                                    <button
+                                        disabled
+                                        title="Coming soon — reminders are not yet implemented"
+                                        className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-border/60 text-sm font-medium text-muted-foreground opacity-50 cursor-not-allowed"
+                                    >
                                         <Bell className="w-3.5 h-3.5" />
                                         Remind {doc.pendingCount} pending {doc.pendingCount === 1 ? 'user' : 'users'}
                                     </button>
