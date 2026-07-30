@@ -1,12 +1,13 @@
 import * as React from 'react';
-import { Users, UserCog, FileText, FileCheck, AlertCircle, FileWarning, ArrowRight, ShieldAlert, ClipboardList } from 'lucide-react';
+import { Users, UserCog, FileText, FileCheck, AlertCircle, FileWarning, ArrowRight, ShieldAlert, ClipboardList, Search, X } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../ui/card';
 import { StatusBadge } from '../ui/status-badge';
 import * as api from '../../lib/api';
-import { Link } from 'react-router-dom';
-import type { DashboardStats, CriticalAllergy, ContractIssue, PendingSignature } from '../../../shared/types';
+import { Link, useNavigate } from 'react-router-dom';
+import type { DashboardStats, CriticalAllergy, ContractIssue, PendingSignature, Student } from '../../../shared/types';
 
 export default function Dashboard() {
+    const navigate = useNavigate();
     const [stats, setStats] = React.useState<DashboardStats | null>(null);
     const [criticalAllergies, setCriticalAllergies] = React.useState<CriticalAllergy[]>([]);
     const [contractIssues, setContractIssues] = React.useState<ContractIssue[]>([]);
@@ -14,20 +15,56 @@ export default function Dashboard() {
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
 
+    // Search state
+    const [allStudents, setAllStudents] = React.useState<Student[]>([]);
+    const [searchQuery, setSearchQuery] = React.useState('');
+    const [searchOpen, setSearchOpen] = React.useState(false);
+    const searchRef = React.useRef<HTMLDivElement>(null);
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    const searchResults = React.useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
+        if (!q) return [];
+        return allStudents.filter(s =>
+            s.name.toLowerCase().includes(q) ||
+            s.className.toLowerCase().includes(q)
+        ).slice(0, 6);
+    }, [allStudents, searchQuery]);
+
+    // Close dropdown on outside click or Escape
+    React.useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+                setSearchOpen(false);
+            }
+        }
+        function handleKeyDown(e: KeyboardEvent) {
+            if (e.key === 'Escape') setSearchOpen(false);
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
     React.useEffect(() => {
         async function loadDashboardData() {
             try {
                 setLoading(true);
-                const [statsData, allergiesData, issuesData, signaturesData] = await Promise.all([
+                const [statsData, allergiesData, issuesData, signaturesData, studentsData] = await Promise.all([
                     api.getDashboardStats(),
                     api.getCriticalAllergies(),
                     api.getContractIssues(),
                     api.getPendingSignatures(),
+                    api.getAllStudents(),
                 ]);
                 setStats(statsData);
                 setCriticalAllergies(allergiesData);
                 setContractIssues(issuesData);
                 setPendingSignatures(signaturesData);
+                setAllStudents(studentsData);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
             } finally {
@@ -62,9 +99,66 @@ export default function Dashboard() {
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Page Header */}
-            <div>
-                <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-                <p className="text-muted-foreground mt-1">Overview of school administration</p>
+            <div className="flex items-start justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+                    <p className="text-muted-foreground mt-1">Overview of school administration</p>
+                </div>
+
+                {/* Student search */}
+                <div ref={searchRef} className="relative w-72 flex-shrink-0">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={searchQuery}
+                            onChange={e => { setSearchQuery(e.target.value); setSearchOpen(true); }}
+                            onFocus={() => setSearchOpen(true)}
+                            placeholder="Search students..."
+                            className="w-full h-9 pl-9 pr-8 text-sm rounded-lg border border-border bg-background shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors placeholder:text-muted-foreground"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => { setSearchQuery(''); setSearchOpen(false); inputRef.current?.focus(); }}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                aria-label="Clear search"
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Results dropdown */}
+                    {searchOpen && searchQuery.trim() && (
+                        <div className="absolute top-full mt-1.5 left-0 right-0 z-50 bg-background border border-border rounded-xl shadow-lg overflow-hidden">
+                            {searchResults.length === 0 ? (
+                                <div className="px-4 py-3 text-sm text-muted-foreground">No students found</div>
+                            ) : (
+                                <div className="divide-y divide-border/50">
+                                    {searchResults.map(student => {
+                                        const initials = student.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
+                                        return (
+                                            <button
+                                                key={student.id}
+                                                onClick={() => { navigate(`/students/${student.id}`); setSearchOpen(false); setSearchQuery(''); }}
+                                                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-muted/50 transition-colors text-left"
+                                            >
+                                                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                                    <span className="text-[10px] font-bold text-primary">{initials}</span>
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-medium truncate">{student.name}</p>
+                                                    <p className="text-xs text-muted-foreground">{student.className}</p>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Stats Grid */}
