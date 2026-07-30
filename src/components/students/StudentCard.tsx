@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone } from 'lucide-react';
+import { ArrowLeft, Phone, ExternalLink, User, CheckCircle2, Clock, CalendarDays, FileText, HeartPulse, ShieldAlert, Stethoscope, BookOpen, PhoneCall } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { StatusBadge } from '../ui/status-badge';
 import { SeverityBadge } from '../ui/severity-badge';
-import { Separator } from '../ui/separator';
+import { PickupPersonCard, RELATION_COLORS } from './PickupPersonCard';
 import * as api from '../../lib/api';
 import { format } from 'date-fns';
 import type { StudentWithDetails } from '../../../shared/types';
@@ -19,12 +19,15 @@ export default function StudentCard({ studentId }: StudentCardProps) {
     const navigate = useNavigate();
     const [student, setStudent] = React.useState<StudentWithDetails | null>(null);
     const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
         async function loadStudent() {
             try {
                 const data = await api.getStudentById(studentId);
                 setStudent(data);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to load student');
             } finally {
                 setLoading(false);
             }
@@ -42,6 +45,22 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                 <Card className="card-elevated">
                     <CardContent className="p-12 text-center">
                         <p className="text-muted-foreground">Loading...</p>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="space-y-6 animate-fade-in">
+                <Button variant="ghost" onClick={() => navigate('/students')}>
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Students
+                </Button>
+                <Card className="card-elevated">
+                    <CardContent className="p-12 text-center">
+                        <p className="text-destructive">{error}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -89,20 +108,36 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                     {student.isPaid ? 'Paid' : 'Unpaid'}
                                 </StatusBadge>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                                <div>
-                                    <span className="data-label">Grade:</span> <span className="data-value">{student.className}</span>
-                                </div>
-                                <div>
-                                    <span className="data-label">Born:</span> <span className="data-value">{format(new Date(student.birthDate), 'MMMM d, yyyy')}</span>
-                                </div>
-                                {primaryContact && (
-                                    <div className="flex items-center gap-2">
-                                        <Phone className="w-4 h-4 text-muted-foreground" />
-                                        <span className="data-value">{primaryContact.name} ({primaryContact.relation})</span>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                                        <div>
+                                            <span className="data-label">Grade:</span> <span className="data-value">{student.className}</span>
+                                        </div>
+                                        <div>
+                                            <span className="data-label">Born:</span> <span className="data-value">{format(new Date(student.birthDate), 'MMMM d, yyyy')}</span>
+                                        </div>
+                                        {primaryContact && (
+                                            <div className="flex items-center gap-2">
+                                                <Phone className="w-4 h-4 text-muted-foreground" />
+                                                <span className="data-value">{primaryContact.name} ({primaryContact.relation})</span>
+                                            </div>
+                                        )}
+                                        <div className="flex items-center gap-2">
+                                            <span className="data-label">Tamo ID:</span>
+                                            {student.tamoId ? (
+                                                <a
+                                                    href={`https://tamo.eu/student/${encodeURIComponent(student.tamoId)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1 text-primary hover:underline font-mono text-xs"
+                                                >
+                                                    {student.tamoId}
+                                                    <ExternalLink className="w-3 h-3 opacity-60" />
+                                                </a>
+                                            ) : (
+                                                <span className="text-muted-foreground text-xs italic">Not linked</span>
+                                            )}
+                                        </div>
                                     </div>
-                                )}
-                            </div>
                         </div>
                     </div>
                 </CardContent>
@@ -120,79 +155,148 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                 {/* Medical & Health Tab */}
                 <TabsContent value="medical">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
                         {/* Allergies */}
-                        <Card className="card-elevated">
-                            <CardHeader>
-                                <CardTitle className="text-lg">Allergies</CardTitle>
+                        <Card className="card-elevated overflow-hidden">
+                            <CardHeader className="pb-4 border-b border-border/60">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
+                                        <ShieldAlert className="w-4 h-4 text-red-500" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-base">Allergies</CardTitle>
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                            {student.allergies.length === 0 ? 'No known allergies' : `${student.allergies.length} recorded`}
+                                        </p>
+                                    </div>
+                                </div>
                             </CardHeader>
-                            <CardContent className="space-y-3">
+                            <CardContent className="p-0">
                                 {student.allergies.length === 0 ? (
-                                    <p className="text-sm text-muted-foreground">No known allergies</p>
+                                    <div className="px-5 py-8 text-center text-sm text-muted-foreground">No known allergies on record</div>
                                 ) : (
-                                    student.allergies.map(allergy => (
-                                        <div key={allergy.id} className="p-3 rounded-lg border bg-card space-y-2">
-                                            <div className="flex items-center gap-2">
-                                                <SeverityBadge severity={allergy.severity}>{allergy.name}</SeverityBadge>
-                                                <span className="text-sm font-medium capitalize">{allergy.severity}</span>
-                                            </div>
-                                            {allergy.notes && (
-                                                <p className="text-sm text-muted-foreground">{allergy.notes}</p>
-                                            )}
-                                        </div>
-                                    ))
+                                    <div className="divide-y divide-border/50">
+                                        {student.allergies.map(allergy => {
+                                            const isLifeThreatening = allergy.severity === 'life-threatening';
+                                            return (
+                                                <div key={allergy.id} className={`px-5 py-3.5 flex flex-col gap-1.5 ${isLifeThreatening ? 'bg-red-50/50 dark:bg-red-950/10' : ''}`}>
+                                                    <div className="flex items-center gap-2.5">
+                                                        <SeverityBadge severity={allergy.severity}>{allergy.name}</SeverityBadge>
+                                                        <span className="text-xs text-muted-foreground capitalize font-medium">{allergy.severity.replace('-', ' ')}</span>
+                                                    </div>
+                                                    {allergy.notes && (
+                                                        <p className="text-sm text-muted-foreground leading-relaxed">{allergy.notes}</p>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 )}
                             </CardContent>
                         </Card>
 
                         {/* Health Status */}
-                        <Card className="card-elevated">
-                            <CardHeader>
-                                <CardTitle className="text-lg">Health Status</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div>
-                                    <p className="data-label mb-1">Overall Health</p>
-                                    <p className="data-value">{student.healthStatus}</p>
+                        <Card className="card-elevated overflow-hidden">
+                            <CardHeader className="pb-4 border-b border-border/60">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                        <HeartPulse className="w-4 h-4 text-primary" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-base">Health Status</CardTitle>
+                                        <p className="text-xs text-muted-foreground mt-0.5">General health overview</p>
+                                    </div>
                                 </div>
-                                {student.medicalSupport && (
-                                    <div>
-                                        <p className="data-label mb-1">Medical Support</p>
-                                        <p className="data-value">{student.medicalSupport}</p>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <div className="divide-y divide-border/50">
+                                    <div className="px-5 py-3.5 flex items-start gap-3">
+                                        <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <Stethoscope className="w-3.5 h-3.5 text-muted-foreground" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">Overall Health</p>
+                                            <p className="text-sm font-semibold text-foreground">{student.healthStatus}</p>
+                                        </div>
                                     </div>
-                                )}
-                                {student.specialEducationNeeds && (
-                                    <div>
-                                        <p className="data-label mb-1">Special Education Needs</p>
-                                        <p className="data-value">{student.specialEducationNeeds}</p>
-                                    </div>
-                                )}
+                                    {student.medicalSupport && (
+                                        <div className="px-5 py-3.5 flex items-start gap-3">
+                                            <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <ShieldAlert className="w-3.5 h-3.5 text-muted-foreground" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">Medical Support</p>
+                                                <p className="text-sm font-semibold text-foreground">{student.medicalSupport}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {student.specialEducationNeeds && (
+                                        <div className="px-5 py-3.5 flex items-start gap-3">
+                                            <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">Special Education Needs</p>
+                                                <p className="text-sm font-semibold text-foreground">{student.specialEducationNeeds}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </CardContent>
                         </Card>
                     </div>
 
                     {/* Emergency Contacts */}
-                    <Card className="card-elevated mt-6">
-                        <CardHeader>
-                            <CardTitle className="text-lg">Emergency Contacts</CardTitle>
+                    <Card className="card-elevated mt-6 overflow-hidden">
+                        <CardHeader className="pb-4 border-b border-border/60">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center">
+                                    <PhoneCall className="w-4 h-4 text-orange-500" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-base">Emergency Contacts</CardTitle>
+                                    <p className="text-xs text-muted-foreground mt-0.5">{student.emergencyContacts.length} contact{student.emergencyContacts.length !== 1 ? 's' : ''} on file</p>
+                                </div>
+                            </div>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="pt-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {student.emergencyContacts.map(contact => (
-                                    <div key={contact.id} className="p-4 rounded-lg border bg-card">
-                                        <div className="flex items-start justify-between mb-2">
-                                            <div>
-                                                <p className="font-medium flex items-center gap-2">
-                                                    📞 {contact.name}
-                                                    {contact.isPrimary && (
-                                                        <StatusBadge variant="info">Primary</StatusBadge>
-                                                    )}
-                                                </p>
-                                                <p className="text-sm text-muted-foreground">{contact.relation}</p>
+                                {student.emergencyContacts.map(contact => {
+                                    const relation = contact.relation?.toLowerCase() ?? '';
+                                    const badgeClass = RELATION_COLORS[relation] ?? 'bg-muted text-muted-foreground border-border';
+                                    const initials = contact.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
+
+                                    return (
+                                        <div key={contact.id} className="p-4 rounded-xl border bg-card hover:shadow-sm transition-shadow flex flex-col gap-3">
+                                            <div className="flex items-start gap-3">
+                                                {/* Avatar with initials */}
+                                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                                    <span className="text-xs font-bold text-primary">{initials}</span>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap mb-2">
+                                                        <span className="font-semibold text-sm leading-tight">{contact.name}</span>
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md border text-xs font-semibold tracking-wide ${badgeClass}`}>
+                                                            {contact.relation}
+                                                        </span>
+                                                        {contact.isPrimary && (
+                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-md border bg-primary/10 text-primary border-primary/20 text-xs font-semibold">
+                                                                Primary
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <a
+                                                        href={`tel:${contact.phone}`}
+                                                        className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                                                    >
+                                                        <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                                                        {contact.phone}
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
-                                        <p className="text-sm font-mono">{contact.phone}</p>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </CardContent>
                     </Card>
@@ -200,25 +304,63 @@ export default function StudentCard({ studentId }: StudentCardProps) {
 
                 {/* Documents Tab */}
                 <TabsContent value="documents">
-                    <Card className="card-elevated">
-                        <CardHeader>
-                            <CardTitle className="text-lg">Document Checklist</CardTitle>
+                    <Card className="card-elevated overflow-hidden">
+                        <CardHeader className="pb-4 border-b border-border/60">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                        <FileText className="w-4 h-4 text-primary" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-base">Document Checklist</CardTitle>
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                            {student.documentChecklist.filter(d => d.isComplete).length} of {student.documentChecklist.length} complete
+                                        </p>
+                                    </div>
+                                </div>
+                                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                                    student.documentChecklist.every(d => d.isComplete)
+                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70'
+                                        : 'bg-amber-50 text-amber-700 border border-amber-200/70'
+                                }`}>
+                                    {student.documentChecklist.every(d => d.isComplete) ? 'All complete' : 'Pending items'}
+                                </span>
+                            </div>
                         </CardHeader>
-                        <CardContent>
-                            <div className="space-y-2">
+                        <CardContent className="p-0">
+                            <div className="divide-y divide-border/50">
                                 {student.documentChecklist.map(doc => (
-                                    <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg border bg-card">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${doc.isComplete ? 'bg-success border-success' : 'border-muted'
-                                                }`}>
-                                                {doc.isComplete && <span className="text-white text-xs">✓</span>}
-                                            </div>
-                                            <span className="font-medium">{doc.name}</span>
+                                    <div key={doc.id} className={`flex items-center gap-4 px-5 py-3.5 transition-colors ${
+                                        doc.isComplete ? 'bg-emerald-50/40 dark:bg-emerald-950/10' : 'bg-card hover:bg-muted/30'
+                                    }`}>
+                                        {/* Status icon */}
+                                        <div className="flex-shrink-0">
+                                            {doc.isComplete
+                                                ? <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                                : <Clock className="w-5 h-5 text-muted-foreground/40" />
+                                            }
                                         </div>
+
+                                        {/* Name */}
+                                        <span className={`flex-1 text-sm font-medium ${doc.isComplete ? 'text-foreground' : 'text-foreground/80'}`}>
+                                            {doc.name}
+                                        </span>
+
+                                        {/* Status chip */}
+                                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${
+                                            doc.isComplete
+                                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
+                                                : 'bg-muted text-muted-foreground'
+                                        }`}>
+                                            {doc.isComplete ? 'Submitted' : 'Pending'}
+                                        </span>
+
+                                        {/* Due date */}
                                         {doc.dueDate && (
-                                            <span className="text-sm text-muted-foreground">
-                                                Due: {format(new Date(doc.dueDate), 'MMM d, yyyy')}
-                                            </span>
+                                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-[110px] justify-end">
+                                                <CalendarDays className="w-3.5 h-3.5 flex-shrink-0" />
+                                                <span>{format(new Date(doc.dueDate), 'MMM d, yyyy')}</span>
+                                            </div>
                                         )}
                                     </div>
                                 ))}
@@ -269,11 +411,11 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {student.authorizedPickup.map(person => (
-                                    <div key={person.id} className="p-4 rounded-lg border bg-card">
-                                        <p className="font-medium">{person.name}</p>
-                                        <p className="text-sm text-muted-foreground mb-2">{person.relation}</p>
-                                        <p className="text-sm font-mono">{person.phone}</p>
-                                    </div>
+                                    <PickupPersonCard
+                                        key={person.id}
+                                        person={person}
+                                        studentId={student.id}
+                                    />
                                 ))}
                             </div>
                         </CardContent>

@@ -63,15 +63,19 @@ async function mutateAPI<T>(method: string, endpoint: string, body?: unknown): P
 
 // ===== AUTH API =====
 
+async function parseAuthResponse(response: Response, fallbackError: string): Promise<Record<string, unknown>> {
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new ApiError(response.status, (data as { error?: string }).error || fallbackError);
+    return data as Record<string, unknown>;
+}
+
 export async function loginUser(email: string, password: string): Promise<AuthResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
     });
-    const data = await response.json();
-    if (!response.ok) throw new ApiError(response.status, data.error || 'Login failed');
-    return data;
+    return parseAuthResponse(response, 'Login failed') as Promise<AuthResponse>;
 }
 
 export async function registerSchool(schoolName: string, email: string, password: string): Promise<AuthResponse> {
@@ -80,9 +84,7 @@ export async function registerSchool(schoolName: string, email: string, password
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ schoolName, email, password }),
     });
-    const data = await response.json();
-    if (!response.ok) throw new ApiError(response.status, data.error || 'Registration failed');
-    return data;
+    return parseAuthResponse(response, 'Registration failed') as Promise<AuthResponse>;
 }
 
 // ===== PASSWORD RESET API =====
@@ -93,9 +95,7 @@ export async function forgotPassword(email: string): Promise<{ message: string }
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
     });
-    const data = await response.json();
-    if (!response.ok) throw new ApiError(response.status, data.error || 'Request failed');
-    return data;
+    return parseAuthResponse(response, 'Request failed') as Promise<{ message: string }>;
 }
 
 export async function resetPassword(token: string, password: string): Promise<{ message: string }> {
@@ -104,9 +104,7 @@ export async function resetPassword(token: string, password: string): Promise<{ 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, password }),
     });
-    const data = await response.json();
-    if (!response.ok) throw new ApiError(response.status, data.error || 'Request failed');
-    return data;
+    return parseAuthResponse(response, 'Request failed') as Promise<{ message: string }>;
 }
 
 // ===== DASHBOARD API =====
@@ -133,6 +131,19 @@ export async function getAllStudents(): Promise<Student[]> {
     return fetchAPI<Student[]>('/students');
 }
 
+export interface StudentStats {
+    totalStudents: number;
+    missingDocuments: number;
+    specialNeeds: number;
+    withAllergies: number;
+    perClass: { className: string; count: number }[];
+    newEnrollments: number;
+}
+
+export async function getStudentStats(): Promise<StudentStats> {
+    return fetchAPI<StudentStats>('/students/stats');
+}
+
 export async function getStudentById(id: string): Promise<StudentWithDetails | null> {
     try {
         return await fetchAPI<StudentWithDetails>(`/students/${id}`);
@@ -140,6 +151,14 @@ export async function getStudentById(id: string): Promise<StudentWithDetails | n
         if (error instanceof ApiError && error.status === 404) return null;
         throw error;
     }
+}
+
+export async function updatePickupNotes(
+    studentId: string,
+    pickupId: string,
+    notes: string,
+): Promise<{ notes: string }> {
+    return mutateAPI<{ notes: string }>('PATCH', `/students/${studentId}/pickup/${pickupId}`, { notes });
 }
 
 // ===== STAFF API =====

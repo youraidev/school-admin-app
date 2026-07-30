@@ -12,6 +12,7 @@ export interface Student {
     className: string;
     birthDate: string;
     photoUrl?: string;
+    tamoId?: string;
     specialEducationNeeds?: string;
     healthStatus: string;
     medicalSupport?: string;
@@ -64,6 +65,7 @@ export interface AuthorizedPerson {
     name: string;
     phone: string;
     relation: string;
+    notes?: string;
 }
 
 // Student with related data

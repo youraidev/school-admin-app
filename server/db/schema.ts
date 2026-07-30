@@ -105,6 +105,7 @@ export const students = pgTable('students', {
     specialEducationNeeds: text('special_education_needs'),
     healthStatus:          text('health_status').default('Good'),
     medicalSupport:        text('medical_support'),
+    tamoId:                text('tamo_id'),
     contractStatus:        text('contract_status').default('active'),
     contractStartDate:     text('contract_start_date'),
     contractEndDate:       text('contract_end_date'),
@@ -154,11 +155,12 @@ export const agreements = pgTable('agreements', {
 
 export const authorizedPickup = pgTable('authorized_pickup', {
     id:        uuid('id').primaryKey().defaultRandom(),
-    schoolId:  uuid('school_id').notNull(),
+    schoolId:  uuid('school_id').notNull().references(() => schools.id, { onDelete: 'cascade' }),
     studentId: uuid('student_id').notNull().references(() => students.id, { onDelete: 'cascade' }),
     name:      text('name').notNull(),
     phone:     text('phone').notNull(),
     relation:  text('relation').notNull(),
+    notes:     text('notes'),
 });
 
 // ===== COMPLIANCE MODULE =====

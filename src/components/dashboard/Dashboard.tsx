@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Users, UserCog, FileText, FileCheck, AlertCircle, FileWarning, ArrowRight } from 'lucide-react';
-import { Card, CardContent } from '../ui/card';
+import { Users, UserCog, FileText, FileCheck, AlertCircle, FileWarning, ArrowRight, ShieldAlert, ClipboardList } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '../ui/card';
 import { StatusBadge } from '../ui/status-badge';
 import * as api from '../../lib/api';
 import { Link } from 'react-router-dom';
@@ -69,197 +69,232 @@ export default function Dashboard() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="card-elevated">
-                    <CardContent className="p-6">
-                        <div className="space-y-2">
-                            <p className="text-sm text-muted-foreground">Total Students</p>
-                            <p className="text-4xl font-semibold">{stats.totalStudents}</p>
-                            <p className="text-xs text-muted-foreground">Enrolled students</p>
-                        </div>
-                        <div className="mt-4 flex justify-end">
-                            <div className="p-2 bg-primary/10 rounded-lg">
+                {/* Total Students */}
+                <Card className="card-elevated overflow-hidden">
+                    <CardContent className="p-0">
+                        <div className="flex items-start justify-between px-5 pt-5 pb-4">
+                            <div className="space-y-1">
+                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Students</p>
+                                <p className="text-4xl font-semibold tracking-tight">{stats.totalStudents}</p>
+                                <p className="text-xs text-muted-foreground">Enrolled students</p>
+                            </div>
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                                 <Users className="w-5 h-5 text-primary" />
                             </div>
                         </div>
+                        <div className="h-1 w-full bg-primary/20" />
                     </CardContent>
                 </Card>
 
-                <Card className="card-elevated">
-                    <CardContent className="p-6">
-                        <div className="space-y-2">
-                            <p className="text-sm text-muted-foreground">Total Staff</p>
-                            <p className="text-4xl font-semibold">{stats.totalStaff}</p>
-                            <p className="text-xs text-muted-foreground">Teachers & admin</p>
-                        </div>
-                        <div className="mt-4 flex justify-end">
-                            <div className="p-2 bg-primary/10 rounded-lg">
+                {/* Total Staff */}
+                <Card className="card-elevated overflow-hidden">
+                    <CardContent className="p-0">
+                        <div className="flex items-start justify-between px-5 pt-5 pb-4">
+                            <div className="space-y-1">
+                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Staff</p>
+                                <p className="text-4xl font-semibold tracking-tight">{stats.totalStaff}</p>
+                                <p className="text-xs text-muted-foreground">Teachers &amp; admin</p>
+                            </div>
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                                 <UserCog className="w-5 h-5 text-primary" />
                             </div>
                         </div>
+                        <div className="h-1 w-full bg-primary/20" />
                     </CardContent>
                 </Card>
 
-                <Card className="card-elevated bg-warning/5">
-                    <CardContent className="p-6">
-                        <div className="space-y-2">
-                            <p className="text-sm text-muted-foreground">Pending Contracts</p>
-                            <p className="text-4xl font-semibold">{stats.pendingContracts}</p>
-                            <p className="text-xs text-muted-foreground">Requires attention</p>
-                        </div>
-                        <div className="mt-4 flex justify-end">
-                            <div className="p-2 bg-warning/10 rounded-lg">
-                                <FileText className="w-5 h-5 text-warning" />
+                {/* Pending Contracts */}
+                <Card className="card-elevated overflow-hidden">
+                    <CardContent className="p-0">
+                        <div className="flex items-start justify-between px-5 pt-5 pb-4">
+                            <div className="space-y-1">
+                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Pending Contracts</p>
+                                <p className="text-4xl font-semibold tracking-tight">{stats.pendingContracts}</p>
+                                <p className="text-xs text-muted-foreground">Requires attention</p>
+                            </div>
+                            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center flex-shrink-0">
+                                <FileText className="w-5 h-5 text-amber-500" />
                             </div>
                         </div>
+                        <div className="h-1 w-full bg-amber-400/40" />
                     </CardContent>
                 </Card>
 
-                <Card className="card-elevated bg-info/5">
-                    <CardContent className="p-6">
-                        <div className="space-y-2">
-                            <p className="text-sm text-muted-foreground">Pending Signatures</p>
-                            <p className="text-4xl font-semibold">{stats.pendingSignatures}</p>
-                            <p className="text-xs text-muted-foreground">Compliance documents</p>
-                        </div>
-                        <div className="mt-4 flex justify-end">
-                            <div className="p-2 bg-info/10 rounded-lg">
-                                <FileCheck className="w-5 h-5 text-info" />
+                {/* Pending Signatures */}
+                <Card className="card-elevated overflow-hidden">
+                    <CardContent className="p-0">
+                        <div className="flex items-start justify-between px-5 pt-5 pb-4">
+                            <div className="space-y-1">
+                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Pending Signatures</p>
+                                <p className="text-4xl font-semibold tracking-tight">{stats.pendingSignatures}</p>
+                                <p className="text-xs text-muted-foreground">Compliance documents</p>
+                            </div>
+                            <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/30 flex items-center justify-center flex-shrink-0">
+                                <FileCheck className="w-5 h-5 text-sky-500" />
                             </div>
                         </div>
+                        <div className="h-1 w-full bg-sky-400/40" />
                     </CardContent>
                 </Card>
             </div>
 
             {/* Alert Panels */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
                 {/* Critical Allergy Alerts */}
-                <Card className="card-elevated border-l-4 border-l-destructive">
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <AlertCircle className="w-5 h-5 text-destructive" />
-                            <h3 className="font-semibold">Critical Allergy Alerts</h3>
-                        </div>
-
-                        {criticalAllergies.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">No critical allergies</p>
-                        ) : (
-                            <div className="space-y-3">
-                                {criticalAllergies.slice(0, 2).map((allergy) => (
-                                    <Link
-                                        key={allergy.studentId}
-                                        to={`/students/${allergy.studentId}`}
-                                        className="block group"
-                                    >
-                                        <div className="space-y-1">
-                                            <p className="font-medium text-sm group-hover:text-primary transition-colors">
-                                                {allergy.studentName}
-                                            </p>
-                                            <div className="flex gap-2 mt-1">
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full border bg-destructive/10 text-destructive border-destructive/20 text-xs font-medium">
-                                                    {allergy.allergen}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
-
-                                <Link
-                                    to="/students"
-                                    className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2"
-                                >
-                                    View all students
-                                    <ArrowRight className="w-3 h-3" />
-                                </Link>
+                <Card className="card-elevated overflow-hidden">
+                    <CardHeader className="pb-0 pt-0 px-0">
+                        <div className="flex items-center gap-2.5 px-5 py-4 border-b border-border/60">
+                            <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
+                                <ShieldAlert className="w-4 h-4 text-red-500" />
                             </div>
+                            <div>
+                                <p className="text-sm font-semibold leading-tight">Critical Allergy Alerts</p>
+                                <p className="text-xs text-muted-foreground">{criticalAllergies.length} student{criticalAllergies.length !== 1 ? 's' : ''} affected</p>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        {criticalAllergies.length === 0 ? (
+                            <p className="px-5 py-6 text-sm text-muted-foreground">No critical allergies on record</p>
+                        ) : (
+                            <>
+                                <div className="divide-y divide-border/50">
+                                    {criticalAllergies.slice(0, 3).map((allergy) => (
+                                        <Link
+                                            key={allergy.studentId}
+                                            to={`/students/${allergy.studentId}`}
+                                            className="flex items-center justify-between px-5 py-3 hover:bg-muted/40 transition-colors group"
+                                        >
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                                    <span className="text-[10px] font-bold text-primary">
+                                                        {allergy.studentName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                                                    </span>
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">{allergy.studentName}</p>
+                                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400 text-[11px] font-semibold">
+                                                        {allergy.allergen}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors flex-shrink-0 ml-2" />
+                                        </Link>
+                                    ))}
+                                </div>
+                                <div className="px-5 py-3 border-t border-border/60">
+                                    <Link to="/students" className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
+                                        View all students <ArrowRight className="w-3 h-3" />
+                                    </Link>
+                                </div>
+                            </>
                         )}
                     </CardContent>
                 </Card>
 
                 {/* Contract Issues */}
-                <Card className="card-elevated border-l-4 border-l-warning">
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <FileWarning className="w-5 h-5 text-warning" />
-                            <h3 className="font-semibold">Contract Issues</h3>
-                        </div>
-
-                        {contractIssues.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">No contract issues</p>
-                        ) : (
-                            <div className="space-y-3">
-                                {contractIssues.slice(0, 2).map((issue) => (
-                                    <Link
-                                        key={issue.studentId}
-                                        to={`/students/${issue.studentId}`}
-                                        className="block group"
-                                    >
-                                        <div className="space-y-1">
-                                            <p className="font-medium text-sm group-hover:text-primary transition-colors">
-                                                {issue.studentName}
-                                            </p>
-                                            <div className="flex gap-2 mt-1">
-                                                <StatusBadge variant={issue.status}>
-                                                    {issue.issue}
-                                                </StatusBadge>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
-
-                                <Link
-                                    to="/students"
-                                    className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2"
-                                >
-                                    View all contracts
-                                    <ArrowRight className="w-3 h-3" />
-                                </Link>
+                <Card className="card-elevated overflow-hidden">
+                    <CardHeader className="pb-0 pt-0 px-0">
+                        <div className="flex items-center gap-2.5 px-5 py-4 border-b border-border/60">
+                            <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center">
+                                <FileWarning className="w-4 h-4 text-amber-500" />
                             </div>
+                            <div>
+                                <p className="text-sm font-semibold leading-tight">Contract Issues</p>
+                                <p className="text-xs text-muted-foreground">{contractIssues.length} issue{contractIssues.length !== 1 ? 's' : ''} found</p>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        {contractIssues.length === 0 ? (
+                            <p className="px-5 py-6 text-sm text-muted-foreground">No contract issues</p>
+                        ) : (
+                            <>
+                                <div className="divide-y divide-border/50">
+                                    {contractIssues.slice(0, 3).map((issue) => (
+                                        <Link
+                                            key={issue.studentId}
+                                            to={`/students/${issue.studentId}`}
+                                            className="flex items-center justify-between px-5 py-3 hover:bg-muted/40 transition-colors group"
+                                        >
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                                    <span className="text-[10px] font-bold text-primary">
+                                                        {issue.studentName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                                                    </span>
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">{issue.studentName}</p>
+                                                    <div className="mt-0.5">
+                                                        <StatusBadge variant={issue.status}>{issue.issue}</StatusBadge>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors flex-shrink-0 ml-2" />
+                                        </Link>
+                                    ))}
+                                </div>
+                                <div className="px-5 py-3 border-t border-border/60">
+                                    <Link to="/students" className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
+                                        View all contracts <ArrowRight className="w-3 h-3" />
+                                    </Link>
+                                </div>
+                            </>
                         )}
                     </CardContent>
                 </Card>
 
                 {/* Awaiting Signatures */}
-                <Card className="card-elevated border-l-4 border-l-info">
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <FileCheck className="w-5 h-5 text-info" />
-                            <h3 className="font-semibold">Awaiting Signatures</h3>
-                        </div>
-
-                        {pendingSignatures.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">All documents signed</p>
-                        ) : (
-                            <div className="space-y-3">
-                                {pendingSignatures.slice(0, 2).map((doc) => (
-                                    <Link
-                                        key={doc.documentId}
-                                        to="/compliance"
-                                        className="block group"
-                                    >
-                                        <div className="space-y-1">
-                                            <p className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-1">
-                                                {doc.documentTitle}
-                                            </p>
-                                            <div className="mt-1">
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full border bg-warning/10 text-warning border-warning/20 text-xs font-medium">
-                                                    {doc.signedCount} pending
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
-
-                                <Link
-                                    to="/compliance"
-                                    className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2"
-                                >
-                                    View all documents
-                                    <ArrowRight className="w-3 h-3" />
-                                </Link>
+                <Card className="card-elevated overflow-hidden">
+                    <CardHeader className="pb-0 pt-0 px-0">
+                        <div className="flex items-center gap-2.5 px-5 py-4 border-b border-border/60">
+                            <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/30 flex items-center justify-center">
+                                <ClipboardList className="w-4 h-4 text-sky-500" />
                             </div>
+                            <div>
+                                <p className="text-sm font-semibold leading-tight">Awaiting Signatures</p>
+                                <p className="text-xs text-muted-foreground">{pendingSignatures.length} document{pendingSignatures.length !== 1 ? 's' : ''} pending</p>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        {pendingSignatures.length === 0 ? (
+                            <p className="px-5 py-6 text-sm text-muted-foreground">All documents signed</p>
+                        ) : (
+                            <>
+                                <div className="divide-y divide-border/50">
+                                    {pendingSignatures.slice(0, 3).map((doc) => (
+                                        <Link
+                                            key={doc.documentId}
+                                            to="/compliance"
+                                            className="flex items-center justify-between px-5 py-3 hover:bg-muted/40 transition-colors group"
+                                        >
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-7 h-7 rounded-md bg-sky-50 dark:bg-sky-950/30 flex items-center justify-center flex-shrink-0">
+                                                    <FileCheck className="w-3.5 h-3.5 text-sky-500" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-medium truncate group-hover:text-primary transition-colors line-clamp-1">{doc.documentTitle}</p>
+                                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 text-[11px] font-semibold mt-0.5">
+                                                        {doc.pendingCount} pending
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors flex-shrink-0 ml-2" />
+                                        </Link>
+                                    ))}
+                                </div>
+                                <div className="px-5 py-3 border-t border-border/60">
+                                    <Link to="/compliance" className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
+                                        View all documents <ArrowRight className="w-3 h-3" />
+                                    </Link>
+                                </div>
+                            </>
                         )}
                     </CardContent>
                 </Card>
+
             </div>
         </div>
     );

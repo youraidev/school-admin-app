@@ -16,6 +16,7 @@ import DepartmentsPage from './pages/DepartmentsPage';
 import AddDepartmentPage from './pages/AddDepartmentPage';
 import EditDepartmentPage from './pages/EditDepartmentPage';
 import CompliancePage from './pages/CompliancePage';
+import NotificationsPage from './pages/NotificationsPage';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
               <Route path="departments/new" element={<AddDepartmentPage />} />
               <Route path="departments/:id/edit" element={<EditDepartmentPage />} />
               <Route path="compliance" element={<CompliancePage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Route>

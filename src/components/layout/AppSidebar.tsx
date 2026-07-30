@@ -60,13 +60,13 @@ export default function AppSidebar() {
 
             {/* Bottom Section */}
             <div className="p-3 border-t border-sidebar-accent space-y-1">
-                <button className="nav-link w-full">
+                <Link to="/notifications" className={cn('nav-link w-full', isActive('/notifications') && 'nav-link-active')}>
                     <Bell className="w-5 h-5" />
                     <span>Notifications</span>
                     <span className="ml-auto bg-sidebar-primary text-white text-xs font-semibold px-2 py-0.5 rounded-full">
                         3
                     </span>
-                </button>
+                </Link>
                 <button className="nav-link w-full">
                     <Settings className="w-5 h-5" />
                     <span>Settings</span>

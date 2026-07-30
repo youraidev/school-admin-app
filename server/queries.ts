@@ -159,6 +159,62 @@ export async function getPendingSignatures(schoolId: string): Promise<PendingSig
 
 // ===== STUDENT QUERIES =====
 
+export interface StudentStats {
+    totalStudents: number;
+    missingDocuments: number;
+    specialNeeds: number;
+    withAllergies: number;
+    perClass: { className: string; count: number }[];
+    newEnrollments: number;
+}
+
+export async function getStudentStats(schoolId: string): Promise<StudentStats> {
+    const [
+        totalRow,
+        missingDocsRow,
+        specialNeedsRow,
+        allergiesRow,
+        perClassRows,
+        newEnrollmentsRow,
+    ] = await Promise.all([
+        qOne(sql`SELECT COUNT(*) AS count FROM students WHERE school_id = ${schoolId}`),
+        qOne(sql`
+            SELECT COUNT(DISTINCT dc.student_id) AS count
+            FROM document_checklist dc
+            JOIN students s ON s.id = dc.student_id
+            WHERE s.school_id = ${schoolId} AND dc.is_complete = false
+        `),
+        qOne(sql`
+            SELECT COUNT(*) AS count FROM students
+            WHERE school_id = ${schoolId}
+              AND (special_education_needs IS NOT NULL AND special_education_needs <> '')
+        `),
+        qOne(sql`
+            SELECT COUNT(DISTINCT student_id) AS count FROM allergies
+            WHERE school_id = ${schoolId}
+        `),
+        qAll(sql`
+            SELECT class_name, COUNT(*) AS count FROM students
+            WHERE school_id = ${schoolId}
+            GROUP BY class_name ORDER BY class_name
+        `),
+        qOne(sql`
+            SELECT COUNT(*) AS count FROM students
+            WHERE school_id = ${schoolId}
+              AND contract_start_date >= (NOW() - INTERVAL '30 days')::date::text
+        `),
+    ]);
+
+    return {
+        totalStudents:   Number((totalRow as { count: string | number })?.count ?? 0),
+        missingDocuments:Number((missingDocsRow as { count: string | number })?.count ?? 0),
+        specialNeeds:    Number((specialNeedsRow as { count: string | number })?.count ?? 0),
+        withAllergies:   Number((allergiesRow as { count: string | number })?.count ?? 0),
+        perClass:        (perClassRows as { class_name: string; count: string | number }[]).map(r => ({ className: r.class_name, count: Number(r.count) })),
+        newEnrollments:  Number((newEnrollmentsRow as { count: string | number })?.count ?? 0),
+    };
+}
+
 export async function getAllStudents(schoolId: string): Promise<Student[]> {
     const rows = await qAll(sql`SELECT * FROM students WHERE school_id = ${schoolId} ORDER BY name`);
     return rows.map(r => toCamelCase<Student>(r));
@@ -457,6 +513,23 @@ export async function getAllComplianceDocuments(schoolId: string): Promise<Compl
         const sigs = sigsByDoc.get(d.id) ?? [];
         return { ...d, signatures: sigs, totalSignatures: sigs.length, signedCount: sigs.filter(s => s.status === 'signed').length, pendingCount: sigs.filter(s => s.status === 'pending').length };
     });
+}
+
+export async function updatePickupNotes(
+    schoolId: string,
+    studentId: string,
+    pickupId: string,
+    notes: string,
+): Promise<boolean> {
+    const result = await qOne(sql`
+        UPDATE authorized_pickup
+        SET notes = ${notes}
+        WHERE id          = ${pickupId}
+          AND student_id  = ${studentId}
+          AND school_id   = ${schoolId}
+        RETURNING id
+    `);
+    return result !== null;
 }
 
 export async function getComplianceDocumentById(schoolId: string, id: string): Promise<ComplianceDocumentWithSignatures | null> {
