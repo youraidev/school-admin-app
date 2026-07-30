@@ -1,0 +1,80 @@
+{
+    "title": "Mokiniai",
+    "subtitle": "Tvarkykite mokinių profilius ir įrašus",
+    "addStudent": "Pridėti mokinį",
+    "stats": {
+        "total": "Iš viso mokinių",
+        "missingDocs": "Trūksta dokumentų",
+        "specialNeeds": "Spec. poreikiai",
+        "withAllergies": "Su alergijomis",
+        "classes": "Klasės",
+        "newEnrollments": "Nauji mokiniai",
+        "perClass": "Mokiniai pagal klases"
+    },
+    "searchPlaceholder": "Ieškoti pagal vardą...",
+    "allClasses": "Visos klasės",
+    "badges": {
+        "medical": "Medicininė",
+        "specialNeeds": "Spec. poreikiai"
+    },
+    "cardStatus": {
+        "problem": "Reikia dėmesio",
+        "missing": "Trūksta dokumentų",
+        "ok": "Viskas gerai"
+    },
+    "empty": "Pagal jūsų paiešką mokinių nerasta.",
+    "detail": {
+        "back": "Grįžti į mokinius",
+        "notFound": "Mokinys nerastas",
+        "grade": "Klasė:",
+        "born": "Gimė:",
+        "tamoId": "Tamo ID:"
+    },
+    "tabs": {
+        "medical": "Sveikata",
+        "documents": "Dokumentai",
+        "agreements": "Sutikimai",
+        "pickup": "Įgalioti pasiimti"
+    },
+    "allergies": {
+        "title": "Alergijos",
+        "none": "Žinomų alergijų nėra",
+        "recorded_one": "Užfiksuota {{count}}",
+        "recorded_few": "Užfiksuotos {{count}}",
+        "recorded_many": "Užfiksuota {{count}}",
+        "recorded_other": "Užfiksuota {{count}}",
+        "noneOnRecord": "Žinomų alergijų neužfiksuota"
+    },
+    "health": {
+        "title": "Sveikatos būklė",
+        "overview": "Bendra sveikatos apžvalga",
+        "overall": "Bendra sveikata",
+        "medicalSupport": "Medicininė pagalba",
+        "specialEducationNeeds": "Specialieji ugdymosi poreikiai"
+    },
+    "contacts": {
+        "title": "Skubios pagalbos kontaktai",
+        "onFile_one": "{{count}} kontaktas",
+        "onFile_few": "{{count}} kontaktai",
+        "onFile_many": "{{count}} kontakto",
+        "onFile_other": "{{count}} kontaktų"
+    },
+    "documents": {
+        "title": "Dokumentų sąrašas",
+        "progress": "Užpildyta {{completed}} iš {{total}}",
+        "allComplete": "Viskas pateikta",
+        "pendingItems": "Yra laukiančių",
+        "submitted": "Pateikta"
+    },
+    "agreements": {
+        "title": "Sutikimai ir sutartys",
+        "signed": "Pasirašyta: {{date}}"
+    },
+    "pickup": {
+        "title": "Įgalioti pasiimti asmenys",
+        "importantNote": "Svarbi pastaba",
+        "addNote": "+ Pridėti svarbią pastabą",
+        "editNote": "Redaguoti pastabą",
+        "notePlaceholder": "pvz., gali pasiimti tik penktadieniais. Privalo pateikti asmens dokumentą."
+    }
+}

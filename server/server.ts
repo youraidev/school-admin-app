@@ -36,7 +36,7 @@ app.get('/api/health', (_req, res) => {
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error('Error:', err);
     res.status(500).json({
-        error: 'Internal server error',
+        error: 'INTERNAL_ERROR',
         message: process.env.NODE_ENV === 'development' ? err.message : undefined,
     });
 });

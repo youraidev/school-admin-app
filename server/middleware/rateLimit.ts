@@ -11,7 +11,7 @@ function makeMiddleware(limiter: Ratelimit | null) {
         res.setHeader('X-RateLimit-Limit', limit);
         res.setHeader('X-RateLimit-Remaining', remaining);
         if (!success) {
-            res.status(429).json({ error: 'Too many requests. Please try again later.' });
+            res.status(429).json({ error: 'RATE_LIMITED' });
             return;
         }
         next();

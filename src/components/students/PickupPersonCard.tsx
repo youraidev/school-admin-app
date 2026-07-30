@@ -1,7 +1,10 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Phone, User, Pencil, X, Loader2, AlertTriangle } from 'lucide-react';
 import { Button } from '../ui/button';
 import * as api from '../../lib/api';
+import { getErrorCode, useErrorMessage } from '../../i18n/errors';
+import { useLabels } from '../../i18n/labels';
 import type { AuthorizedPerson } from '../../../shared/types';
 
 const NOTES_MAX = 500;
@@ -19,6 +22,10 @@ interface Props {
 }
 
 export function PickupPersonCard({ person, studentId }: Props) {
+    const { t } = useTranslation('students');
+    const { t: tc } = useTranslation('common');
+    const errorMessage = useErrorMessage();
+    const labels = useLabels();
     const badgeClass = RELATION_COLORS[person.relation?.toLowerCase() ?? ''] ?? 'bg-muted text-muted-foreground border-border';
 
     // --- local state ---
@@ -56,8 +63,7 @@ export function PickupPersonCard({ person, studentId }: Props) {
             setSavedNote(draftValue);
             setIsEditing(false);
         } catch (err) {
-            const msg = err instanceof api.ApiError ? err.message : 'Failed to save. Please try again.';
-            setSaveError(msg);
+            setSaveError(getErrorCode(err));
         } finally {
             setIsSaving(false);
         }
@@ -76,7 +82,7 @@ export function PickupPersonCard({ person, studentId }: Props) {
                     <div className="flex items-center gap-2 flex-wrap mb-2">
                         <span className="font-semibold text-sm leading-tight">{person.name}</span>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-md border text-xs font-semibold tracking-wide ${badgeClass}`}>
-                            {person.relation}
+                            {labels.relation(person.relation)}
                         </span>
                     </div>
                     <a
@@ -96,14 +102,14 @@ export function PickupPersonCard({ person, studentId }: Props) {
                         /* Edit mode */
                         <div className="flex flex-col gap-2">
                             <label className="text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-400">
-                                Important Note
+                                {t('pickup.importantNote')}
                             </label>
                             <textarea
                                 rows={3}
                                 maxLength={NOTES_MAX}
                                 value={draftValue}
                                 onChange={e => setDraftValue(e.target.value)}
-                                placeholder="e.g. Authorized to pick up on Fridays only. Must show valid ID."
+                                placeholder={t('pickup.notePlaceholder')}
                                 className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring leading-relaxed overflow-y-auto"
                                 autoFocus
                             />
@@ -112,7 +118,7 @@ export function PickupPersonCard({ person, studentId }: Props) {
                                     {draftValue.length}/{NOTES_MAX}
                                 </span>
                                 {saveError && (
-                                    <span className="text-xs text-destructive flex-1 text-right">{saveError}</span>
+                                    <span className="text-xs text-destructive flex-1 text-right">{errorMessage(saveError)}</span>
                                 )}
                             </div>
                             <div className="flex items-center gap-2 justify-end">
@@ -124,7 +130,7 @@ export function PickupPersonCard({ person, studentId }: Props) {
                                     className="h-8 px-3"
                                 >
                                     <X className="w-3.5 h-3.5 mr-1" />
-                                    Cancel
+                                    {tc('actions.cancel')}
                                 </Button>
                                 <Button
                                     size="sm"
@@ -135,7 +141,7 @@ export function PickupPersonCard({ person, studentId }: Props) {
                                     {isSaving ? (
                                         <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
                                     ) : null}
-                                    {isSaving ? 'Saving…' : 'Save'}
+                                    {isSaving ? tc('actions.saving') : tc('actions.save')}
                                 </Button>
                             </div>
                         </div>
@@ -145,7 +151,7 @@ export function PickupPersonCard({ person, studentId }: Props) {
                             <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                             <div className="flex-1 min-w-0">
                                 <p className="text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-1">
-                                    Important Note
+                                    {t('pickup.importantNote')}
                                 </p>
                                 <p className="text-sm text-amber-900 dark:text-amber-200 font-medium leading-relaxed">
                                     {savedNote}
@@ -153,7 +159,7 @@ export function PickupPersonCard({ person, studentId }: Props) {
                             </div>
                             <button
                                 onClick={openEdit}
-                                aria-label="Edit note"
+                                aria-label={t('pickup.editNote')}
                                 className="ml-1 flex-shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity rounded p-1 hover:bg-amber-100 dark:hover:bg-amber-900/40"
                             >
                                 <Pencil className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
@@ -169,7 +175,7 @@ export function PickupPersonCard({ person, studentId }: Props) {
                     onClick={openEdit}
                     className="w-full border-t border-border/40 px-4 py-3 text-left text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors rounded-b-xl"
                 >
-                    + Add important note
+                    {t('pickup.addNote')}
                 </button>
             )}
         </div>

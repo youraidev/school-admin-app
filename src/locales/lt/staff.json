@@ -1,0 +1,121 @@
+{
+    "title": "Darbuotojai",
+    "subtitle": "Tvarkykite mokytojų ir darbuotojų profilius",
+    "addStaff": "Pridėti darbuotoją",
+    "searchPlaceholder": "Ieškoti pagal vardą, pareigas ar skyrių...",
+    "empty": "Darbuotojų nerasta",
+    "profile": {
+        "title": "Darbuotojo profilis",
+        "subtitle": "Peržiūrėkite ir tvarkykite darbuotojo informaciją",
+        "notFound": "Darbuotojas nerastas",
+        "editProfile": "Redaguoti profilį",
+        "since": "Nuo {{date}} · {{tenure}}"
+    },
+    "tabs": {
+        "academic": "Akademinis profilis",
+        "duties": "Pareigos ir atsakomybės",
+        "emergency": "Skubus kontaktas"
+    },
+    "qualifications": {
+        "title": "Akademinės kvalifikacijos",
+        "manage": "Tvarkyti kvalifikacijas",
+        "manageDescription": "Redaguokite šio darbuotojo akademines kvalifikacijas ir sertifikatus.",
+        "empty": "Kvalifikacijų neužfiksuota",
+        "inField": "{{degree}}, {{field}}",
+        "itemTitle": "Kvalifikacija {{number}}",
+        "degreeType": "Laipsnis / sertifikatas *",
+        "selectType": "Pasirinkite tipą",
+        "fieldOfStudy": "Studijų kryptis *",
+        "fieldPlaceholder": "pvz., Matematika",
+        "institution": "Institucija *",
+        "institutionPlaceholder": "pvz., Vilniaus universitetas",
+        "year": "Metai",
+        "yearPlaceholder": "pvz., 2020",
+        "yearInvalid": "Metai turi būti tarp 1950 ir 2100.",
+        "addQualification": "Pridėti kvalifikaciją",
+        "emptyHint": "Kvalifikacijų dar nepridėta. Spauskite mygtuką viršuje.",
+        "summaryDegree": "Laipsnis",
+        "summaryField": "Kryptis",
+        "summaryYear": "Metai"
+    },
+    "certificates": {
+        "title": "Sertifikatai",
+        "manage": "Tvarkyti sertifikatus",
+        "manageDescription": "Pridėkite, redaguokite ar pašalinkite šio darbuotojo sertifikatus.",
+        "empty": "Sertifikatų neužfiksuota",
+        "emptyHint": "Sertifikatų dar nepridėta. Spauskite mygtuką žemiau.",
+        "itemTitle": "Sertifikatas {{number}}",
+        "name": "Sertifikato pavadinimas *",
+        "namePlaceholder": "pvz., Pirmoji pagalba",
+        "issuer": "Išdavė *",
+        "issuerPlaceholder": "pvz., Raudonasis Kryžius",
+        "dateIssued": "Išdavimo data *",
+        "fileUrl": "Failo nuoroda (nebūtina)",
+        "addCertificate": "+ Pridėti sertifikatą"
+    },
+    "evaluations": {
+        "title": "Kursų vertinimai",
+        "manage": "Tvarkyti kursų vertinimus",
+        "manageDescription": "Pridėkite, redaguokite ar pašalinkite šio darbuotojo kursų vertinimus.",
+        "empty": "Vertinimų neužfiksuota",
+        "emptyHint": "Vertinimų dar nepridėta. Spauskite mygtuką žemiau.",
+        "itemTitle": "Vertinimas {{number}}",
+        "courseName": "Kurso pavadinimas *",
+        "coursePlaceholder": "pvz., Kūno kultūra – 6 klasė",
+        "rating": "Įvertinimas (0–5) *",
+        "date": "Data *",
+        "feedback": "Atsiliepimas (nebūtina)",
+        "feedbackPlaceholder": "Trumpas atsiliepimas apie kursą...",
+        "addEvaluation": "+ Pridėti vertinimą"
+    },
+    "duties": {
+        "title": "Priskirtos pareigos",
+        "empty": "Papildomų pareigų nepriskirta"
+    },
+    "emergency": {
+        "title": "Skubios pagalbos kontaktai",
+        "empty": "Skubios pagalbos kontaktų nėra"
+    },
+    "editDialog": {
+        "title": "Redaguoti profilį",
+        "description": "Atnaujinkite darbuotojo profilio informaciją.",
+        "personalInfo": "Asmeninė informacija",
+        "employment": "Darbo informacija"
+    },
+    "fields": {
+        "firstName": "Vardas *",
+        "firstNamePlaceholder": "pvz., Kristina",
+        "lastName": "Pavardė *",
+        "lastNamePlaceholder": "pvz., Balčiūnienė",
+        "email": "El. paštas *",
+        "emailPlaceholder": "pvz., k.balciuniene@mokykla.lt",
+        "photoUrl": "Nuotraukos nuoroda",
+        "photoUrlPlaceholder": "https://...",
+        "role": "Pareigos *",
+        "rolePlaceholder": "pvz., Direktorius",
+        "department": "Skyrius *",
+        "selectDepartment": "Pasirinkite skyrių",
+        "position": "Pozicija *",
+        "positionHint": "(darbo sritis)",
+        "positionTooltip": "Ką mokytojas dirba (pvz., matematikos mokytojas)",
+        "selectPosition": "Pasirinkite poziciją",
+        "rank": "Kvalifikacinė kategorija",
+        "rankHint": "(patirties lygis)",
+        "rankTooltip": "Patirties lygis (pvz., vyresnysis mokytojas)",
+        "selectRank": "Pasirinkite kategoriją (nebūtina)",
+        "startDate": "Darbo pradžia *"
+    },
+    "addPage": {
+        "title": "Naujas darbuotojas",
+        "subtitle": "Įveskite naujo darbuotojo duomenis",
+        "cardTitle": "Darbuotojo informacija",
+        "cardDescription": "Užpildykite visus privalomus laukus, pažymėtus žvaigždute (*)",
+        "submit": "Pridėti darbuotoją",
+        "submitting": "Pridedama..."
+    },
+    "editPage": {
+        "title": "Redaguoti darbuotoją",
+        "subtitle": "Atnaujinkite {{name}} duomenis",
+        "cardDescription": "Atnaujinkite reikiamus laukus. Būtinas teisingas formatas."
+    }
+}

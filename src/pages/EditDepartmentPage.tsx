@@ -6,8 +6,13 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import * as api from '../lib/api';
+import { useTranslation } from 'react-i18next';
+import { getErrorCode, useErrorMessage } from '../i18n/errors';
 
 export default function EditDepartmentPage() {
+    const { t } = useTranslation('departments');
+    const { t: tc } = useTranslation('common');
+    const errorMessage = useErrorMessage();
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const [formData, setFormData] = React.useState({
@@ -29,10 +34,10 @@ export default function EditDepartmentPage() {
                         description: dept.description || '',
                     });
                 } else {
-                    setError('Department not found');
+                    setError('DEPARTMENT_NOT_FOUND');
                 }
             } catch (err) {
-                setError('Failed to load department details');
+                setError(getErrorCode(err));
             } finally {
                 setIsLoading(false);
             }
@@ -55,7 +60,7 @@ export default function EditDepartmentPage() {
 
             navigate('/departments');
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to update department');
+            setError(getErrorCode(err));
         } finally {
             setIsSubmitting(false);
         }
@@ -80,10 +85,10 @@ export default function EditDepartmentPage() {
                     <Button variant="outline" size="icon" onClick={() => navigate('/departments')}>
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
-                    <h1 className="text-3xl font-semibold tracking-tight">Error</h1>
+                    <h1 className="text-3xl font-semibold tracking-tight">{tc('states.error')}</h1>
                 </div>
                 <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
-                    {error || 'Invalid department ID'}
+                    {error ? errorMessage(error) : t('invalidId')}
                 </div>
             </div>
         );
@@ -101,57 +106,57 @@ export default function EditDepartmentPage() {
                     <ArrowLeft className="w-4 h-4" />
                 </Button>
                 <div>
-                    <h1 className="text-3xl font-semibold tracking-tight">Edit Department</h1>
-                    <p className="text-muted-foreground mt-1">Update department details</p>
+                    <h1 className="text-3xl font-semibold tracking-tight">{t('editPage.title')}</h1>
+                    <p className="text-muted-foreground mt-1">{t('editPage.subtitle')}</p>
                 </div>
             </div>
 
             {/* Form Card */}
             <Card className="card-elevated max-w-2xl">
                 <CardHeader>
-                    <CardTitle>Department Information</CardTitle>
+                    <CardTitle>{t('addPage.cardTitle')}</CardTitle>
                     <CardDescription>
-                        Update the details for this department.
+                        {t('editPage.cardDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {error && (
                             <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
-                                {error}
+                                {errorMessage(error)}
                             </div>
                         )}
 
                         <div className="space-y-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Department Name *</Label>
+                                <Label htmlFor="name">{t('fields.name')}</Label>
                                 <Input
                                     id="name"
                                     value={formData.name}
                                     onChange={(e) => handleChange('name', e.target.value)}
-                                    placeholder="e.g., Mathematics"
+                                    placeholder={t('fields.namePlaceholder')}
                                     required
                                     disabled={isSubmitting}
                                     maxLength={100}
                                 />
                                 <p className="text-xs text-muted-foreground">
-                                    Must be unique. Max 100 characters.
+                                    {t('fields.nameHint')}
                                 </p>
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="description">Description</Label>
+                                <Label htmlFor="description">{t('fields.description')}</Label>
                                 <textarea
                                     id="description"
                                     className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                     value={formData.description}
                                     onChange={(e) => handleChange('description', e.target.value)}
-                                    placeholder="Optional description of the department..."
+                                    placeholder={t('fields.descriptionPlaceholder')}
                                     disabled={isSubmitting}
                                     maxLength={500}
                                 />
                                 <p className="text-xs text-muted-foreground">
-                                    Max 500 characters.
+                                    {t('fields.descriptionHint')}
                                 </p>
                             </div>
                         </div>
@@ -163,10 +168,10 @@ export default function EditDepartmentPage() {
                                 onClick={() => navigate('/departments')}
                                 disabled={isSubmitting}
                             >
-                                Cancel
+                                {tc('actions.cancel')}
                             </Button>
                             <Button type="submit" disabled={isSubmitting}>
-                                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                                {isSubmitting ? tc('actions.saving') : tc('actions.saveChanges')}
                             </Button>
                         </div>
                     </form>

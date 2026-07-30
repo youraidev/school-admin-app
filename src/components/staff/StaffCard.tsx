@@ -14,7 +14,10 @@ import {
 } from '../ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import * as api from '../../lib/api';
-import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
+import { getErrorCode, useErrorMessage } from '../../i18n/errors';
+import { useLabels } from '../../i18n/labels';
+import { formatDate, formatTenure } from '../../i18n/format';
 import type { StaffWithDetails, StaffQualification, Certificate, CourseEvaluation, Department, Rank, Position } from '../../../shared/types';
 import { RANK_OPTIONS, POSITION_OPTIONS } from '../../../shared/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../ui/dialog';
@@ -25,6 +28,10 @@ interface StaffCardProps {
 }
 
 export default function StaffCard({ staffId }: StaffCardProps) {
+    const { t } = useTranslation('staff');
+    const { t: tc } = useTranslation('common');
+    const errorMessage = useErrorMessage();
+    const labels = useLabels();
     const navigate = useNavigate();
     const [staff, setStaff] = React.useState<StaffWithDetails | null>(null);
     const [loading, setLoading] = React.useState(true);
@@ -91,7 +98,7 @@ export default function StaffCard({ staffId }: StaffCardProps) {
             setIsManageQualificationsOpen(false);
         } catch (error) {
             console.error('Failed to save qualifications:', error);
-            alert('Failed to save qualifications');
+            alert(errorMessage(error));
         } finally {
             setIsSavingQuals(false);
         }
@@ -105,8 +112,8 @@ export default function StaffCard({ staffId }: StaffCardProps) {
             const updated = await api.updateCertificates(staff.id, certificates);
             setStaff(prev => prev ? { ...prev, certificates: updated } : null);
             setIsManageCertificatesOpen(false);
-        } catch (error: any) {
-            setCertsError(error.message || 'Failed to save certificates');
+        } catch (error) {
+            setCertsError(getErrorCode(error));
         } finally {
             setIsSavingCerts(false);
         }
@@ -137,8 +144,8 @@ export default function StaffCard({ staffId }: StaffCardProps) {
             })));
             setStaff(prev => prev ? { ...prev, courseEvaluations: updated } : null);
             setIsManageEvalsOpen(false);
-        } catch (error: any) {
-            setEvalsError(error.message || 'Failed to save evaluations');
+        } catch (error) {
+            setEvalsError(getErrorCode(error));
         } finally {
             setIsSavingEvals(false);
         }
@@ -176,7 +183,7 @@ export default function StaffCard({ staffId }: StaffCardProps) {
     const handleSaveProfile = async () => {
         if (!staff) return;
         setEditProfileError('');
-        if (!editForm.position) { setEditProfileError('Position is required'); return; }
+        if (!editForm.position) { setEditProfileError('POSITION_REQUIRED'); return; }
         setIsSavingProfile(true);
         try {
             await api.updateStaff(staff.id, {
@@ -194,8 +201,8 @@ export default function StaffCard({ staffId }: StaffCardProps) {
             const updated = await api.getStaffById(staff.id);
             setStaff(updated);
             setIsEditProfileOpen(false);
-        } catch (err: any) {
-            setEditProfileError(err.message || 'Failed to save profile');
+        } catch (err) {
+            setEditProfileError(getErrorCode(err));
         } finally {
             setIsSavingProfile(false);
         }
@@ -209,13 +216,13 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                         <ArrowLeft className="w-4 h-4 text-muted-foreground" />
                     </Button>
                     <div>
-                        <h1 className="text-2xl font-semibold tracking-tight">Staff Profile</h1>
-                        <p className="text-sm text-muted-foreground">View and manage staff information</p>
+                        <h1 className="text-2xl font-semibold tracking-tight">{t('profile.title')}</h1>
+                        <p className="text-sm text-muted-foreground">{t('profile.subtitle')}</p>
                     </div>
                 </div>
                 <Card className="rounded-xl border border-slate-200 shadow-sm">
                     <CardContent className="p-12 text-center">
-                        <p className="text-muted-foreground">Loading...</p>
+                        <p className="text-muted-foreground">{tc('states.loading')}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -230,13 +237,13 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                         <ArrowLeft className="w-4 h-4 text-muted-foreground" />
                     </Button>
                     <div>
-                        <h1 className="text-2xl font-semibold tracking-tight">Staff Profile</h1>
-                        <p className="text-sm text-muted-foreground">View and manage staff information</p>
+                        <h1 className="text-2xl font-semibold tracking-tight">{t('profile.title')}</h1>
+                        <p className="text-sm text-muted-foreground">{t('profile.subtitle')}</p>
                     </div>
                 </div>
                 <Card className="rounded-xl border border-slate-200 shadow-sm">
                     <CardContent className="p-12 text-center">
-                        <p className="text-muted-foreground">Staff member not found</p>
+                        <p className="text-muted-foreground">{t('profile.notFound')}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -256,8 +263,8 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                     <ArrowLeft className="w-4 h-4 text-slate-500" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Staff Profile</h1>
-                    <p className="text-sm text-slate-500">View and manage staff information</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t('profile.title')}</h1>
+                    <p className="text-sm text-slate-500">{t('profile.subtitle')}</p>
                 </div>
             </div>
 
@@ -279,11 +286,11 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                         {/* Name + position */}
                         <div className="flex-1 min-w-0">
                             <h2 className="text-2xl font-bold text-slate-900 leading-tight">{staff.firstName} {staff.lastName}</h2>
-                            <p className="text-base text-indigo-600 font-semibold mt-0.5">{staff.position}</p>
+                            <p className="text-base text-indigo-600 font-semibold mt-0.5">{labels.position(staff.position)}</p>
                             {staff.rank && (
                                 <span className="inline-flex items-center gap-1.5 mt-2 bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full">
                                     <GraduationCap className="w-3.5 h-3.5" />
-                                    {staff.rank}
+                                    {labels.rank(staff.rank)}
                                 </span>
                             )}
                         </div>
@@ -295,7 +302,7 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                             className="shrink-0 h-9 flex items-center gap-2 shadow-sm"
                         >
                             <Pencil className="w-3.5 h-3.5" />
-                            Edit Profile
+                            {t('profile.editProfile')}
                         </Button>
                     </div>
                 </div>
@@ -308,7 +315,7 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                     </span>
                     <span className="inline-flex items-center gap-1.5 text-sm text-slate-500">
                         <Clock className="w-4 h-4 text-slate-400" />
-                        Since {format(new Date(staff.startDate), 'MMM d, yyyy')} &middot; {api.calculateTenure(staff.startDate)}
+                        {t('profile.since', { date: formatDate(staff.startDate, 'MMM d, yyyy'), tenure: formatTenure(staff.startDate) })}
                     </span>
                     <span className="inline-flex items-center gap-1.5 text-sm text-slate-500">
                         <Mail className="w-4 h-4 text-slate-400" />
@@ -333,21 +340,21 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                 className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none pb-3 pt-3 px-4 text-slate-500 data-[state=active]:text-indigo-700 font-semibold text-sm flex items-center gap-2 transition-colors"
                             >
                                 <FileText className="w-4 h-4" />
-                                Academic Profile
+                                {t('tabs.academic')}
                             </TabsTrigger>
                             <TabsTrigger
                                 value="duties"
                                 className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none pb-3 pt-3 px-4 text-slate-500 data-[state=active]:text-indigo-700 font-semibold text-sm flex items-center gap-2 transition-colors"
                             >
                                 <Briefcase className="w-4 h-4" />
-                                Duties &amp; Responsibilities
+                                {t('tabs.duties')}
                             </TabsTrigger>
                             <TabsTrigger
                                 value="emergency"
                                 className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none pb-3 pt-3 px-4 text-slate-500 data-[state=active]:text-indigo-700 font-semibold text-sm flex items-center gap-2 transition-colors"
                             >
                                 <Info className="w-4 h-4" />
-                                Emergency Contact
+                                {t('tabs.emergency')}
                             </TabsTrigger>
                         </TabsList>
                     </div>
@@ -366,12 +373,12 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                                 <div className="w-8 h-8 rounded-xl bg-teal-600 flex items-center justify-center shrink-0">
                                                     <GraduationCap className="w-4 h-4 text-white" />
                                                 </div>
-                                                <h3 className="text-base font-bold text-slate-800">Academic Qualifications</h3>
+                                                <h3 className="text-base font-bold text-slate-800">{t('qualifications.title')}</h3>
                                             </div>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                title="Manage Qualifications"
+                                                title={t('qualifications.manage')}
                                                 className="h-7 w-7 text-slate-400 hover:text-teal-600 hover:bg-teal-100"
                                                 onClick={() => {
                                                     setQualifications(staff.qualifications || []);
@@ -385,12 +392,12 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                         <div className="p-5 space-y-3">
                                             {(!staff.qualifications || staff.qualifications.length === 0) ? (
                                                 <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-                                                    <p className="text-sm text-slate-400">No qualifications recorded</p>
+                                                    <p className="text-sm text-slate-400">{t('qualifications.empty')}</p>
                                                 </div>
                                             ) : (
                                                 staff.qualifications.map((qual, i) => (
                                                     <div key={i} className="rounded-xl bg-teal-50 border border-teal-100 p-4 shadow-sm">
-                                                        <h4 className="text-sm font-bold text-slate-800 mb-1">{qual.degreeType} {qual.fieldOfStudy ? `in ${qual.fieldOfStudy}` : ''}</h4>
+                                                        <h4 className="text-sm font-bold text-slate-800 mb-1">{qual.fieldOfStudy ? t('qualifications.inField', { degree: labels.degree(qual.degreeType), field: qual.fieldOfStudy }) : labels.degree(qual.degreeType)}</h4>
                                                         <div className="flex items-center justify-between gap-2">
                                                             <p className="text-xs text-slate-500">{qual.institution}</p>
                                                             {qual.year && (
@@ -416,12 +423,12 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                                 <div className="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
                                                     <Award className="w-4 h-4 text-white" />
                                                 </div>
-                                                <h3 className="text-base font-bold text-slate-800">Certificates</h3>
+                                                <h3 className="text-base font-bold text-slate-800">{t('certificates.title')}</h3>
                                             </div>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                title="Manage Certificates"
+                                                title={t('certificates.manage')}
                                                 className="h-7 w-7 text-slate-400 hover:text-amber-600 hover:bg-amber-100"
                                                 onClick={() => {
                                                     setCertificates(staff.certificates || []);
@@ -435,7 +442,7 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                         <div className="p-5 space-y-3">
                                             {staff.certificates.length === 0 ? (
                                                 <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-                                                    <p className="text-sm text-slate-400">No certificates on record</p>
+                                                    <p className="text-sm text-slate-400">{t('certificates.empty')}</p>
                                                 </div>
                                             ) : (
                                                 staff.certificates.map(cert => (
@@ -444,7 +451,7 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                                         <div className="flex items-center justify-between gap-2">
                                                             <p className="text-xs text-slate-500">{cert.issuer}</p>
                                                             <span className="text-xs text-amber-700 font-bold bg-amber-100 px-2.5 py-0.5 rounded-full shrink-0">
-                                                                {format(new Date(cert.date), 'MMM yyyy')}
+                                                                {formatDate(cert.date, 'MMM yyyy')}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -460,12 +467,12 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                                 <div className="w-8 h-8 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
                                                     <Star className="w-4 h-4 text-white" />
                                                 </div>
-                                                <h3 className="text-base font-bold text-slate-800">Course Evaluations</h3>
+                                                <h3 className="text-base font-bold text-slate-800">{t('evaluations.title')}</h3>
                                             </div>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                title="Manage Course Evaluations"
+                                                title={t('evaluations.manage')}
                                                 className="h-7 w-7 text-slate-400 hover:text-violet-600 hover:bg-violet-100"
                                                 onClick={() => {
                                                     setEvals(staff.courseEvaluations || []);
@@ -479,7 +486,7 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                         <div className="p-5 space-y-3">
                                             {staff.courseEvaluations.length === 0 ? (
                                                 <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-                                                    <p className="text-sm text-slate-400">No evaluations recorded</p>
+                                                    <p className="text-sm text-slate-400">{t('evaluations.empty')}</p>
                                                 </div>
                                             ) : (
                                                 staff.courseEvaluations.map(evaluation => (
@@ -495,7 +502,7 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                                                 <p className="text-xs text-slate-500 truncate">{evaluation.feedback}</p>
                                                             ) : <span />}
                                                             <span className="text-xs text-violet-700 font-bold bg-violet-100 px-2.5 py-0.5 rounded-full shrink-0">
-                                                                {format(new Date(evaluation.date), 'MMM d, yyyy')}
+                                                                {formatDate(evaluation.date, 'MMM d, yyyy')}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -510,10 +517,10 @@ export default function StaffCard({ staffId }: StaffCardProps) {
 
                         <TabsContent value="duties" className="m-0 focus-visible:outline-none">
                             <div className="space-y-4 max-w-2xl">
-                                <h3 className="section-title">Assigned Duties</h3>
+                                <h3 className="section-title">{t('duties.title')}</h3>
                                 {staff.extraDuties.length === 0 ? (
                                     <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center">
-                                        <p className="text-sm text-slate-500">No extra duties assigned</p>
+                                        <p className="text-sm text-slate-500">{t('duties.empty')}</p>
                                     </div>
                                 ) : (
                                     <div className="grid gap-3">
@@ -532,10 +539,10 @@ export default function StaffCard({ staffId }: StaffCardProps) {
 
                         <TabsContent value="emergency" className="m-0 focus-visible:outline-none">
                             <div className="space-y-4 max-w-4xl">
-                                <h3 className="section-title">Emergency Contacts</h3>
+                                <h3 className="section-title">{t('emergency.title')}</h3>
                                 {staff.emergencyContacts.length === 0 ? (
                                     <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/50 p-8 text-center">
-                                        <p className="text-sm text-slate-500">No emergency contacts on file</p>
+                                        <p className="text-sm text-slate-500">{t('emergency.empty')}</p>
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -546,11 +553,11 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                                         <h4 className="text-base font-bold text-slate-900">{contact.name}</h4>
                                                         {contact.isPrimary && (
                                                             <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600">
-                                                                Primary
+                                                                {tc('states.primary')}
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <p className="text-sm text-slate-500 mb-4">{contact.relation}</p>
+                                                    <p className="text-sm text-slate-500 mb-4">{labels.relation(contact.relation)}</p>
                                                 </div>
                                                 <div className="flex items-center gap-2 pt-4 border-t border-slate-100">
                                                     <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100 shrink-0">
@@ -571,9 +578,9 @@ export default function StaffCard({ staffId }: StaffCardProps) {
             <Dialog open={isManageQualificationsOpen} onOpenChange={setIsManageQualificationsOpen}>
                 <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>Manage Qualifications</DialogTitle>
+                        <DialogTitle>{t('qualifications.manage')}</DialogTitle>
                         <DialogDescription>
-                            Edit the academic qualifications and certifications for this staff member.
+                            {t('qualifications.manageDescription')}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -587,10 +594,10 @@ export default function StaffCard({ staffId }: StaffCardProps) {
 
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsManageQualificationsOpen(false)} disabled={isSavingQuals}>
-                            Cancel
+                            {tc('actions.cancel')}
                         </Button>
                         <Button onClick={handleSaveQualifications} disabled={isSavingQuals}>
-                            {isSavingQuals ? 'Saving...' : 'Save Changes'}
+                            {isSavingQuals ? tc('actions.saving') : tc('actions.saveChanges')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -602,16 +609,16 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Award className="w-4 h-4 text-amber-500" />
-                            Manage Certificates
+                            {t('certificates.manage')}
                         </DialogTitle>
                         <DialogDescription>
-                            Add, edit, or remove certificates for this staff member.
+                            {t('certificates.manageDescription')}
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="py-3 space-y-3">
                         {certificates.length === 0 && (
-                            <p className="text-sm text-slate-400 text-center py-6">No certificates added yet. Click below to add one.</p>
+                            <p className="text-sm text-slate-400 text-center py-6">{t('certificates.emptyHint')}</p>
                         )}
                         {certificates.map((cert, i) => (
                             <div key={i} className="bg-white rounded-xl border border-slate-200 border-l-4 border-l-amber-400 shadow-sm overflow-hidden">
@@ -619,37 +626,37 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                 <div className="flex items-center justify-between px-4 py-2.5 bg-amber-50 border-b border-amber-100">
                                     <div className="flex items-center gap-2">
                                         <Award className="w-3.5 h-3.5 text-amber-600" />
-                                        <p className="text-xs font-bold text-amber-800 uppercase tracking-wider">Certificate {i + 1}</p>
+                                        <p className="text-xs font-bold text-amber-800 uppercase tracking-wider">{t('certificates.itemTitle', { number: i + 1 })}</p>
                                     </div>
                                     <button
                                         onClick={() => removeCertificate(i)}
                                         className="text-xs text-red-400 hover:text-red-600 font-semibold transition-colors"
                                     >
-                                        Remove
+                                        {tc('actions.remove')}
                                     </button>
                                 </div>
                                 {/* Fields */}
                                 <div className="p-4 grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="text-xs font-medium text-slate-500 mb-1 block">Certificate Name *</label>
+                                        <label className="text-xs font-medium text-slate-500 mb-1 block">{t('certificates.name')}</label>
                                         <input
                                             className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-300 transition"
-                                            placeholder="e.g. First Aid and CPR"
+                                            placeholder={t('certificates.namePlaceholder')}
                                             value={cert.name}
                                             onChange={e => updateCertField(i, 'name', e.target.value)}
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-medium text-slate-500 mb-1 block">Issuer *</label>
+                                        <label className="text-xs font-medium text-slate-500 mb-1 block">{t('certificates.issuer')}</label>
                                         <input
                                             className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-300 transition"
-                                            placeholder="e.g. Red Cross"
+                                            placeholder={t('certificates.issuerPlaceholder')}
                                             value={cert.issuer}
                                             onChange={e => updateCertField(i, 'issuer', e.target.value)}
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-medium text-slate-500 mb-1 block">Date Issued *</label>
+                                        <label className="text-xs font-medium text-slate-500 mb-1 block">{t('certificates.dateIssued')}</label>
                                         <input
                                             type="date"
                                             className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-300 transition"
@@ -658,7 +665,7 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-medium text-slate-500 mb-1 block">File URL (optional)</label>
+                                        <label className="text-xs font-medium text-slate-500 mb-1 block">{t('certificates.fileUrl')}</label>
                                         <input
                                             className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-300 transition"
                                             placeholder="https://..."
@@ -673,17 +680,17 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                             onClick={addCertificate}
                             className="w-full py-2.5 rounded-xl border-2 border-dashed border-amber-200 text-sm font-semibold text-amber-600 hover:border-amber-400 hover:bg-amber-50 transition-colors"
                         >
-                            + Add Certificate
+                            {t('certificates.addCertificate')}
                         </button>
-                        {certsError && <p className="text-sm text-red-600">{certsError}</p>}
+                        {certsError && <p className="text-sm text-red-600">{errorMessage(certsError)}</p>}
                     </div>
 
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsManageCertificatesOpen(false)} disabled={isSavingCerts}>
-                            Cancel
+                            {tc('actions.cancel')}
                         </Button>
                         <Button onClick={handleSaveCertificates} disabled={isSavingCerts}>
-                            {isSavingCerts ? 'Saving...' : 'Save Changes'}
+                            {isSavingCerts ? tc('actions.saving') : tc('actions.saveChanges')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -695,16 +702,16 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Star className="w-4 h-4 text-violet-600" />
-                            Manage Course Evaluations
+                            {t('evaluations.manage')}
                         </DialogTitle>
                         <DialogDescription>
-                            Add, edit, or remove course evaluations for this staff member.
+                            {t('evaluations.manageDescription')}
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="py-3 space-y-3">
                         {evals.length === 0 && (
-                            <p className="text-sm text-slate-400 text-center py-6">No evaluations added yet. Click below to add one.</p>
+                            <p className="text-sm text-slate-400 text-center py-6">{t('evaluations.emptyHint')}</p>
                         )}
                         {evals.map((ev, i) => (
                             <div key={i} className="bg-white rounded-xl border border-slate-200 border-l-4 border-l-violet-400 shadow-sm overflow-hidden">
@@ -712,28 +719,28 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                 <div className="flex items-center justify-between px-4 py-2.5 bg-violet-50 border-b border-violet-100">
                                     <div className="flex items-center gap-2">
                                         <Star className="w-3 h-3 text-violet-600" />
-                                        <p className="text-xs font-bold text-violet-800 uppercase tracking-wider">Evaluation {i + 1}</p>
+                                        <p className="text-xs font-bold text-violet-800 uppercase tracking-wider">{t('evaluations.itemTitle', { number: i + 1 })}</p>
                                     </div>
                                     <button
                                         onClick={() => removeEval(i)}
                                         className="text-xs text-red-400 hover:text-red-600 font-semibold transition-colors"
                                     >
-                                        Remove
+                                        {tc('actions.remove')}
                                     </button>
                                 </div>
                                 {/* Fields */}
                                 <div className="p-4 grid grid-cols-2 gap-3">
                                     <div className="col-span-2">
-                                        <label className="text-xs font-medium text-slate-500 mb-1 block">Course Name *</label>
+                                        <label className="text-xs font-medium text-slate-500 mb-1 block">{t('evaluations.courseName')}</label>
                                         <input
                                             className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-300 transition"
-                                            placeholder="e.g. Physical Education – Grade 6"
+                                            placeholder={t('evaluations.coursePlaceholder')}
                                             value={ev.courseName}
                                             onChange={e => updateEvalField(i, 'courseName', e.target.value)}
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-medium text-slate-500 mb-1 block">Rating (0–5) *</label>
+                                        <label className="text-xs font-medium text-slate-500 mb-1 block">{t('evaluations.rating')}</label>
                                         <input
                                             type="number"
                                             min={0}
@@ -745,7 +752,7 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-medium text-slate-500 mb-1 block">Date *</label>
+                                        <label className="text-xs font-medium text-slate-500 mb-1 block">{t('evaluations.date')}</label>
                                         <input
                                             type="date"
                                             className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-300 transition"
@@ -754,11 +761,11 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                                         />
                                     </div>
                                     <div className="col-span-2">
-                                        <label className="text-xs font-medium text-slate-500 mb-1 block">Feedback (optional)</label>
+                                        <label className="text-xs font-medium text-slate-500 mb-1 block">{t('evaluations.feedback')}</label>
                                         <textarea
                                             rows={2}
                                             className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-300 resize-none transition"
-                                            placeholder="Brief feedback about the course..."
+                                            placeholder={t('evaluations.feedbackPlaceholder')}
                                             value={ev.feedback || ''}
                                             onChange={e => updateEvalField(i, 'feedback', e.target.value)}
                                         />
@@ -770,17 +777,17 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                             onClick={addEval}
                             className="w-full py-2.5 rounded-xl border-2 border-dashed border-violet-200 text-sm font-semibold text-violet-600 hover:border-violet-400 hover:bg-violet-50 transition-colors"
                         >
-                            + Add Evaluation
+                            {t('evaluations.addEvaluation')}
                         </button>
-                        {evalsError && <p className="text-sm text-red-600">{evalsError}</p>}
+                        {evalsError && <p className="text-sm text-red-600">{errorMessage(evalsError)}</p>}
                     </div>
 
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsManageEvalsOpen(false)} disabled={isSavingEvals}>
-                            Cancel
+                            {tc('actions.cancel')}
                         </Button>
                         <Button onClick={handleSaveEvals} disabled={isSavingEvals}>
-                            {isSavingEvals ? 'Saving...' : 'Save Changes'}
+                            {isSavingEvals ? tc('actions.saving') : tc('actions.saveChanges')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -792,42 +799,42 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Pencil className="w-4 h-4 text-indigo-600" />
-                            Edit Profile
+                            {t('editDialog.title')}
                         </DialogTitle>
-                        <DialogDescription>Update the staff member's profile information.</DialogDescription>
+                        <DialogDescription>{t('editDialog.description')}</DialogDescription>
                     </DialogHeader>
 
                     <div className="py-3 space-y-4">
                         {editProfileError && (
-                            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{editProfileError}</p>
+                            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{errorMessage(editProfileError)}</p>
                         )}
 
                         {/* Name */}
                         <div className="bg-white rounded-xl border border-slate-200 border-l-4 border-l-indigo-400 shadow-sm overflow-hidden">
                             <div className="flex items-center gap-2 px-4 py-2.5 bg-indigo-50 border-b border-indigo-100">
                                 <Pencil className="w-3.5 h-3.5 text-indigo-600" />
-                                <p className="text-xs font-bold text-indigo-800 uppercase tracking-wider">Personal Info</p>
+                                <p className="text-xs font-bold text-indigo-800 uppercase tracking-wider">{t('editDialog.personalInfo')}</p>
                             </div>
                             <div className="p-4 grid grid-cols-2 gap-3">
                                 <div>
-                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">First Name *</Label>
+                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">{t('fields.firstName')}</Label>
                                     <Input className="bg-slate-50 focus:bg-white focus-visible:ring-indigo-300 border-slate-200"
-                                        value={editForm.firstName} onChange={e => setEditForm(p => ({ ...p, firstName: e.target.value }))} placeholder="e.g. Kristina" />
+                                        value={editForm.firstName} onChange={e => setEditForm(p => ({ ...p, firstName: e.target.value }))} placeholder={t('fields.firstNamePlaceholder')} />
                                 </div>
                                 <div>
-                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">Last Name *</Label>
+                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">{t('fields.lastName')}</Label>
                                     <Input className="bg-slate-50 focus:bg-white focus-visible:ring-indigo-300 border-slate-200"
-                                        value={editForm.lastName} onChange={e => setEditForm(p => ({ ...p, lastName: e.target.value }))} placeholder="e.g. Balčiūnienė" />
+                                        value={editForm.lastName} onChange={e => setEditForm(p => ({ ...p, lastName: e.target.value }))} placeholder={t('fields.lastNamePlaceholder')} />
                                 </div>
                                 <div className="col-span-2">
-                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">Email *</Label>
+                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">{t('fields.email')}</Label>
                                     <Input type="email" className="bg-slate-50 focus:bg-white focus-visible:ring-indigo-300 border-slate-200"
-                                        value={editForm.email} onChange={e => setEditForm(p => ({ ...p, email: e.target.value }))} placeholder="e.g. k.example@school.lt" />
+                                        value={editForm.email} onChange={e => setEditForm(p => ({ ...p, email: e.target.value }))} placeholder={t('fields.emailPlaceholder')} />
                                 </div>
                                 <div className="col-span-2">
-                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">Photo URL</Label>
+                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">{t('fields.photoUrl')}</Label>
                                     <Input type="url" className="bg-slate-50 focus:bg-white focus-visible:ring-indigo-300 border-slate-200"
-                                        value={editForm.photoUrl} onChange={e => setEditForm(p => ({ ...p, photoUrl: e.target.value }))} placeholder="https://..." />
+                                        value={editForm.photoUrl} onChange={e => setEditForm(p => ({ ...p, photoUrl: e.target.value }))} placeholder={t('fields.photoUrlPlaceholder')} />
                                 </div>
                             </div>
                         </div>
@@ -836,44 +843,44 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                         <div className="bg-white rounded-xl border border-slate-200 border-l-4 border-l-indigo-400 shadow-sm overflow-hidden">
                             <div className="flex items-center gap-2 px-4 py-2.5 bg-indigo-50 border-b border-indigo-100">
                                 <Briefcase className="w-3.5 h-3.5 text-indigo-600" />
-                                <p className="text-xs font-bold text-indigo-800 uppercase tracking-wider">Employment</p>
+                                <p className="text-xs font-bold text-indigo-800 uppercase tracking-wider">{t('editDialog.employment')}</p>
                             </div>
                             <div className="p-4 grid grid-cols-2 gap-3">
                                 <div>
-                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">Role *</Label>
+                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">{t('fields.role')}</Label>
                                     <Input className="bg-slate-50 focus:bg-white focus-visible:ring-indigo-300 border-slate-200"
-                                        value={editForm.role} onChange={e => setEditForm(p => ({ ...p, role: e.target.value }))} placeholder="e.g. Principal" />
+                                        value={editForm.role} onChange={e => setEditForm(p => ({ ...p, role: e.target.value }))} placeholder={t('fields.rolePlaceholder')} />
                                 </div>
                                 <div>
-                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">Department *</Label>
+                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">{t('fields.department')}</Label>
                                     <Select value={editForm.department} onValueChange={v => setEditForm(p => ({ ...p, department: v }))}>
-                                        <SelectTrigger className="bg-slate-50 border-slate-200 focus:ring-indigo-300"><SelectValue placeholder="Select department" /></SelectTrigger>
+                                        <SelectTrigger className="bg-slate-50 border-slate-200 focus:ring-indigo-300"><SelectValue placeholder={t('fields.selectDepartment')} /></SelectTrigger>
                                         <SelectContent>
                                             {departments.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div>
-                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">Position <span className="text-slate-400 font-normal">(Job Role)</span> *</Label>
+                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">{t('fields.position')} <span className="text-slate-400 font-normal">{t('fields.positionHint')}</span></Label>
                                     <Select value={editForm.position} onValueChange={v => setEditForm(p => ({ ...p, position: v as Position }))}>
-                                        <SelectTrigger className="bg-slate-50 border-slate-200 focus:ring-indigo-300"><SelectValue placeholder="Select position" /></SelectTrigger>
+                                        <SelectTrigger className="bg-slate-50 border-slate-200 focus:ring-indigo-300"><SelectValue placeholder={t('fields.selectPosition')} /></SelectTrigger>
                                         <SelectContent>
-                                            {POSITION_OPTIONS.map(pos => <SelectItem key={pos} value={pos}>{pos}</SelectItem>)}
+                                            {POSITION_OPTIONS.map(pos => <SelectItem key={pos} value={pos}>{labels.position(pos)}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div>
-                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">Rank <span className="text-slate-400 font-normal">(Seniority)</span></Label>
+                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">{t('fields.rank')} <span className="text-slate-400 font-normal">{t('fields.rankHint')}</span></Label>
                                     <Select value={editForm.rank} onValueChange={v => setEditForm(p => ({ ...p, rank: v as Rank | 'none' }))}>
-                                        <SelectTrigger className="bg-slate-50 border-slate-200 focus:ring-indigo-300"><SelectValue placeholder="Select rank (optional)" /></SelectTrigger>
+                                        <SelectTrigger className="bg-slate-50 border-slate-200 focus:ring-indigo-300"><SelectValue placeholder={t('fields.selectRank')} /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="none" className="text-slate-400 italic">None</SelectItem>
-                                            {RANK_OPTIONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                                            <SelectItem value="none" className="text-slate-400 italic">{tc('states.none')}</SelectItem>
+                                            {RANK_OPTIONS.map(r => <SelectItem key={r} value={r}>{labels.rank(r)}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div>
-                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">Start Date *</Label>
+                                    <Label className="text-xs font-medium text-slate-500 mb-1 block">{t('fields.startDate')}</Label>
                                     <Input type="date" className="bg-slate-50 focus:bg-white focus-visible:ring-indigo-300 border-slate-200"
                                         value={editForm.startDate} onChange={e => setEditForm(p => ({ ...p, startDate: e.target.value }))} />
                                 </div>
@@ -882,9 +889,9 @@ export default function StaffCard({ staffId }: StaffCardProps) {
                     </div>
 
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsEditProfileOpen(false)} disabled={isSavingProfile}>Cancel</Button>
+                        <Button variant="outline" onClick={() => setIsEditProfileOpen(false)} disabled={isSavingProfile}>{tc('actions.cancel')}</Button>
                         <Button onClick={handleSaveProfile} disabled={isSavingProfile}>
-                            {isSavingProfile ? 'Saving...' : 'Save Changes'}
+                            {isSavingProfile ? tc('actions.saving') : tc('actions.saveChanges')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

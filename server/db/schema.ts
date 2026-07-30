@@ -14,12 +14,13 @@ export const schools = pgTable('schools', {
 });
 
 export const users = pgTable('users', {
-    id:           uuid('id').primaryKey().defaultRandom(),
-    schoolId:     uuid('school_id').notNull().references(() => schools.id, { onDelete: 'cascade' }),
-    email:        text('email').notNull().unique(),
-    passwordHash: text('password_hash').notNull(),
-    role:         text('role').notNull().default('staff'),
-    createdAt:    timestamp('created_at', { mode: 'string' }).defaultNow(),
+    id:                uuid('id').primaryKey().defaultRandom(),
+    schoolId:          uuid('school_id').notNull().references(() => schools.id, { onDelete: 'cascade' }),
+    email:             text('email').notNull().unique(),
+    passwordHash:      text('password_hash').notNull(),
+    role:              text('role').notNull().default('staff'),
+    preferredLanguage: text('preferred_language').notNull().default('en'),
+    createdAt:         timestamp('created_at', { mode: 'string' }).defaultNow(),
 });
 
 // ===== STAFF MODULE (defined before students so emergency_contacts can ref both) =====

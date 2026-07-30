@@ -9,20 +9,32 @@ const router = Router();
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// All error responses return stable CODES (translated client-side), never English text.
+
+function normalizeLanguage(value: unknown): 'en' | 'lt' | null {
+    return value === 'en' || value === 'lt' ? value : null;
+}
+
 // POST /api/auth/login
 router.post('/login', loginRateLimit, async (req, res, next) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, language } = req.body;
         if (!email || !password) {
-            return res.status(400).json({ error: 'Email and password are required' });
+            return res.status(400).json({ error: 'EMAIL_PASSWORD_REQUIRED' });
         }
         if (!EMAIL_RE.test(email)) {
-            return res.status(400).json({ error: 'Invalid email format' });
+            return res.status(400).json({ error: 'INVALID_EMAIL' });
         }
 
         const user = await queries.getUserByEmail(email.toLowerCase().trim());
         if (!user || !(await verifyPassword(password, user.passwordHash))) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(401).json({ error: 'INVALID_CREDENTIALS' });
+        }
+
+        // Keep the stored preference in sync with the UI language used at login
+        const lang = normalizeLanguage(language);
+        if (lang && lang !== user.preferredLanguage) {
+            await queries.updateUserPreferredLanguage(user.id, lang);
         }
 
         const token = signToken({ userId: user.id, schoolId: user.schoolId, role: user.role });
@@ -35,36 +47,51 @@ router.post('/login', loginRateLimit, async (req, res, next) => {
 // POST /api/auth/register — creates a new school + school_admin user
 router.post('/register', async (req, res, next) => {
     try {
-        const { schoolName, email, password } = req.body;
+        const { schoolName, email, password, language } = req.body;
         if (!schoolName || !email || !password) {
-            return res.status(400).json({ error: 'School name, email, and password are required' });
+            return res.status(400).json({ error: 'REGISTER_FIELDS_REQUIRED' });
         }
         if (!EMAIL_RE.test(email)) {
-            return res.status(400).json({ error: 'Invalid email format' });
+            return res.status(400).json({ error: 'INVALID_EMAIL' });
         }
         if (password.length < 8) {
-            return res.status(400).json({ error: 'Password must be at least 8 characters' });
+            return res.status(400).json({ error: 'PASSWORD_TOO_SHORT' });
         }
         if (password.length > 72) {
-            return res.status(400).json({ error: 'Password must be 72 characters or fewer' });
+            return res.status(400).json({ error: 'PASSWORD_TOO_LONG' });
         }
 
         if (await queries.getUserByEmail(email.toLowerCase().trim())) {
-            return res.status(409).json({ error: 'Email already registered' });
+            return res.status(409).json({ error: 'EMAIL_TAKEN' });
         }
 
         const { school, user } = await queries.registerSchoolWithAdmin({
             schoolName: schoolName.trim(),
             email: email.toLowerCase().trim(),
             passwordHash: await hashPassword(password),
+            preferredLanguage: normalizeLanguage(language) ?? 'en',
         });
 
         const token = signToken({ userId: user.id, schoolId: school.id, role: user.role });
         res.status(201).json({ token, user: { id: user.id, email: user.email, role: user.role, schoolId: school.id } });
     } catch (error: any) {
         if (error.message === 'SLUG_CONFLICT') {
-            return res.status(409).json({ error: 'A school with that name already exists' });
+            return res.status(409).json({ error: 'SCHOOL_NAME_TAKEN' });
         }
+        next(error);
+    }
+});
+
+// PATCH /api/auth/language — persist the signed-in user's UI language (used for emails)
+router.patch('/language', authenticate, async (req, res, next) => {
+    try {
+        const lang = normalizeLanguage(req.body?.language);
+        if (!lang) {
+            return res.status(400).json({ error: 'LANGUAGE_INVALID' });
+        }
+        await queries.updateUserPreferredLanguage(req.user!.userId, lang);
+        res.json({ language: lang });
+    } catch (error) {
         next(error);
     }
 });
@@ -72,21 +99,23 @@ router.post('/register', async (req, res, next) => {
 // POST /api/auth/forgot-password
 router.post('/forgot-password', forgotPasswordRateLimit, async (req, res, next) => {
     try {
-        const { email } = req.body;
+        const { email, language } = req.body;
 
         // Always respond with 200 to prevent email enumeration
         if (!email || !EMAIL_RE.test(email)) {
-            return res.json({ message: 'If that email is registered, a reset link has been sent.' });
+            return res.json({ message: 'OK' });
         }
 
         const user = await queries.getUserByEmail(email.toLowerCase().trim());
         if (user) {
             const token    = await queries.createPasswordResetToken(user.id);
             const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
-            await sendPasswordResetEmail(user.email, resetUrl);
+            // Prefer the stored account language; fall back to the requester's UI language
+            const lang = normalizeLanguage(user.preferredLanguage) ?? normalizeLanguage(language) ?? 'en';
+            await sendPasswordResetEmail(user.email, resetUrl, lang);
         }
 
-        res.json({ message: 'If that email is registered, a reset link has been sent.' });
+        res.json({ message: 'OK' });
     } catch (error) {
         next(error);
     }
@@ -97,22 +126,22 @@ router.post('/reset-password', async (req, res, next) => {
     try {
         const { token, password } = req.body;
         if (!token || !password) {
-            return res.status(400).json({ error: 'Token and password are required' });
+            return res.status(400).json({ error: 'RESET_FIELDS_REQUIRED' });
         }
         if (password.length < 8) {
-            return res.status(400).json({ error: 'Password must be at least 8 characters' });
+            return res.status(400).json({ error: 'PASSWORD_TOO_SHORT' });
         }
         if (password.length > 72) {
-            return res.status(400).json({ error: 'Password must be 72 characters or fewer' });
+            return res.status(400).json({ error: 'PASSWORD_TOO_LONG' });
         }
 
         const userId = await queries.validateAndConsumeResetToken(token);
         if (!userId) {
-            return res.status(400).json({ error: 'This reset link is invalid or has expired.' });
+            return res.status(400).json({ error: 'RESET_LINK_INVALID' });
         }
 
         await queries.updateUserPassword(userId, await hashPassword(password));
-        res.json({ message: 'Password reset successfully. You can now log in.' });
+        res.json({ message: 'OK' });
     } catch (error) {
         next(error);
     }

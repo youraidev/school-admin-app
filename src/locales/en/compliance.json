@@ -1,0 +1,16 @@
+{
+    "title": "Internal Compliance",
+    "subtitle": "Manage internal rules and acknowledgments",
+    "upload": "Upload Document",
+    "uploadComingSoon": "Coming soon — upload is not yet implemented",
+    "searchPlaceholder": "Search documents...",
+    "overdue": "Overdue",
+    "complete": "Complete",
+    "uploaded": "Uploaded {{date}}",
+    "allStaff": "All Staff",
+    "signatures": "Signatures",
+    "remind_one": "Remind {{count}} pending user",
+    "remind_other": "Remind {{count}} pending users",
+    "remindComingSoon": "Coming soon — reminders are not yet implemented",
+    "empty": "No compliance documents found"
+}

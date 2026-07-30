@@ -1,0 +1,133 @@
+{
+    "appName": "School Admin",
+    "appTagline": "Core",
+    "language": {
+        "label": "Kalba",
+        "en": "English",
+        "lt": "Lietuvių"
+    },
+    "nav": {
+        "dashboard": "Valdymo skydas",
+        "students": "Mokiniai",
+        "staff": "Darbuotojai",
+        "departments": "Skyriai",
+        "compliance": "Atitiktis",
+        "notifications": "Pranešimai",
+        "settings": "Nustatymai"
+    },
+    "actions": {
+        "save": "Išsaugoti",
+        "saveChanges": "Išsaugoti pakeitimus",
+        "saving": "Saugoma...",
+        "cancel": "Atšaukti",
+        "delete": "Ištrinti",
+        "deleting": "Trinama...",
+        "edit": "Redaguoti",
+        "remove": "Pašalinti",
+        "add": "Pridėti",
+        "back": "Atgal",
+        "filters": "Filtrai",
+        "clearFields": "Išvalyti laukus"
+    },
+    "states": {
+        "loading": "Kraunama...",
+        "error": "Klaida",
+        "comingSoon": "Netrukus",
+        "none": "Nėra",
+        "primary": "Pagrindinis",
+        "notLinked": "Nesusieta"
+    },
+    "status": {
+        "active": "Aktyvi",
+        "pending": "Laukiama",
+        "expired": "Pasibaigusi",
+        "terminated": "Nutraukta",
+        "signed": "Pasirašyta",
+        "paid": "Apmokėta",
+        "unpaid": "Neapmokėta"
+    },
+    "severity": {
+        "low": "Lengva",
+        "medium": "Vidutinė",
+        "life-threatening": "Pavojinga gyvybei"
+    },
+    "healthStatus": {
+        "good": "Gera",
+        "needs_review": "Reikia peržiūros"
+    },
+    "relations": {
+        "father": "Tėvas",
+        "mother": "Mama",
+        "guardian": "Globėjas",
+        "sibling": "Brolis / sesuo"
+    },
+    "seniority": {
+        "expert": "Ekspertas",
+        "senior": "Vyresnysis mokytojas",
+        "specialist": "Specialistas",
+        "teacher": "Mokytojas"
+    },
+    "ranks": {
+        "assistant_teacher": "Mokytojo padėjėjas",
+        "teacher": "Mokytojas",
+        "senior_teacher": "Vyresnysis mokytojas",
+        "lead_teacher": "Mokytojas metodininkas",
+        "master_teacher": "Mokytojas ekspertas",
+        "department_head": "Skyriaus vedėjas",
+        "vice_principal": "Direktoriaus pavaduotojas",
+        "principal": "Direktorius"
+    },
+    "positions": {
+        "teacher": "Mokytojas",
+        "pe_teacher": "Kūno kultūros mokytojas",
+        "math_teacher": "Matematikos mokytojas",
+        "english_teacher": "Anglų kalbos mokytojas",
+        "science_teacher": "Gamtos mokslų mokytojas",
+        "history_teacher": "Istorijos mokytojas",
+        "arts_teacher": "Menų mokytojas",
+        "librarian": "Bibliotekininkas",
+        "counselor": "Konsultantas",
+        "special_education_teacher": "Specialusis pedagogas",
+        "admin": "Administratorius",
+        "principal": "Direktorius",
+        "other": "Kita"
+    },
+    "degrees": {
+        "diploma_education": "Pedagogikos diplomas",
+        "bed": "Edukologijos bakalauras (B.Ed)",
+        "bachelors": "Bakalauro laipsnis",
+        "pgde": "PGDE / PGCE",
+        "med": "Edukologijos magistras (M.Ed)",
+        "masters": "Magistro laipsnis",
+        "edd": "Edukologijos daktaras (Ed.D)",
+        "phd": "Daktaro laipsnis (PhD)",
+        "teaching_license": "Mokytojo licencija",
+        "qts": "QTS",
+        "montessori": "Montesori sertifikatas",
+        "special_education_cert": "Specialiojo ugdymo sertifikatas",
+        "tesol": "TESOL / TEFL",
+        "ib": "IB mokytojo sertifikatas"
+    },
+    "degreeGroups": {
+        "degrees": "Laipsniai",
+        "certifications": "Pedagoginiai sertifikatai"
+    },
+    "tenure": {
+        "years_one": "{{count}} m.",
+        "years_few": "{{count}} m.",
+        "years_many": "{{count}} m.",
+        "years_other": "{{count}} m.",
+        "months_one": "{{count}} mėn.",
+        "months_few": "{{count}} mėn.",
+        "months_many": "{{count}} mėn.",
+        "months_other": "{{count}} mėn."
+    },
+    "notFoundPage": {
+        "message": "Puslapis nerastas",
+        "returnHome": "Grįžti į valdymo skydą"
+    },
+    "errorBoundary": {
+        "title": "Įvyko klaida!",
+        "details": "Klaidos informacija"
+    }
+}

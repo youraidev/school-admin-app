@@ -61,6 +61,17 @@ SQLite database at `db/school.db` (auto-created on first server start). Schema i
 
 The seed data belongs to school `00000000-0000-0000-0000-000000000001` ("Default School"). Register a new school via `POST /api/auth/register` to get a JWT for the default school's admin, or create a new school entirely.
 
+### Internationalization (i18n)
+
+The UI supports **English (`en`)** and **Lithuanian (`lt`)** via `react-i18next`.
+
+- **Translations** live in `src/locales/{en,lt}/*.json`, one namespace per domain: `common`, `auth`, `dashboard`, `students`, `staff`, `departments`, `compliance`, `notifications`, `errors`. Add every new user-facing string to BOTH languages — keys are typed (`src/i18n/i18next.d.ts`), so a missing key in the `en` files is a compile error.
+- **Rules**: semantic keys (`students.actions.add`), interpolation over concatenation (`"Showing {{count}}"`), plurals via i18next suffixes — Lithuanian needs `_one`, `_few`, `_many`, `_other`.
+- **Helpers** in `src/i18n/`: `formatDate()`/`formatTenure()` (locale-aware, use instead of raw date-fns `format`), `useLabels()` (translates DB enum values like ranks/positions/degrees/statuses — DB stores canonical English), `useErrorMessage()` + `getErrorCode()` (see below).
+- **API errors are stable CODES**, not sentences: server returns `{ error: 'INVALID_CREDENTIALS' }`; the client stores the code in state and renders `errorMessage(code)`. New server errors need a code entry in `src/locales/{en,lt}/errors.json`. `queries.ts` throws `Error('SOME_CODE')`; routes map codes to HTTP statuses.
+- **Language selection**: detected from browser, persisted in `localStorage` (`language` key). Signed-in users' choice is also stored in `users.preferred_language` (via `PATCH /api/auth/language`, and on login/register) so server-sent emails (`server/email.ts`) use the right language.
+- **User data is NOT translated** (names, department names, agreement titles, free-text notes) — only UI chrome and enum-like values.
+
 ### Auth flow
 
 1. `POST /api/auth/register` — creates a `schools` row + `school_admin` user, returns `{ token, user }`

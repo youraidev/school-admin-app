@@ -18,10 +18,19 @@ import { getToken, clearAuth } from './auth';
 
 const API_BASE_URL = '/api';
 
+/**
+ * API errors carry a stable error CODE (e.g. 'INVALID_CREDENTIALS'), not a
+ * human-readable message. UI code translates codes via useErrorMessage().
+ */
 export class ApiError extends Error {
-    constructor(public readonly status: number, message: string) {
-        super(message);
+    readonly status: number;
+    readonly code: string;
+
+    constructor(status: number, code: string) {
+        super(code);
         this.name = 'ApiError';
+        this.status = status;
+        this.code = code;
     }
 }
 
@@ -34,7 +43,12 @@ function handleUnauthorized(): never {
     clearAuth();
     // Dispatch event so AuthContext can clear user state and let RequireAuth navigate to /login
     window.dispatchEvent(new Event('auth:unauthorized'));
-    throw new ApiError(401, 'Session expired');
+    throw new ApiError(401, 'SESSION_EXPIRED');
+}
+
+async function errorCodeFrom(response: Response): Promise<string> {
+    const data = await response.json().catch(() => ({}));
+    return (data as { error?: string }).error || 'UNKNOWN';
 }
 
 async function fetchAPI<T>(endpoint: string): Promise<T> {
@@ -42,7 +56,7 @@ async function fetchAPI<T>(endpoint: string): Promise<T> {
         headers: authHeaders(),
     });
     if (response.status === 401) handleUnauthorized();
-    if (!response.ok) throw new ApiError(response.status, `API Error: ${response.statusText}`);
+    if (!response.ok) throw new ApiError(response.status, await errorCodeFrom(response));
     return response.json();
 }
 
@@ -53,49 +67,51 @@ async function mutateAPI<T>(method: string, endpoint: string, body?: unknown): P
         body: body !== undefined ? JSON.stringify(body) : undefined,
     });
     if (response.status === 401) handleUnauthorized();
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new ApiError(response.status, (errorData as { error?: string }).error || `API Error: ${response.statusText}`);
-    }
+    if (!response.ok) throw new ApiError(response.status, await errorCodeFrom(response));
     if (response.status === 204) return undefined as T;
     return response.json();
 }
 
 // ===== AUTH API =====
 
-async function parseAuthResponse(response: Response, fallbackError: string): Promise<Record<string, unknown>> {
+async function parseAuthResponse(response: Response): Promise<Record<string, unknown>> {
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new ApiError(response.status, (data as { error?: string }).error || fallbackError);
+    if (!response.ok) throw new ApiError(response.status, (data as { error?: string }).error || 'UNKNOWN');
     return data as Record<string, unknown>;
 }
 
-export async function loginUser(email: string, password: string): Promise<AuthResponse> {
+export async function loginUser(email: string, password: string, language?: string): Promise<AuthResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, language }),
     });
-    return parseAuthResponse(response, 'Login failed') as Promise<AuthResponse>;
+    return parseAuthResponse(response) as Promise<AuthResponse>;
 }
 
-export async function registerSchool(schoolName: string, email: string, password: string): Promise<AuthResponse> {
+export async function registerSchool(schoolName: string, email: string, password: string, language?: string): Promise<AuthResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ schoolName, email, password }),
+        body: JSON.stringify({ schoolName, email, password, language }),
     });
-    return parseAuthResponse(response, 'Registration failed') as Promise<AuthResponse>;
+    return parseAuthResponse(response) as Promise<AuthResponse>;
+}
+
+/** Persists the user's UI language so server-sent emails use it. */
+export async function updatePreferredLanguage(language: string): Promise<void> {
+    await mutateAPI<{ language: string }>('PATCH', '/auth/language', { language });
 }
 
 // ===== PASSWORD RESET API =====
 
-export async function forgotPassword(email: string): Promise<{ message: string }> {
+export async function forgotPassword(email: string, language?: string): Promise<{ message: string }> {
     const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, language }),
     });
-    return parseAuthResponse(response, 'Request failed') as Promise<{ message: string }>;
+    return parseAuthResponse(response) as Promise<{ message: string }>;
 }
 
 export async function resetPassword(token: string, password: string): Promise<{ message: string }> {
@@ -104,7 +120,7 @@ export async function resetPassword(token: string, password: string): Promise<{ 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, password }),
     });
-    return parseAuthResponse(response, 'Request failed') as Promise<{ message: string }>;
+    return parseAuthResponse(response) as Promise<{ message: string }>;
 }
 
 // ===== DASHBOARD API =====
@@ -250,18 +266,4 @@ export async function getComplianceDocumentById(id: string): Promise<ComplianceD
     }
 }
 
-// ===== UTILITY =====
-
-export function calculateTenure(startDate: string): string {
-    const start = new Date(startDate);
-    const now   = new Date();
-    let totalMonths = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
-    if (now.getDate() < start.getDate()) totalMonths--;
-
-    const y = Math.floor(totalMonths / 12);
-    const m = totalMonths % 12;
-
-    if (y === 0) return `${m} ${m === 1 ? 'mo' : 'mos'}`;
-    if (m === 0) return `${y} ${y === 1 ? 'yr' : 'yrs'}`;
-    return `${y} ${y === 1 ? 'yr' : 'yrs'}, ${m} ${m === 1 ? 'mo' : 'mos'}`;
-}
+// Tenure formatting moved to src/i18n/format.ts (formatTenure) so it is localized.

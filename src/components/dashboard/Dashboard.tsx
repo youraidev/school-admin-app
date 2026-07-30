@@ -1,13 +1,24 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Users, UserCog, FileText, FileCheck, AlertCircle, FileWarning, ArrowRight, ShieldAlert, ClipboardList } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../ui/card';
 import { StatusBadge } from '../ui/status-badge';
 import * as api from '../../lib/api';
+import { getErrorCode, useErrorMessage } from '../../i18n/errors';
 import { Link } from 'react-router-dom';
 import type { DashboardStats, CriticalAllergy, ContractIssue, PendingSignature } from '../../../shared/types';
 
 export default function Dashboard() {
+    const { t } = useTranslation('dashboard');
+    const { t: tc } = useTranslation('common');
+    const errorMessage = useErrorMessage();
     const [stats, setStats] = React.useState<DashboardStats | null>(null);
+    const issueLabels: Record<string, string> = {
+        unpaid: t('contracts.issueLabels.unpaid'),
+        pending: t('contracts.issueLabels.pending'),
+        expired: t('contracts.issueLabels.expired'),
+        other: t('contracts.issueLabels.other'),
+    };
     const [criticalAllergies, setCriticalAllergies] = React.useState<CriticalAllergy[]>([]);
     const [contractIssues, setContractIssues] = React.useState<ContractIssue[]>([]);
     const [pendingSignatures, setPendingSignatures] = React.useState<PendingSignature[]>([]);
@@ -29,7 +40,7 @@ export default function Dashboard() {
                 setContractIssues(issuesData);
                 setPendingSignatures(signaturesData);
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
+                setError(getErrorCode(err));
             } finally {
                 setLoading(false);
             }
@@ -41,8 +52,8 @@ export default function Dashboard() {
         return (
             <div className="space-y-8 animate-fade-in">
                 <div>
-                    <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-                    <p className="text-muted-foreground mt-1">Loading...</p>
+                    <h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
+                    <p className="text-muted-foreground mt-1">{tc('states.loading')}</p>
                 </div>
             </div>
         );
@@ -52,8 +63,8 @@ export default function Dashboard() {
         return (
             <div className="space-y-8 animate-fade-in">
                 <div>
-                    <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-                    <p className="text-destructive mt-1">{error || 'Failed to load data'}</p>
+                    <h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
+                    <p className="text-destructive mt-1">{errorMessage(error ?? 'UNKNOWN')}</p>
                 </div>
             </div>
         );
@@ -63,8 +74,8 @@ export default function Dashboard() {
         <div className="space-y-6 animate-fade-in">
             {/* Page Header */}
             <div>
-                <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-                <p className="text-muted-foreground mt-1">Overview of school administration</p>
+                <h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
+                <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
             </div>
 
             {/* Stats Grid */}
@@ -74,9 +85,9 @@ export default function Dashboard() {
                     <CardContent className="p-0">
                         <div className="flex items-start justify-between px-5 pt-5 pb-4">
                             <div className="space-y-1">
-                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Students</p>
+                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('stats.totalStudents')}</p>
                                 <p className="text-4xl font-semibold tracking-tight">{stats.totalStudents}</p>
-                                <p className="text-xs text-muted-foreground">Enrolled students</p>
+                                <p className="text-xs text-muted-foreground">{t('stats.enrolledStudents')}</p>
                             </div>
                             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                                 <Users className="w-5 h-5 text-primary" />
@@ -91,9 +102,9 @@ export default function Dashboard() {
                     <CardContent className="p-0">
                         <div className="flex items-start justify-between px-5 pt-5 pb-4">
                             <div className="space-y-1">
-                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Staff</p>
+                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('stats.totalStaff')}</p>
                                 <p className="text-4xl font-semibold tracking-tight">{stats.totalStaff}</p>
-                                <p className="text-xs text-muted-foreground">Teachers &amp; admin</p>
+                                <p className="text-xs text-muted-foreground">{t('stats.teachersAndAdmin')}</p>
                             </div>
                             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                                 <UserCog className="w-5 h-5 text-primary" />
@@ -108,9 +119,9 @@ export default function Dashboard() {
                     <CardContent className="p-0">
                         <div className="flex items-start justify-between px-5 pt-5 pb-4">
                             <div className="space-y-1">
-                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Pending Contracts</p>
+                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('stats.pendingContracts')}</p>
                                 <p className="text-4xl font-semibold tracking-tight">{stats.pendingContracts}</p>
-                                <p className="text-xs text-muted-foreground">Requires attention</p>
+                                <p className="text-xs text-muted-foreground">{t('stats.requiresAttention')}</p>
                             </div>
                             <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center flex-shrink-0">
                                 <FileText className="w-5 h-5 text-amber-500" />
@@ -125,9 +136,9 @@ export default function Dashboard() {
                     <CardContent className="p-0">
                         <div className="flex items-start justify-between px-5 pt-5 pb-4">
                             <div className="space-y-1">
-                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Pending Signatures</p>
+                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('stats.pendingSignatures')}</p>
                                 <p className="text-4xl font-semibold tracking-tight">{stats.pendingSignatures}</p>
-                                <p className="text-xs text-muted-foreground">Compliance documents</p>
+                                <p className="text-xs text-muted-foreground">{t('stats.complianceDocuments')}</p>
                             </div>
                             <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/30 flex items-center justify-center flex-shrink-0">
                                 <FileCheck className="w-5 h-5 text-sky-500" />
@@ -149,14 +160,14 @@ export default function Dashboard() {
                                 <ShieldAlert className="w-4 h-4 text-red-500" />
                             </div>
                             <div>
-                                <p className="text-sm font-semibold leading-tight">Critical Allergy Alerts</p>
-                                <p className="text-xs text-muted-foreground">{criticalAllergies.length} student{criticalAllergies.length !== 1 ? 's' : ''} affected</p>
+                                <p className="text-sm font-semibold leading-tight">{t('allergies.title')}</p>
+                                <p className="text-xs text-muted-foreground">{t('allergies.affected', { count: criticalAllergies.length })}</p>
                             </div>
                         </div>
                     </CardHeader>
                     <CardContent className="p-0">
                         {criticalAllergies.length === 0 ? (
-                            <p className="px-5 py-6 text-sm text-muted-foreground">No critical allergies on record</p>
+                            <p className="px-5 py-6 text-sm text-muted-foreground">{t('allergies.empty')}</p>
                         ) : (
                             <>
                                 <div className="divide-y divide-border/50">
@@ -185,7 +196,7 @@ export default function Dashboard() {
                                 </div>
                                 <div className="px-5 py-3 border-t border-border/60">
                                     <Link to="/students" className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
-                                        View all students <ArrowRight className="w-3 h-3" />
+                                        {t('allergies.viewAll')} <ArrowRight className="w-3 h-3" />
                                     </Link>
                                 </div>
                             </>
@@ -201,14 +212,14 @@ export default function Dashboard() {
                                 <FileWarning className="w-4 h-4 text-amber-500" />
                             </div>
                             <div>
-                                <p className="text-sm font-semibold leading-tight">Contract Issues</p>
-                                <p className="text-xs text-muted-foreground">{contractIssues.length} issue{contractIssues.length !== 1 ? 's' : ''} found</p>
+                                <p className="text-sm font-semibold leading-tight">{t('contracts.title')}</p>
+                                <p className="text-xs text-muted-foreground">{t('contracts.found', { count: contractIssues.length })}</p>
                             </div>
                         </div>
                     </CardHeader>
                     <CardContent className="p-0">
                         {contractIssues.length === 0 ? (
-                            <p className="px-5 py-6 text-sm text-muted-foreground">No contract issues</p>
+                            <p className="px-5 py-6 text-sm text-muted-foreground">{t('contracts.empty')}</p>
                         ) : (
                             <>
                                 <div className="divide-y divide-border/50">
@@ -227,7 +238,7 @@ export default function Dashboard() {
                                                 <div className="min-w-0">
                                                     <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">{issue.studentName}</p>
                                                     <div className="mt-0.5">
-                                                        <StatusBadge variant={issue.status}>{issue.issue}</StatusBadge>
+                                                        <StatusBadge variant={issue.status}>{issueLabels[issue.issue] ?? issue.issue}</StatusBadge>
                                                     </div>
                                                 </div>
                                             </div>
@@ -237,7 +248,7 @@ export default function Dashboard() {
                                 </div>
                                 <div className="px-5 py-3 border-t border-border/60">
                                     <Link to="/students" className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
-                                        View all contracts <ArrowRight className="w-3 h-3" />
+                                        {t('contracts.viewAll')} <ArrowRight className="w-3 h-3" />
                                     </Link>
                                 </div>
                             </>
@@ -253,14 +264,14 @@ export default function Dashboard() {
                                 <ClipboardList className="w-4 h-4 text-sky-500" />
                             </div>
                             <div>
-                                <p className="text-sm font-semibold leading-tight">Awaiting Signatures</p>
-                                <p className="text-xs text-muted-foreground">{pendingSignatures.length} document{pendingSignatures.length !== 1 ? 's' : ''} pending</p>
+                                <p className="text-sm font-semibold leading-tight">{t('signatures.title')}</p>
+                                <p className="text-xs text-muted-foreground">{t('signatures.pendingDocs', { count: pendingSignatures.length })}</p>
                             </div>
                         </div>
                     </CardHeader>
                     <CardContent className="p-0">
                         {pendingSignatures.length === 0 ? (
-                            <p className="px-5 py-6 text-sm text-muted-foreground">All documents signed</p>
+                            <p className="px-5 py-6 text-sm text-muted-foreground">{t('signatures.empty')}</p>
                         ) : (
                             <>
                                 <div className="divide-y divide-border/50">
@@ -277,7 +288,7 @@ export default function Dashboard() {
                                                 <div className="min-w-0">
                                                     <p className="text-sm font-medium truncate group-hover:text-primary transition-colors line-clamp-1">{doc.documentTitle}</p>
                                                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 text-[11px] font-semibold mt-0.5">
-                                                        {doc.pendingCount} pending
+                                                        {t('signatures.pendingChip', { count: doc.pendingCount })}
                                                     </span>
                                                 </div>
                                             </div>
@@ -287,7 +298,7 @@ export default function Dashboard() {
                                 </div>
                                 <div className="px-5 py-3 border-t border-border/60">
                                     <Link to="/compliance" className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
-                                        View all documents <ArrowRight className="w-3 h-3" />
+                                        {t('signatures.viewAll')} <ArrowRight className="w-3 h-3" />
                                     </Link>
                                 </div>
                             </>

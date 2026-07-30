@@ -12,7 +12,7 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
     try {
         const document = await queries.getComplianceDocumentById(req.user!.schoolId, req.params.id as string);
-        if (!document) return res.status(404).json({ error: 'Compliance document not found' });
+        if (!document) return res.status(404).json({ error: 'COMPLIANCE_DOC_NOT_FOUND' });
         res.json(document);
     } catch (error) { next(error); }
 });

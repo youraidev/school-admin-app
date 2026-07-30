@@ -1,0 +1,76 @@
+{
+    "title": "Students",
+    "subtitle": "Manage student profiles and records",
+    "addStudent": "Add Student",
+    "stats": {
+        "total": "Total students",
+        "missingDocs": "Missing docs",
+        "specialNeeds": "Special needs",
+        "withAllergies": "With allergies",
+        "classes": "Classes",
+        "newEnrollments": "New enrollments",
+        "perClass": "Students per class"
+    },
+    "searchPlaceholder": "Search by name...",
+    "allClasses": "All classes",
+    "badges": {
+        "medical": "Medical",
+        "specialNeeds": "Special needs"
+    },
+    "cardStatus": {
+        "problem": "Requires attention",
+        "missing": "Missing documents",
+        "ok": "All well"
+    },
+    "empty": "No students found matching your search.",
+    "detail": {
+        "back": "Back to Students",
+        "notFound": "Student not found",
+        "grade": "Grade:",
+        "born": "Born:",
+        "tamoId": "Tamo ID:"
+    },
+    "tabs": {
+        "medical": "Medical & Health",
+        "documents": "Documents",
+        "agreements": "Agreements",
+        "pickup": "Authorized Pickup"
+    },
+    "allergies": {
+        "title": "Allergies",
+        "none": "No known allergies",
+        "recorded_one": "{{count}} recorded",
+        "recorded_other": "{{count}} recorded",
+        "noneOnRecord": "No known allergies on record"
+    },
+    "health": {
+        "title": "Health Status",
+        "overview": "General health overview",
+        "overall": "Overall Health",
+        "medicalSupport": "Medical Support",
+        "specialEducationNeeds": "Special Education Needs"
+    },
+    "contacts": {
+        "title": "Emergency Contacts",
+        "onFile_one": "{{count}} contact on file",
+        "onFile_other": "{{count}} contacts on file"
+    },
+    "documents": {
+        "title": "Document Checklist",
+        "progress": "{{completed}} of {{total}} complete",
+        "allComplete": "All complete",
+        "pendingItems": "Pending items",
+        "submitted": "Submitted"
+    },
+    "agreements": {
+        "title": "Agreements & Consents",
+        "signed": "Signed: {{date}}"
+    },
+    "pickup": {
+        "title": "Authorized Pickup Persons",
+        "importantNote": "Important Note",
+        "addNote": "+ Add important note",
+        "editNote": "Edit note",
+        "notePlaceholder": "e.g. Authorized to pick up on Fridays only. Must show valid ID."
+    }
+}

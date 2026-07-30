@@ -313,11 +313,14 @@ export interface School {
     createdAt: string;
 }
 
+export type PreferredLanguage = 'en' | 'lt';
+
 export interface User {
     id: string;
     schoolId: string;
     email: string;
     role: UserRole;
+    preferredLanguage: PreferredLanguage;
     createdAt: string;
 }
 

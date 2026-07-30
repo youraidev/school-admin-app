@@ -1,13 +1,18 @@
 import * as React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Search, UserPlus, Filter, Building2, Pencil, GraduationCap } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import * as api from '../../lib/api';
+import { getErrorCode, useErrorMessage } from '../../i18n/errors';
 import type { Staff } from '../../../shared/types';
 
 export default function StaffList() {
+    const { t } = useTranslation('staff');
+    const { t: tc } = useTranslation('common');
+    const errorMessage = useErrorMessage();
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = React.useState('');
     const [staffMembers, setStaffMembers] = React.useState<Staff[]>([]);
@@ -31,7 +36,7 @@ export default function StaffList() {
             });
             setDepartments(deptMap);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to load data');
+            setError(getErrorCode(err));
         } finally {
             setLoading(false);
         }
@@ -62,13 +67,13 @@ export default function StaffList() {
     const getSeniorityBadge = (rank: string) => {
         const rankLower = rank.toLowerCase();
         if (rankLower.includes('expert') || rankLower.includes('principal') || rankLower.includes('director')) {
-            return { label: 'Expert', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20' };
+            return { label: tc('seniority.expert'), color: 'bg-blue-500/10 text-blue-600 border-blue-500/20' };
         } else if (rankLower.includes('senior')) {
-            return { label: 'Senior Teacher', color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20' };
+            return { label: tc('seniority.senior'), color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20' };
         } else if (rankLower.includes('specialist')) {
-            return { label: 'Specialist', color: 'bg-teal-500/10 text-teal-600 border-teal-500/20' };
+            return { label: tc('seniority.specialist'), color: 'bg-teal-500/10 text-teal-600 border-teal-500/20' };
         } else {
-            return { label: 'Teacher', color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20' };
+            return { label: tc('seniority.teacher'), color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20' };
         }
     };
 
@@ -78,8 +83,8 @@ export default function StaffList() {
         return (
             <div className="space-y-6 animate-fade-in">
                 <div>
-                    <h1 className="text-3xl font-semibold tracking-tight">Staff</h1>
-                    <p className="text-muted-foreground mt-1">Loading...</p>
+                    <h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
+                    <p className="text-muted-foreground mt-1">{tc('states.loading')}</p>
                 </div>
             </div>
         );
@@ -89,8 +94,8 @@ export default function StaffList() {
         return (
             <div className="space-y-6 animate-fade-in">
                 <div>
-                    <h1 className="text-3xl font-semibold tracking-tight">Staff</h1>
-                    <p className="text-destructive mt-1">{error}</p>
+                    <h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
+                    <p className="text-destructive mt-1">{errorMessage(error)}</p>
                 </div>
             </div>
         );
@@ -101,12 +106,12 @@ export default function StaffList() {
             {/* Page Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-semibold tracking-tight">Staff</h1>
-                    <p className="text-muted-foreground mt-1">Manage teacher and staff profiles</p>
+                    <h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
+                    <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
                 </div>
                 <Button onClick={() => navigate('/staff/new')}>
                     <UserPlus className="w-4 h-4 mr-2" />
-                    Add Staff
+                    {t('addStaff')}
                 </Button>
             </div>
 
@@ -115,7 +120,7 @@ export default function StaffList() {
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                        placeholder="Search by name, role, or department..."
+                        placeholder={t('searchPlaceholder')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-9"
@@ -123,7 +128,7 @@ export default function StaffList() {
                 </div>
                 <Button variant="outline">
                     <Filter className="w-4 h-4 mr-2" />
-                    Filters
+                    {tc('actions.filters')}
                 </Button>
             </div>
 
@@ -189,7 +194,7 @@ export default function StaffList() {
                                             className="absolute top-6 right-6 p-1.5 text-muted-foreground hover:text-primary transition-colors rounded-md hover:bg-muted opacity-0 group-hover:opacity-100 focus:opacity-100"
                                         >
                                             <Pencil className="w-4 h-4" />
-                                            <span className="sr-only">Edit</span>
+                                            <span className="sr-only">{tc('actions.edit')}</span>
                                         </button>
                                     </li>
                                 );
@@ -201,7 +206,7 @@ export default function StaffList() {
                 {filteredStaff.length === 0 && (
                     <Card className="card-elevated">
                         <CardContent className="p-12 text-center">
-                            <p className="text-muted-foreground">No staff members found</p>
+                            <p className="text-muted-foreground">{t('empty')}</p>
                         </CardContent>
                     </Card>
                 )}
