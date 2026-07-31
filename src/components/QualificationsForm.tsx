@@ -89,12 +89,12 @@ export function QualificationsForm({ qualifications, onChange, suggestions }: Qu
                     const isExpanded = expandedIndices.includes(index);
                     const isYearValid = validateYear(qual.year);
 
-                    // Generate summary
-                    const summary = [
-                        qual.degreeType ? labels.degree(qual.degreeType) : t('qualifications.summaryDegree'),
-                        qual.fieldOfStudy || t('qualifications.summaryField'),
-                        qual.year || t('qualifications.summaryYear')
-                    ].join(' — ');
+                    // Generate summary — the locale controls order and separators
+                    const summary = t('qualifications.summary', {
+                        degree: qual.degreeType ? labels.degree(qual.degreeType) : t('qualifications.summaryDegree'),
+                        field: qual.fieldOfStudy || t('qualifications.summaryField'),
+                        year: qual.year || t('qualifications.summaryYear'),
+                    });
 
                     return (
                         <div key={index} className="bg-white rounded-xl border border-slate-200 border-l-4 border-l-teal-400 shadow-sm overflow-hidden">

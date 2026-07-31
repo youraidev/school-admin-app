@@ -34,6 +34,7 @@
         "yearInvalid": "Metai turi būti tarp 1950 ir 2100.",
         "addQualification": "Pridėti kvalifikaciją",
         "emptyHint": "Kvalifikacijų dar nepridėta. Spauskite mygtuką viršuje.",
+        "summary": "{{degree}} — {{field}} — {{year}}",
         "summaryDegree": "Laipsnis",
         "summaryField": "Kryptis",
         "summaryYear": "Metai"

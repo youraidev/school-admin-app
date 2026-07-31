@@ -2,8 +2,8 @@
     "title": "Departments",
     "subtitle": "Manage school departments and their descriptions",
     "addDepartment": "Add Department",
-    "staffCount_one": "{{count}} Staff",
-    "staffCount_other": "{{count}} Staff",
+    "staffCount_one": "{{count}} Staff member",
+    "staffCount_other": "{{count}} Staff members",
     "empty": "No departments found. Create one to get started.",
     "deleteDialog": {
         "title": "Are you sure?",

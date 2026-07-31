@@ -34,6 +34,7 @@
         "yearInvalid": "Year must be between 1950 and 2100.",
         "addQualification": "Add Qualification",
         "emptyHint": "No qualifications added yet. Click above to add one.",
+        "summary": "{{degree}} — {{field}} — {{year}}",
         "summaryDegree": "Degree",
         "summaryField": "Field",
         "summaryYear": "Year"
