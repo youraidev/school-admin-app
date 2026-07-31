@@ -64,7 +64,11 @@
     },
     "agreements": {
         "title": "Agreements & Consents",
-        "signed": "Signed: {{date}}"
+        "signed": "Signed: {{date}}",
+        "status": {
+            "galioja": "Valid",
+            "nepasirašyta": "Unsigned"
+        }
     },
     "pickup": {
         "title": "Authorized Pickup Persons",

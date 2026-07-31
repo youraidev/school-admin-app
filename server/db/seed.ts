@@ -177,11 +177,22 @@ async function seed() {
     // Agreements
     await db.execute(sql`
         INSERT INTO agreements (id, school_id, student_id, type, name, status, signed_date) VALUES
-        ('c0000000-0000-0000-0000-000000000001', ${IDS.school}, ${IDS.p1}, 'photography', 'Photography Consent',   'internal-only', '2024-09-01'),
-        ('c0000000-0000-0000-0000-000000000002', ${IDS.school}, ${IDS.p1}, 'travel',      'Field Trip Authorization','allowed',      '2024-09-01'),
-        ('c0000000-0000-0000-0000-000000000003', ${IDS.school}, ${IDS.p2}, 'photography', 'Photography Consent',   'allowed',       '2024-09-01'),
-        ('c0000000-0000-0000-0000-000000000004', ${IDS.school}, ${IDS.p3}, 'travel',      'Field Trip Authorization','forbidden',    null),
-        ('c0000000-0000-0000-0000-000000000005', ${IDS.school}, ${IDS.p4}, 'photography', 'Photography Consent',   'allowed',       '2024-09-01')
+        ('c0000000-0000-0000-0000-000000000001', ${IDS.school}, ${IDS.p1}, 'photography',    'Sutikimas dėl fotografavimo',                           'galioja',     '2024-09-01'),
+        ('c0000000-0000-0000-0000-000000000002', ${IDS.school}, ${IDS.p1}, 'travel',         'Sutikimas dėl vaiko išvykų / ekskursijų',               'galioja',     '2024-09-01'),
+        ('c0000000-0000-0000-0000-000000000003', ${IDS.school}, ${IDS.p1}, 'pediculosis',    'Sutikimas dėl pedikuliozės patikros',                   'nepasirašyta', null),
+        ('c0000000-0000-0000-0000-000000000004', ${IDS.school}, ${IDS.p1}, 'self_departure', 'Sutikimas dėl vaiko savarankiško išėjimo iš mokyklos',  'nepasirašyta', null),
+        ('c0000000-0000-0000-0000-000000000005', ${IDS.school}, ${IDS.p2}, 'photography',    'Sutikimas dėl fotografavimo',                           'galioja',     '2024-09-01'),
+        ('c0000000-0000-0000-0000-000000000006', ${IDS.school}, ${IDS.p2}, 'travel',         'Sutikimas dėl vaiko išvykų / ekskursijų',               'galioja',     '2024-09-01'),
+        ('c0000000-0000-0000-0000-000000000007', ${IDS.school}, ${IDS.p2}, 'pediculosis',    'Sutikimas dėl pedikuliozės patikros',                   'galioja',     '2024-09-01'),
+        ('c0000000-0000-0000-0000-000000000008', ${IDS.school}, ${IDS.p2}, 'self_departure', 'Sutikimas dėl vaiko savarankiško išėjimo iš mokyklos',  'nepasirašyta', null),
+        ('c0000000-0000-0000-0000-000000000009', ${IDS.school}, ${IDS.p3}, 'photography',    'Sutikimas dėl fotografavimo',                           'nepasirašyta', null),
+        ('c0000000-0000-0000-0000-000000000010', ${IDS.school}, ${IDS.p3}, 'travel',         'Sutikimas dėl vaiko išvykų / ekskursijų',               'nepasirašyta', null),
+        ('c0000000-0000-0000-0000-000000000011', ${IDS.school}, ${IDS.p3}, 'pediculosis',    'Sutikimas dėl pedikuliozės patikros',                   'nepasirašyta', null),
+        ('c0000000-0000-0000-0000-000000000012', ${IDS.school}, ${IDS.p3}, 'self_departure', 'Sutikimas dėl vaiko savarankiško išėjimo iš mokyklos',  'nepasirašyta', null),
+        ('c0000000-0000-0000-0000-000000000013', ${IDS.school}, ${IDS.p4}, 'photography',    'Sutikimas dėl fotografavimo',                           'galioja',     '2024-09-01'),
+        ('c0000000-0000-0000-0000-000000000014', ${IDS.school}, ${IDS.p4}, 'travel',         'Sutikimas dėl vaiko išvykų / ekskursijų',               'galioja',     '2024-09-01'),
+        ('c0000000-0000-0000-0000-000000000015', ${IDS.school}, ${IDS.p4}, 'pediculosis',    'Sutikimas dėl pedikuliozės patikros',                   'galioja',     '2024-09-01'),
+        ('c0000000-0000-0000-0000-000000000016', ${IDS.school}, ${IDS.p4}, 'self_departure', 'Sutikimas dėl vaiko savarankiško išėjimo iš mokyklos',  'galioja',     '2024-09-01')
         ON CONFLICT (id) DO NOTHING
     `);
 

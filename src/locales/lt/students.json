@@ -68,7 +68,11 @@
     },
     "agreements": {
         "title": "Sutikimai ir sutartys",
-        "signed": "Pasirašyta: {{date}}"
+        "signed": "Pasirašyta: {{date}}",
+        "status": {
+            "galioja": "Galioja",
+            "nepasirašyta": "Nepasirašyta"
+        }
     },
     "pickup": {
         "title": "Įgalioti pasiimti asmenys",
