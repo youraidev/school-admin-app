@@ -169,12 +169,12 @@ export default function StaffList() {
                                                         `${member.firstName[0]}${member.lastName[0]}`.toUpperCase()
                                                     )}
                                                 </div>
-                                                <div className="flex-1 truncate">
-                                                    <div className="flex items-center space-x-3 mb-1">
-                                                        <h3 className="truncate text-sm font-semibold text-foreground">
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                        <h3 className="text-sm font-semibold text-foreground truncate">
                                                             {member.firstName} {member.lastName}
                                                         </h3>
-                                                        <span className={`inline-flex flex-shrink-0 items-center rounded-full border px-1.5 py-0.5 text-[0.625rem] font-medium leading-[14px] ${seniority.color}`}>
+                                                        <span className={`inline-flex shrink-0 items-center rounded-full border px-1.5 py-0.5 text-[0.625rem] font-medium leading-[14px] whitespace-nowrap ${seniority.color}`}>
                                                             <GraduationCap className="w-3 h-3 mr-1" />
                                                             {seniority.label}
                                                         </span>
