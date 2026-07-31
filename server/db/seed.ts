@@ -162,16 +162,16 @@ async function seed() {
     // Document checklist
     await db.execute(sql`
         INSERT INTO document_checklist (id, school_id, student_id, name, is_complete, due_date) VALUES
-        ('b0000000-0000-0000-0000-000000000001', ${IDS.school}, ${IDS.p1}, 'Health Certificate',    true,  '2024-09-15'),
-        ('b0000000-0000-0000-0000-000000000002', ${IDS.school}, ${IDS.p1}, 'Vaccination Record',    true,  '2024-09-15'),
-        ('b0000000-0000-0000-0000-000000000003', ${IDS.school}, ${IDS.p1}, 'Emergency Contact Form',false, '2024-09-30'),
-        ('b0000000-0000-0000-0000-000000000004', ${IDS.school}, ${IDS.p2}, 'Health Certificate',    true,  '2024-09-15'),
-        ('b0000000-0000-0000-0000-000000000005', ${IDS.school}, ${IDS.p2}, 'Vaccination Record',    true,  '2024-09-15'),
-        ('b0000000-0000-0000-0000-000000000006', ${IDS.school}, ${IDS.p3}, 'Health Certificate',    true,  '2024-09-15'),
-        ('b0000000-0000-0000-0000-000000000007', ${IDS.school}, ${IDS.p3}, 'Vaccination Record',    false, '2024-09-30'),
-        ('b0000000-0000-0000-0000-000000000008', ${IDS.school}, ${IDS.p4}, 'Health Certificate',    true,  '2024-09-15'),
-        ('b0000000-0000-0000-0000-000000000009', ${IDS.school}, ${IDS.p4}, 'Vaccination Record',    true,  '2024-09-15')
-        ON CONFLICT (id) DO NOTHING
+        ('b0000000-0000-0000-0000-000000000001', ${IDS.school}, ${IDS.p1}, 'Ugdymo sutartis',                                           true,  '2024-09-15'),
+        ('b0000000-0000-0000-0000-000000000002', ${IDS.school}, ${IDS.p1}, 'Priedas prie ugdymo sutarties (dėl kainos pasikeitimo)',    true,  '2024-09-15'),
+        ('b0000000-0000-0000-0000-000000000003', ${IDS.school}, ${IDS.p1}, 'Skubaus kontakto forma',                                    false, '2024-09-30'),
+        ('b0000000-0000-0000-0000-000000000004', ${IDS.school}, ${IDS.p2}, 'Ugdymo sutartis',                                           true,  '2024-09-15'),
+        ('b0000000-0000-0000-0000-000000000005', ${IDS.school}, ${IDS.p2}, 'Priedas prie ugdymo sutarties (dėl kainos pasikeitimo)',    true,  '2024-09-15'),
+        ('b0000000-0000-0000-0000-000000000006', ${IDS.school}, ${IDS.p3}, 'Ugdymo sutartis',                                           true,  '2024-09-15'),
+        ('b0000000-0000-0000-0000-000000000007', ${IDS.school}, ${IDS.p3}, 'Priedas prie ugdymo sutarties (dėl kainos pasikeitimo)',    false, '2024-09-30'),
+        ('b0000000-0000-0000-0000-000000000008', ${IDS.school}, ${IDS.p4}, 'Ugdymo sutartis',                                           true,  '2024-09-15'),
+        ('b0000000-0000-0000-0000-000000000009', ${IDS.school}, ${IDS.p4}, 'Priedas prie ugdymo sutarties (dėl kainos pasikeitimo)',    true,  '2024-09-15')
+        ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, is_complete = EXCLUDED.is_complete, due_date = EXCLUDED.due_date
     `);
 
     // Agreements
@@ -193,7 +193,7 @@ async function seed() {
         ('c0000000-0000-0000-0000-000000000014', ${IDS.school}, ${IDS.p4}, 'travel',         'Sutikimas dėl vaiko išvykų / ekskursijų',               'galioja',     '2024-09-01'),
         ('c0000000-0000-0000-0000-000000000015', ${IDS.school}, ${IDS.p4}, 'pediculosis',    'Sutikimas dėl pedikuliozės patikros',                   'galioja',     '2024-09-01'),
         ('c0000000-0000-0000-0000-000000000016', ${IDS.school}, ${IDS.p4}, 'self_departure', 'Sutikimas dėl vaiko savarankiško išėjimo iš mokyklos',  'galioja',     '2024-09-01')
-        ON CONFLICT (id) DO NOTHING
+        ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, status = EXCLUDED.status, signed_date = EXCLUDED.signed_date
     `);
 
     // Authorized pickup
