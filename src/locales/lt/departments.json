@@ -1,0 +1,36 @@
+{
+    "title": "Skyriai",
+    "subtitle": "Tvarkykite mokyklos skyrius ir jų aprašymus",
+    "addDepartment": "Pridėti skyrių",
+    "staffCount_one": "{{count}} darbuotojas",
+    "staffCount_few": "{{count}} darbuotojai",
+    "staffCount_many": "{{count}} darbuotojo",
+    "staffCount_other": "{{count}} darbuotojų",
+    "empty": "Skyrių nėra. Sukurkite pirmąjį.",
+    "deleteDialog": {
+        "title": "Ar tikrai?",
+        "description": "Šio veiksmo negalima atšaukti. Skyrius bus ištrintas visam laikui. Negalima ištrinti skyriaus, kuriam priskirta darbuotojų."
+    },
+    "fields": {
+        "name": "Skyriaus pavadinimas *",
+        "namePlaceholder": "pvz., Matematika",
+        "nameHint": "Turi būti unikalus. Iki 100 simbolių.",
+        "description": "Aprašymas",
+        "descriptionPlaceholder": "Neprivalomas skyriaus aprašymas...",
+        "descriptionHint": "Iki 500 simbolių."
+    },
+    "addPage": {
+        "title": "Naujas skyrius",
+        "subtitle": "Sukurkite naują skyrių darbuotojams",
+        "cardTitle": "Skyriaus informacija",
+        "cardDescription": "Užpildykite naujo skyriaus duomenis. Pavadinimas privalomas.",
+        "submit": "Sukurti skyrių",
+        "submitting": "Kuriama..."
+    },
+    "editPage": {
+        "title": "Redaguoti skyrių",
+        "subtitle": "Atnaujinkite skyriaus duomenis",
+        "cardDescription": "Atnaujinkite šio skyriaus duomenis."
+    },
+    "invalidId": "Neteisingas skyriaus ID"
+}

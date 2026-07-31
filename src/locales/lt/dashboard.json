@@ -1,0 +1,56 @@
+{
+    "title": "Valdymo skydas",
+    "subtitle": "Mokyklos administravimo apžvalga",
+    "search": {
+        "placeholder": "Ieškoti mokinių...",
+        "clear": "Išvalyti paiešką",
+        "noResults": "Mokinių nerasta"
+    },
+    "stats": {
+        "totalStudents": "Iš viso mokinių",
+        "enrolledStudents": "Užregistruoti mokiniai",
+        "totalStaff": "Iš viso darbuotojų",
+        "teachersAndAdmin": "Mokytojai ir administracija",
+        "pendingContracts": "Laukiančios sutartys",
+        "requiresAttention": "Reikia dėmesio",
+        "pendingSignatures": "Laukiantys parašai",
+        "complianceDocuments": "Atitikties dokumentai"
+    },
+    "allergies": {
+        "title": "Kritinės alergijos",
+        "affected_one": "Paveiktas {{count}} mokinys",
+        "affected_few": "Paveikti {{count}} mokiniai",
+        "affected_many": "Paveikta {{count}} mokinio",
+        "affected_other": "Paveikta {{count}} mokinių",
+        "empty": "Kritinių alergijų neužfiksuota",
+        "viewAll": "Peržiūrėti visus mokinius"
+    },
+    "contracts": {
+        "title": "Sutarčių problemos",
+        "found_one": "Rasta {{count}} problema",
+        "found_few": "Rastos {{count}} problemos",
+        "found_many": "Rasta {{count}} problemos",
+        "found_other": "Rasta {{count}} problemų",
+        "empty": "Sutarčių problemų nėra",
+        "viewAll": "Peržiūrėti visas sutartis",
+        "issueLabels": {
+            "unpaid": "Neapmokėta sutartis",
+            "pending": "Laukianti sutartis",
+            "expired": "Pasibaigusi sutartis",
+            "other": "Sutarties problema"
+        }
+    },
+    "signatures": {
+        "title": "Laukiama parašų",
+        "pendingDocs_one": "Laukia {{count}} dokumentas",
+        "pendingDocs_few": "Laukia {{count}} dokumentai",
+        "pendingDocs_many": "Laukia {{count}} dokumento",
+        "pendingDocs_other": "Laukia {{count}} dokumentų",
+        "pendingChip_one": "laukia {{count}}",
+        "pendingChip_few": "laukia {{count}}",
+        "pendingChip_many": "laukia {{count}}",
+        "pendingChip_other": "laukia {{count}}",
+        "empty": "Visi dokumentai pasirašyti",
+        "viewAll": "Peržiūrėti visus dokumentus"
+    }
+}

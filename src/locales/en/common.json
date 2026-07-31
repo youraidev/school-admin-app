@@ -1,0 +1,129 @@
+{
+    "appName": "School Admin",
+    "appTagline": "Core",
+    "language": {
+        "label": "Language",
+        "en": "English",
+        "lt": "Lietuvių"
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "students": "Students",
+        "staff": "Staff",
+        "departments": "Departments",
+        "compliance": "Compliance",
+        "notifications": "Notifications",
+        "settings": "Settings"
+    },
+    "actions": {
+        "save": "Save",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "edit": "Edit",
+        "remove": "Remove",
+        "add": "Add",
+        "back": "Back",
+        "filters": "Filters",
+        "clearFields": "Clear Fields"
+    },
+    "states": {
+        "loading": "Loading...",
+        "error": "Error",
+        "comingSoon": "Coming soon",
+        "none": "None",
+        "primary": "Primary",
+        "notLinked": "Not linked"
+    },
+    "status": {
+        "active": "Active",
+        "pending": "Pending",
+        "expired": "Expired",
+        "terminated": "Terminated",
+        "signed": "Signed",
+        "paid": "Paid",
+        "unpaid": "Unpaid"
+    },
+    "severity": {
+        "low": "Low",
+        "medium": "Medium",
+        "life-threatening": "Life-threatening"
+    },
+    "healthStatus": {
+        "good": "Good",
+        "needs_review": "Needs review"
+    },
+    "relations": {
+        "father": "Father",
+        "mother": "Mother",
+        "guardian": "Guardian",
+        "sibling": "Sibling"
+    },
+    "seniority": {
+        "expert": "Expert",
+        "senior": "Senior Teacher",
+        "specialist": "Specialist",
+        "teacher": "Teacher"
+    },
+    "ranks": {
+        "assistant_teacher": "Assistant Teacher",
+        "teacher": "Teacher",
+        "senior_teacher": "Senior Teacher",
+        "lead_teacher": "Lead Teacher",
+        "master_teacher": "Master Teacher",
+        "department_head": "Department Head",
+        "vice_principal": "Vice Principal",
+        "principal": "Principal"
+    },
+    "positions": {
+        "teacher": "Teacher",
+        "pe_teacher": "PE Teacher",
+        "math_teacher": "Math Teacher",
+        "english_teacher": "English Teacher",
+        "science_teacher": "Science Teacher",
+        "history_teacher": "History Teacher",
+        "arts_teacher": "Arts Teacher",
+        "librarian": "Librarian",
+        "counselor": "Counselor",
+        "special_education_teacher": "Special Education Teacher",
+        "admin": "Admin",
+        "principal": "Principal",
+        "other": "Other"
+    },
+    "degrees": {
+        "diploma_education": "Diploma in Education",
+        "bed": "Bachelor of Education (B.Ed)",
+        "bachelors": "Bachelor’s Degree",
+        "pgde": "PGDE / PGCE",
+        "med": "Master of Education (M.Ed)",
+        "masters": "Master’s Degree",
+        "edd": "Doctor of Education (Ed.D)",
+        "phd": "PhD",
+        "teaching_license": "Teaching License",
+        "qts": "QTS",
+        "montessori": "Montessori Certification",
+        "special_education_cert": "Special Education Certification",
+        "tesol": "TESOL / TEFL",
+        "ib": "IB Teacher Certification"
+    },
+    "degreeGroups": {
+        "degrees": "Degrees",
+        "certifications": "Teaching Certifications"
+    },
+    "tenure": {
+        "years_one": "{{count}} yr",
+        "years_other": "{{count}} yrs",
+        "months_one": "{{count}} mo",
+        "months_other": "{{count}} mos"
+    },
+    "notFoundPage": {
+        "message": "Page not found",
+        "returnHome": "Return to Dashboard"
+    },
+    "errorBoundary": {
+        "title": "Something went wrong!",
+        "details": "Error Details"
+    }
+}

@@ -1,0 +1,122 @@
+{
+    "title": "Staff",
+    "subtitle": "Manage teacher and staff profiles",
+    "addStaff": "Add Staff",
+    "searchPlaceholder": "Search by name, role, or department...",
+    "empty": "No staff members found",
+    "profile": {
+        "title": "Staff Profile",
+        "subtitle": "View and manage staff information",
+        "notFound": "Staff member not found",
+        "editProfile": "Edit Profile",
+        "since": "Since {{date}} · {{tenure}}"
+    },
+    "tabs": {
+        "academic": "Academic Profile",
+        "duties": "Duties & Responsibilities",
+        "emergency": "Emergency Contact"
+    },
+    "qualifications": {
+        "title": "Academic Qualifications",
+        "manage": "Manage Qualifications",
+        "manageDescription": "Edit the academic qualifications and certifications for this staff member.",
+        "empty": "No qualifications recorded",
+        "inField": "{{degree}} in {{field}}",
+        "itemTitle": "Qualification {{number}}",
+        "degreeType": "Degree Type / Certification *",
+        "selectType": "Select type",
+        "fieldOfStudy": "Field of Study *",
+        "fieldPlaceholder": "e.g. Mathematics",
+        "institution": "Institution *",
+        "institutionPlaceholder": "e.g. University of Cambridge",
+        "year": "Year",
+        "yearPlaceholder": "e.g. 2020",
+        "yearInvalid": "Year must be between 1950 and 2100.",
+        "addQualification": "Add Qualification",
+        "emptyHint": "No qualifications added yet. Click above to add one.",
+        "summary": "{{degree}} — {{field}} — {{year}}",
+        "summaryDegree": "Degree",
+        "summaryField": "Field",
+        "summaryYear": "Year"
+    },
+    "certificates": {
+        "title": "Certificates",
+        "manage": "Manage Certificates",
+        "manageDescription": "Add, edit, or remove certificates for this staff member.",
+        "empty": "No certificates on record",
+        "emptyHint": "No certificates added yet. Click below to add one.",
+        "itemTitle": "Certificate {{number}}",
+        "name": "Certificate Name *",
+        "namePlaceholder": "e.g. First Aid and CPR",
+        "issuer": "Issuer *",
+        "issuerPlaceholder": "e.g. Red Cross",
+        "dateIssued": "Date Issued *",
+        "fileUrl": "File URL (optional)",
+        "addCertificate": "+ Add Certificate"
+    },
+    "evaluations": {
+        "title": "Course Evaluations",
+        "manage": "Manage Course Evaluations",
+        "manageDescription": "Add, edit, or remove course evaluations for this staff member.",
+        "empty": "No evaluations recorded",
+        "emptyHint": "No evaluations added yet. Click below to add one.",
+        "itemTitle": "Evaluation {{number}}",
+        "courseName": "Course Name *",
+        "coursePlaceholder": "e.g. Physical Education – Grade 6",
+        "rating": "Rating (0–5) *",
+        "date": "Date *",
+        "feedback": "Feedback (optional)",
+        "feedbackPlaceholder": "Brief feedback about the course...",
+        "addEvaluation": "+ Add Evaluation"
+    },
+    "duties": {
+        "title": "Assigned Duties",
+        "empty": "No extra duties assigned"
+    },
+    "emergency": {
+        "title": "Emergency Contacts",
+        "empty": "No emergency contacts on file"
+    },
+    "editDialog": {
+        "title": "Edit Profile",
+        "description": "Update the staff member's profile information.",
+        "personalInfo": "Personal Info",
+        "employment": "Employment"
+    },
+    "fields": {
+        "firstName": "First Name *",
+        "firstNamePlaceholder": "e.g. Kristina",
+        "lastName": "Last Name *",
+        "lastNamePlaceholder": "e.g. Balčiūnienė",
+        "email": "Email *",
+        "emailPlaceholder": "e.g. k.balciuniene@school.lt",
+        "photoUrl": "Photo URL",
+        "photoUrlPlaceholder": "https://...",
+        "role": "Role *",
+        "rolePlaceholder": "e.g. Principal",
+        "department": "Department *",
+        "selectDepartment": "Select department",
+        "position": "Position *",
+        "positionHint": "(Job Role)",
+        "positionTooltip": "What the teacher does (e.g. Math Teacher)",
+        "selectPosition": "Select position",
+        "rank": "Rank",
+        "rankHint": "(Seniority)",
+        "rankTooltip": "Their seniority level (e.g. Senior Teacher)",
+        "selectRank": "Select rank (Optional)",
+        "startDate": "Start Date *"
+    },
+    "addPage": {
+        "title": "Add New Staff Member",
+        "subtitle": "Enter the details of the new staff member",
+        "cardTitle": "Staff Information",
+        "cardDescription": "Fill in all required fields marked with an asterisk (*)",
+        "submit": "Add Staff Member",
+        "submitting": "Adding..."
+    },
+    "editPage": {
+        "title": "Edit Staff Member",
+        "subtitle": "Update details for {{name}}",
+        "cardDescription": "Update the necessary fields. Correct formatting is required."
+    }
+}

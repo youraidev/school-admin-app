@@ -1,4 +1,5 @@
 import React from 'react';
+import i18n from '../i18n';
 
 interface Props {
     children: React.ReactNode;
@@ -27,9 +28,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
         if (this.state.hasError) {
             return (
                 <div style={{ padding: '20px', fontFamily: 'monospace' }}>
-                    <h1 style={{ color: 'red' }}>Something went wrong!</h1>
+                    <h1 style={{ color: 'red' }}>{i18n.t('common:errorBoundary.title')}</h1>
                     <details style={{ whiteSpace: 'pre-wrap' }}>
-                        <summary>Error Details</summary>
+                        <summary>{i18n.t('common:errorBoundary.details')}</summary>
                         <p>{this.state.error?.toString()}</p>
                         <p>{this.state.error?.stack}</p>
                     </details>

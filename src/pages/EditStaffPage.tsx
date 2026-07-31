@@ -13,10 +13,17 @@ import {
     SelectValue,
 } from '../components/ui/select';
 import * as api from '../lib/api';
+import { useTranslation } from 'react-i18next';
+import { getErrorCode, useErrorMessage } from '../i18n/errors';
+import { useLabels } from '../i18n/labels';
 import type { Department, Rank, Position } from '../../shared/types';
 import { RANK_OPTIONS, POSITION_OPTIONS } from '../../shared/types';
 
 export default function EditStaffPage() {
+    const { t } = useTranslation('staff');
+    const { t: tc } = useTranslation('common');
+    const errorMessage = useErrorMessage();
+    const labels = useLabels();
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const [formData, setFormData] = React.useState<{
@@ -71,10 +78,10 @@ export default function EditStaffPage() {
                         startDate: new Date(staffData.startDate).toISOString().split('T')[0],
                     });
                 } else {
-                    setError('Staff member not found');
+                    setError('STAFF_NOT_FOUND');
                 }
             } catch (err) {
-                setError('Failed to load staff details');
+                setError(getErrorCode(err));
             } finally {
                 setIsLoading(false);
             }
@@ -89,7 +96,7 @@ export default function EditStaffPage() {
         setError(null);
 
         if (!formData.position) {
-            setError('Position is required');
+            setError('POSITION_REQUIRED');
             return;
         }
 
@@ -111,7 +118,7 @@ export default function EditStaffPage() {
 
             navigate(`/staff/${id}`);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to update staff member');
+            setError(getErrorCode(err));
         } finally {
             setIsSubmitting(false);
         }
@@ -136,10 +143,10 @@ export default function EditStaffPage() {
                     <Button variant="outline" size="icon" onClick={() => navigate(`/staff/${id}`)}>
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
-                    <h1 className="text-3xl font-semibold tracking-tight">Error</h1>
+                    <h1 className="text-3xl font-semibold tracking-tight">{tc('states.error')}</h1>
                 </div>
                 <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
-                    {error || 'Invalid staff ID'}
+                    {errorMessage(error || 'STAFF_NOT_FOUND')}
                 </div>
             </div>
         );
@@ -157,47 +164,47 @@ export default function EditStaffPage() {
                     <ArrowLeft className="w-4 h-4" />
                 </Button>
                 <div>
-                    <h1 className="text-3xl font-semibold tracking-tight">Edit Staff Member</h1>
-                    <p className="text-muted-foreground mt-1">Update details for {formData.firstName} {formData.lastName}</p>
+                    <h1 className="text-3xl font-semibold tracking-tight">{t('editPage.title')}</h1>
+                    <p className="text-muted-foreground mt-1">{t('editPage.subtitle', { name: `${formData.firstName} ${formData.lastName}` })}</p>
                 </div>
             </div>
 
             {/* Form Card */}
             <Card className="card-elevated max-w-2xl mx-auto">
                 <CardHeader>
-                    <CardTitle>Staff Information</CardTitle>
+                    <CardTitle>{t('addPage.cardTitle')}</CardTitle>
                     <CardDescription>
-                        Update the necessary fields. Correct formatting is required.
+                        {t('editPage.cardDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {error && (
                             <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
-                                {error}
+                                {errorMessage(error)}
                             </div>
                         )}
 
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="firstName">First Name *</Label>
+                                    <Label htmlFor="firstName">{t('fields.firstName')}</Label>
                                     <Input
                                         id="firstName"
                                         value={formData.firstName}
                                         onChange={(e) => handleChange('firstName', e.target.value)}
-                                        placeholder="e.g., Kristina"
+                                        placeholder={t('fields.firstNamePlaceholder')}
                                         required
                                         disabled={isSubmitting}
                                     />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="lastName">Last Name *</Label>
+                                    <Label htmlFor="lastName">{t('fields.lastName')}</Label>
                                     <Input
                                         id="lastName"
                                         value={formData.lastName}
                                         onChange={(e) => handleChange('lastName', e.target.value)}
-                                        placeholder="e.g., Balčiūnienė"
+                                        placeholder={t('fields.lastNamePlaceholder')}
                                         required
                                         disabled={isSubmitting}
                                     />
@@ -205,25 +212,25 @@ export default function EditStaffPage() {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="photoUrl">Photo URL</Label>
+                                <Label htmlFor="photoUrl">{t('fields.photoUrl')}</Label>
                                 <Input
                                     id="photoUrl"
                                     value={formData.photoUrl}
                                     onChange={(e) => handleChange('photoUrl', e.target.value)}
-                                    placeholder="e.g., https://example.com/photo.jpg"
+                                    placeholder={t('fields.photoUrlPlaceholder')}
                                     type="url"
                                     disabled={isSubmitting}
                                 />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email *</Label>
+                                <Label htmlFor="email">{t('fields.email')}</Label>
                                 <Input
                                     id="email"
                                     type="email"
                                     value={formData.email}
                                     onChange={(e) => handleChange('email', e.target.value)}
-                                    placeholder="e.g., k.balciuniene@school.lt"
+                                    placeholder={t('fields.emailPlaceholder')}
                                     required
                                     disabled={isSubmitting}
                                 />
@@ -231,19 +238,19 @@ export default function EditStaffPage() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="role">Role *</Label>
+                                    <Label htmlFor="role">{t('fields.role')}</Label>
                                     <Input
                                         id="role"
                                         value={formData.role}
                                         onChange={(e) => handleChange('role', e.target.value)}
-                                        placeholder="e.g., Principal"
+                                        placeholder={t('fields.rolePlaceholder')}
                                         required
                                         disabled={isSubmitting}
                                     />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="department">Department *</Label>
+                                    <Label htmlFor="department">{t('fields.department')}</Label>
                                     <Select
                                         value={formData.department}
                                         onValueChange={(value) => handleChange('department', value)}
@@ -251,7 +258,7 @@ export default function EditStaffPage() {
                                         required
                                     >
                                         <SelectTrigger id="department">
-                                            <SelectValue placeholder="Select department" />
+                                            <SelectValue placeholder={t('fields.selectDepartment')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {departments.map((dept) => (
@@ -267,8 +274,8 @@ export default function EditStaffPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
                                     <div className="flex items-center gap-1.5 mb-1">
-                                        <Label htmlFor="position" className="m-0">Position *</Label>
-                                        <span className="text-xs text-slate-500 font-normal" title="What the teacher does (e.g. Math Teacher)">(Job Role)</span>
+                                        <Label htmlFor="position" className="m-0">{t('fields.position')}</Label>
+                                        <span className="text-xs text-slate-500 font-normal" title={t('fields.positionTooltip')}>{t('fields.positionHint')}</span>
                                     </div>
                                     <Select
                                         value={formData.position}
@@ -277,12 +284,12 @@ export default function EditStaffPage() {
                                         required
                                     >
                                         <SelectTrigger id="position">
-                                            <SelectValue placeholder="Select position" />
+                                            <SelectValue placeholder={t('fields.selectPosition')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {POSITION_OPTIONS.map((pos) => (
                                                 <SelectItem key={pos} value={pos}>
-                                                    {pos}
+                                                    {labels.position(pos)}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -291,8 +298,8 @@ export default function EditStaffPage() {
 
                                 <div className="grid gap-2">
                                     <div className="flex items-center gap-1.5 mb-1">
-                                        <Label htmlFor="rank" className="m-0">Rank</Label>
-                                        <span className="text-xs text-slate-500 font-normal" title="Their seniority level (e.g. Senior Teacher)">(Seniority)</span>
+                                        <Label htmlFor="rank" className="m-0">{t('fields.rank')}</Label>
+                                        <span className="text-xs text-slate-500 font-normal" title={t('fields.rankTooltip')}>{t('fields.rankHint')}</span>
                                     </div>
                                     <Select
                                         value={formData.rank}
@@ -300,13 +307,13 @@ export default function EditStaffPage() {
                                         disabled={isSubmitting}
                                     >
                                         <SelectTrigger id="rank">
-                                            <SelectValue placeholder="Select rank (Optional)" />
+                                            <SelectValue placeholder={t('fields.selectRank')} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="none" className="text-muted-foreground italic">None</SelectItem>
+                                            <SelectItem value="none" className="text-muted-foreground italic">{tc('states.none')}</SelectItem>
                                             {RANK_OPTIONS.map((rank) => (
                                                 <SelectItem key={rank} value={rank}>
-                                                    {rank}
+                                                    {labels.rank(rank)}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -316,7 +323,7 @@ export default function EditStaffPage() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="startDate">Start Date *</Label>
+                                    <Label htmlFor="startDate">{t('fields.startDate')}</Label>
                                     <Input
                                         id="startDate"
                                         type="date"
@@ -338,10 +345,10 @@ export default function EditStaffPage() {
                                 onClick={() => navigate(`/staff/${id}`)}
                                 disabled={isSubmitting}
                             >
-                                Cancel
+                                {tc('actions.cancel')}
                             </Button>
                             <Button type="submit" disabled={isSubmitting}>
-                                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                                {isSubmitting ? tc('actions.saving') : tc('actions.saveChanges')}
                             </Button>
                         </div>
                     </form>

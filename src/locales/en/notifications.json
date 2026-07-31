@@ -1,0 +1,59 @@
+{
+    "title": "Notifications",
+    "subtitle": "Review and manage alerts requiring your attention",
+    "markAllRead": "Mark all read",
+    "markRead": "Mark as read",
+    "dismiss": "Dismiss",
+    "viewStudent": "View student",
+    "summary": {
+        "total": "Total",
+        "unread": "Unread",
+        "critical": "Critical",
+        "highPriority": "High priority"
+    },
+    "tabs": {
+        "all": "All",
+        "unread": "Unread",
+        "critical": "Critical",
+        "high": "High priority"
+    },
+    "priority": {
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+    },
+    "daysRemaining_one": "{{count}}d remaining",
+    "daysRemaining_other": "{{count}}d remaining",
+    "empty": {
+        "title": "No notifications",
+        "subtitle": "You are all caught up."
+    },
+    "comingSoon": {
+        "title": "Coming soon",
+        "description": "The notifications feature is not yet implemented. This is a preview of the planned interface.",
+        "aria": "Feature not yet implemented"
+    },
+    "mock": {
+        "medicalExpiringSoon": {
+            "title": "Medical check document expiring soon",
+            "description": "Annual medical check certificate expires in 7 days. Immediate renewal required."
+        },
+        "medicalExpiring": {
+            "title": "Medical check document expiring",
+            "description": "Annual medical check certificate will expire in 14 days. Please arrange renewal."
+        },
+        "contractMissing": {
+            "title": "No signed contract on file",
+            "description": "Student enrollment contract has not been signed. Required before the new term."
+        },
+        "agreementsMissing": {
+            "title": "Missing signed agreements",
+            "description": "Photo consent and data processing agreements are unsigned. Required for compliance."
+        },
+        "activityConsentMissing": {
+            "title": "Missing signed agreements",
+            "description": "Extracurricular activity consent form is missing. Required for participation."
+        }
+    }
+}

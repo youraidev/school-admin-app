@@ -45,15 +45,17 @@ export async function registerSchoolWithAdmin(data: {
     schoolName: string;
     email: string;
     passwordHash: string;
+    preferredLanguage?: string;
 }): Promise<{ school: School; user: User }> {
     const schoolId = randomUUID();
     const userId   = randomUUID();
     const slug = data.schoolName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const language = data.preferredLanguage === 'lt' ? 'lt' : 'en';
 
     try {
         await db.transaction(async (tx) => {
             await tx.execute(sql`INSERT INTO schools (id, name, slug) VALUES (${schoolId}, ${data.schoolName}, ${slug})`);
-            await tx.execute(sql`INSERT INTO users (id, school_id, email, password_hash, role) VALUES (${userId}, ${schoolId}, ${data.email}, ${data.passwordHash}, 'school_admin')`);
+            await tx.execute(sql`INSERT INTO users (id, school_id, email, password_hash, role, preferred_language) VALUES (${userId}, ${schoolId}, ${data.email}, ${data.passwordHash}, 'school_admin', ${language})`);
         });
     } catch (err: unknown) {
         if (isUniqueViolation(err)) throw new Error('SLUG_CONFLICT');
@@ -101,6 +103,10 @@ export async function updateUserPassword(userId: string, passwordHash: string): 
     await db.execute(sql`UPDATE users SET password_hash = ${passwordHash} WHERE id = ${userId}`);
 }
 
+export async function updateUserPreferredLanguage(schoolId: string, userId: string, language: 'en' | 'lt'): Promise<void> {
+    await db.execute(sql`UPDATE users SET preferred_language = ${language} WHERE id = ${userId} AND school_id = ${schoolId}`);
+}
+
 // ===== DASHBOARD QUERIES =====
 
 export async function getDashboardStats(schoolId: string): Promise<DashboardStats> {
@@ -131,10 +137,10 @@ export async function getCriticalAllergies(schoolId: string): Promise<CriticalAl
 export async function getContractIssues(schoolId: string): Promise<ContractIssue[]> {
     const rows = await qAll(sql`
         SELECT id as student_id, name as student_name,
-            CASE WHEN is_paid = false THEN 'Unpaid Contract'
-                 WHEN contract_status = 'pending' THEN 'Pending Contract'
-                 WHEN contract_status = 'expired' THEN 'Expired Contract'
-                 ELSE 'Contract Issue' END as issue,
+            CASE WHEN is_paid = false THEN 'unpaid'
+                 WHEN contract_status = 'pending' THEN 'pending'
+                 WHEN contract_status = 'expired' THEN 'expired'
+                 ELSE 'other' END as issue,
             contract_status as status
         FROM students
         WHERE school_id = ${schoolId} AND (contract_status IN ('pending','expired') OR is_paid = false)
@@ -336,7 +342,7 @@ export async function addStaff(schoolId: string, staffData: {
             }
         });
     } catch (err: unknown) {
-        if (isUniqueViolation(err)) throw new Error('A staff member with this email already exists in this school');
+        if (isUniqueViolation(err)) throw new Error('STAFF_EMAIL_TAKEN');
         throw err;
     }
 
@@ -366,7 +372,7 @@ export async function updateStaff(schoolId: string, id: string, staffData: {
         if (!returning) return null;
         staffFound = true;
     } catch (err: unknown) {
-        if (isUniqueViolation(err)) throw new Error('A staff member with this email already exists in this school');
+        if (isUniqueViolation(err)) throw new Error('STAFF_EMAIL_TAKEN');
         throw err;
     }
 
@@ -394,7 +400,7 @@ export async function updateCertificates(schoolId: string, staffId: string, cert
     name: string; issuer: string; date: string; fileUrl?: string;
 }[]): Promise<Certificate[]> {
     const exists = await qOne(sql`SELECT id FROM staff WHERE school_id = ${schoolId} AND id = ${staffId}`);
-    if (!exists) throw new Error('Staff member not found');
+    if (!exists) throw new Error('STAFF_NOT_FOUND');
 
     await db.transaction(async (tx) => {
         await tx.execute(sql`DELETE FROM certificates WHERE staff_id = ${staffId}`);
@@ -413,7 +419,7 @@ export async function updateCourseEvaluations(schoolId: string, staffId: string,
     courseName: string; rating: number; feedback?: string; date: string;
 }[]): Promise<CourseEvaluation[]> {
     const exists = await qOne(sql`SELECT id FROM staff WHERE school_id = ${schoolId} AND id = ${staffId}`);
-    if (!exists) throw new Error('Staff member not found');
+    if (!exists) throw new Error('STAFF_NOT_FOUND');
 
     await db.transaction(async (tx) => {
         await tx.execute(sql`DELETE FROM course_evaluations WHERE staff_id = ${staffId}`);
@@ -449,28 +455,28 @@ export async function getDepartmentById(schoolId: string, id: string): Promise<D
 }
 
 export async function addDepartment(schoolId: string, data: { name: string; description?: string }): Promise<Department> {
-    if (!data.name?.trim()) throw new Error('Department name is required');
-    if (data.name.length > 100) throw new Error('Department name exceeds 100 characters');
-    if (data.description && data.description.length > 500) throw new Error('Description exceeds 500 characters');
+    if (!data.name?.trim()) throw new Error('DEPARTMENT_NAME_REQUIRED');
+    if (data.name.length > 100) throw new Error('DEPARTMENT_NAME_TOO_LONG');
+    if (data.description && data.description.length > 500) throw new Error('DEPARTMENT_DESCRIPTION_TOO_LONG');
     const id = randomUUID();
     try {
         await db.execute(sql`INSERT INTO departments (id, school_id, name, description) VALUES (${id}, ${schoolId}, ${data.name.trim()}, ${data.description ?? null})`);
     } catch (err: unknown) {
-        if (isUniqueViolation(err)) throw new Error('Department with this name already exists');
+        if (isUniqueViolation(err)) throw new Error('DEPARTMENT_NAME_TAKEN');
         throw err;
     }
     return toCamelCase<Department>((await qOne(sql`SELECT * FROM departments WHERE id = ${id}`))!);
 }
 
 export async function updateDepartment(schoolId: string, id: string, data: { name: string; description?: string }): Promise<Department | null> {
-    if (!data.name?.trim()) throw new Error('Department name is required');
-    if (data.name.length > 100) throw new Error('Department name exceeds 100 characters');
-    if (data.description && data.description.length > 500) throw new Error('Description exceeds 500 characters');
+    if (!data.name?.trim()) throw new Error('DEPARTMENT_NAME_REQUIRED');
+    if (data.name.length > 100) throw new Error('DEPARTMENT_NAME_TOO_LONG');
+    if (data.description && data.description.length > 500) throw new Error('DEPARTMENT_DESCRIPTION_TOO_LONG');
     try {
         const row = await qOne(sql`UPDATE departments SET name = ${data.name.trim()}, description = ${data.description ?? null} WHERE school_id = ${schoolId} AND id = ${id} RETURNING id`);
         if (!row) return null;
     } catch (err: unknown) {
-        if (isUniqueViolation(err)) throw new Error('Department with this name already exists');
+        if (isUniqueViolation(err)) throw new Error('DEPARTMENT_NAME_TAKEN');
         throw err;
     }
     return toCamelCase<Department>((await qOne(sql`SELECT * FROM departments WHERE id = ${id}`))!);
@@ -483,7 +489,7 @@ export async function getDepartmentStaffCount(schoolId: string, id: string): Pro
 
 export async function deleteDepartment(schoolId: string, id: string): Promise<boolean> {
     const count = await getDepartmentStaffCount(schoolId, id);
-    if (count > 0) throw new Error(`Cannot delete department. ${count} staff members are assigned to this department.`);
+    if (count > 0) throw new Error('DEPARTMENT_HAS_STAFF');
     const row = await qOne(sql`DELETE FROM departments WHERE school_id = ${schoolId} AND id = ${id} RETURNING id`);
     return row !== null;
 }

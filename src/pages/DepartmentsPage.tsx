@@ -12,9 +12,14 @@ import {
     DialogTitle,
 } from '../components/ui/dialog';
 import * as api from '../lib/api';
+import { useTranslation } from 'react-i18next';
+import { getErrorCode, useErrorMessage } from '../i18n/errors';
 import type { Department } from '../../shared/types';
 
 export default function DepartmentsPage() {
+    const { t } = useTranslation('departments');
+    const { t: tc } = useTranslation('common');
+    const errorMessage = useErrorMessage();
     const navigate = useNavigate();
     const [departments, setDepartments] = React.useState<Department[]>([]);
     const [loading, setLoading] = React.useState(true);
@@ -29,7 +34,7 @@ export default function DepartmentsPage() {
             const data = await api.getAllDepartments();
             setDepartments(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to load departments');
+            setError(getErrorCode(err));
         } finally {
             setLoading(false);
         }
@@ -49,7 +54,7 @@ export default function DepartmentsPage() {
             setDepartments(prev => prev.filter(d => d.id !== deleteId));
             setDeleteId(null);
         } catch (err) {
-            setDeleteError(err instanceof Error ? err.message : 'Failed to delete department');
+            setDeleteError(getErrorCode(err));
         } finally {
             setIsDeleting(false);
         }
@@ -68,18 +73,18 @@ export default function DepartmentsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-semibold tracking-tight">Departments</h1>
-                    <p className="text-muted-foreground mt-1">Manage school departments and their descriptions</p>
+                    <h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
+                    <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
                 </div>
                 <Button onClick={() => navigate('/departments/new')}>
                     <Plus className="w-4 h-4 mr-2" />
-                    Add Department
+                    {t('addDepartment')}
                 </Button>
             </div>
 
             {error && (
                 <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
-                    {error}
+                    {errorMessage(error)}
                 </div>
             )}
 
@@ -93,7 +98,7 @@ export default function DepartmentsPage() {
                             </CardTitle>
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-                                    {dept.staffCount || 0} Staff
+                                    {t('staffCount', { count: dept.staffCount || 0 })}
                                 </span>
                                 <Building2 className="w-4 h-4 text-muted-foreground" />
                             </div>
@@ -113,7 +118,7 @@ export default function DepartmentsPage() {
                                     onClick={() => navigate(`/departments/${dept.id}/edit`)}
                                 >
                                     <Pencil className="w-4 h-4" />
-                                    <span className="sr-only">Edit</span>
+                                    <span className="sr-only">{tc('actions.edit')}</span>
                                 </Button>
                                 <Button
                                     variant="ghost"
@@ -125,7 +130,7 @@ export default function DepartmentsPage() {
                                     }}
                                 >
                                     <Trash2 className="w-4 h-4" />
-                                    <span className="sr-only">Delete</span>
+                                    <span className="sr-only">{tc('actions.delete')}</span>
                                 </Button>
                             </div>
                         </CardContent>
@@ -135,7 +140,7 @@ export default function DepartmentsPage() {
 
             {departments.length === 0 && !error && (
                 <div className="text-center py-12 text-muted-foreground">
-                    No departments found. Create one to get started.
+                    {t('empty')}
                 </div>
             )}
 
@@ -143,16 +148,15 @@ export default function DepartmentsPage() {
             <Dialog open={!!deleteId} onOpenChange={(open: boolean) => !open && setDeleteId(null)}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Are you sure?</DialogTitle>
+                        <DialogTitle>{t('deleteDialog.title')}</DialogTitle>
                         <DialogDescription>
-                            This action cannot be undone. This will permanently delete the department.
-                            You cannot delete a department if it has staff members assigned to it.
+                            {t('deleteDialog.description')}
                         </DialogDescription>
                     </DialogHeader>
 
                     {deleteError && (
                         <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">
-                            {deleteError}
+                            {errorMessage(deleteError)}
                         </div>
                     )}
 
@@ -162,14 +166,14 @@ export default function DepartmentsPage() {
                             onClick={() => setDeleteId(null)}
                             disabled={isDeleting}
                         >
-                            Cancel
+                            {tc('actions.cancel')}
                         </Button>
                         <Button
                             variant="destructive"
                             onClick={handleDelete}
                             disabled={isDeleting}
                         >
-                            {isDeleting ? 'Deleting...' : 'Delete'}
+                            {isDeleting ? tc('actions.deleting') : tc('actions.delete')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

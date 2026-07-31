@@ -1,0 +1,22 @@
+{
+    "title": "Vidaus atitiktis",
+    "subtitle": "Tvarkykite vidaus taisykles ir patvirtinimus",
+    "upload": "Įkelti dokumentą",
+    "uploadComingSoon": "Netrukus — įkėlimas dar neįgyvendintas",
+    "searchPlaceholder": "Ieškoti dokumentų...",
+    "overdue": "Vėluojama",
+    "complete": "Užbaigta",
+    "uploaded": "Įkelta {{date}}",
+    "allStaff": "Visi darbuotojai",
+    "audience": {
+        "department": "Skyrius",
+        "individual": "Atskiri asmenys"
+    },
+    "signatures": "Parašai",
+    "remind_one": "Priminti {{count}} laukiančiam naudotojui",
+    "remind_few": "Priminti {{count}} laukiantiems naudotojams",
+    "remind_many": "Priminti {{count}} laukiančio naudotojo",
+    "remind_other": "Priminti {{count}} laukiančių naudotojų",
+    "remindComingSoon": "Netrukus — priminimai dar neįgyvendinti",
+    "empty": "Atitikties dokumentų nerasta"
+}

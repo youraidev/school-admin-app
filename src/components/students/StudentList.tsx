@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     Search, UserPlus, AlertCircle, Users, FileWarning, Brain,
     Leaf, BookOpen, UserCheck, ChevronRight, AlertTriangle,
@@ -10,10 +11,16 @@ import { Card, CardContent, CardHeader } from '../ui/card';
 import { StatusBadge } from '../ui/status-badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import * as api from '../../lib/api';
+import { getErrorCode, useErrorMessage } from '../../i18n/errors';
+import { useLabels } from '../../i18n/labels';
 import type { Student } from '../../../shared/types';
 import type { StudentStats } from '../../lib/api';
 
 export default function StudentList() {
+    const { t } = useTranslation('students');
+    const { t: tc } = useTranslation('common');
+    const errorMessage = useErrorMessage();
+    const labels = useLabels();
     const [searchTerm, setSearchTerm] = React.useState('');
     const [classFilter, setClassFilter] = React.useState('all');
     const [students, setStudents] = React.useState<Student[]>([]);
@@ -32,7 +39,7 @@ export default function StudentList() {
                 setStudents(data);
                 setStats(statsData);
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to load students');
+                setError(getErrorCode(err));
             } finally {
                 setLoading(false);
             }
@@ -75,8 +82,8 @@ export default function StudentList() {
             <div className="space-y-6 animate-fade-in">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-semibold tracking-tight">Students</h1>
-                        <p className="text-muted-foreground mt-1">Loading...</p>
+                        <h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
+                        <p className="text-muted-foreground mt-1">{tc('states.loading')}</p>
                     </div>
                 </div>
             </div>
@@ -88,8 +95,8 @@ export default function StudentList() {
             <div className="space-y-6 animate-fade-in">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-semibold tracking-tight">Students</h1>
-                        <p className="text-destructive mt-1">{error}</p>
+                        <h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
+                        <p className="text-destructive mt-1">{errorMessage(error)}</p>
                     </div>
                 </div>
             </div>
@@ -99,7 +106,7 @@ export default function StudentList() {
     const statCards = stats ? [
         {
             value: stats.totalStudents,
-            label: 'Total students',
+            label: t('stats.total'),
             icon: Users,
             iconBg: 'bg-primary/10',
             iconColor: 'text-primary',
@@ -107,7 +114,7 @@ export default function StudentList() {
         },
         {
             value: stats.missingDocuments,
-            label: 'Missing docs',
+            label: t('stats.missingDocs'),
             icon: FileWarning,
             iconBg: 'bg-destructive/10',
             iconColor: 'text-destructive',
@@ -115,7 +122,7 @@ export default function StudentList() {
         },
         {
             value: stats.specialNeeds,
-            label: 'Special needs',
+            label: t('stats.specialNeeds'),
             icon: Brain,
             iconBg: 'bg-blue-500/10',
             iconColor: 'text-blue-500',
@@ -123,7 +130,7 @@ export default function StudentList() {
         },
         {
             value: stats.withAllergies,
-            label: 'With allergies',
+            label: t('stats.withAllergies'),
             icon: Leaf,
             iconBg: 'bg-orange-500/10',
             iconColor: 'text-orange-500',
@@ -131,7 +138,7 @@ export default function StudentList() {
         },
         {
             value: stats.perClass.length,
-            label: 'Classes',
+            label: t('stats.classes'),
             icon: BookOpen,
             iconBg: 'bg-violet-500/10',
             iconColor: 'text-violet-500',
@@ -139,7 +146,7 @@ export default function StudentList() {
         },
         {
             value: stats.newEnrollments,
-            label: 'New enrollments',
+            label: t('stats.newEnrollments'),
             icon: UserCheck,
             iconBg: 'bg-emerald-500/10',
             iconColor: 'text-emerald-500',
@@ -152,12 +159,12 @@ export default function StudentList() {
             {/* Page Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-semibold tracking-tight">Students</h1>
-                    <p className="text-muted-foreground mt-1">Manage student profiles and records</p>
+                    <h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
+                    <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
                 </div>
                 <Button className="gap-2">
                     <UserPlus className="w-4 h-4" />
-                    Add Student
+                    {t('addStudent')}
                 </Button>
             </div>
 
@@ -190,7 +197,7 @@ export default function StudentList() {
                                 <div className="w-6 h-6 rounded-md bg-violet-500/10 flex items-center justify-center">
                                     <BookOpen className="w-3.5 h-3.5 text-violet-500" />
                                 </div>
-                                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Students per class</span>
+                                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('stats.perClass')}</span>
                             </CardHeader>
                             <CardContent className="p-4">
                                 <div className="flex flex-wrap gap-2">
@@ -232,7 +239,7 @@ export default function StudentList() {
                 <div className="relative flex-1">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                        placeholder="Search by name..."
+                        placeholder={t('searchPlaceholder')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10 h-10"
@@ -240,10 +247,10 @@ export default function StudentList() {
                 </div>
                 <Select value={classFilter} onValueChange={setClassFilter}>
                     <SelectTrigger className="w-44 h-10">
-                        <SelectValue placeholder="All classes" />
+                        <SelectValue placeholder={t('allClasses')} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All classes</SelectItem>
+                        <SelectItem value="all">{t('allClasses')}</SelectItem>
                         {classOptions.map(cls => (
                             <SelectItem key={cls} value={cls}>{cls}</SelectItem>
                         ))}
@@ -286,21 +293,21 @@ export default function StudentList() {
                         avatarText: string;
                     }> = {
                         problem: {
-                            label: 'Requires attention',
+                            label: t('cardStatus.problem'),
                             dotClass: 'bg-destructive',
                             accentClass: 'bg-destructive',
                             avatarBg: 'bg-destructive/10',
                             avatarText: 'text-destructive',
                         },
                         missing: {
-                            label: 'Missing documents',
+                            label: t('cardStatus.missing'),
                             dotClass: 'bg-amber-500',
                             accentClass: 'bg-amber-400',
                             avatarBg: 'bg-amber-500/10',
                             avatarText: 'text-amber-600',
                         },
                         ok: {
-                            label: 'All well',
+                            label: t('cardStatus.ok'),
                             dotClass: 'bg-emerald-500',
                             accentClass: 'bg-emerald-500',
                             avatarBg: 'bg-primary/10',
@@ -337,25 +344,25 @@ export default function StudentList() {
                                     {/* Badge row */}
                                     <div className="flex flex-wrap gap-1.5">
                                         <StatusBadge variant={student.contractStatus}>
-                                            {student.contractStatus}
+                                            {labels.contractStatus(student.contractStatus)}
                                         </StatusBadge>
 
                                         {!student.isPaid && (
                                             <span className="inline-flex items-center px-2 py-0.5 rounded-md border bg-destructive/10 text-destructive border-destructive/20 text-xs font-semibold">
-                                                Unpaid
+                                                {tc('status.unpaid')}
                                             </span>
                                         )}
 
                                         {student.medicalSupport && (
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border bg-destructive/10 text-destructive border-destructive/20 text-xs font-semibold">
                                                 <AlertCircle className="w-3 h-3" />
-                                                Medical
+                                                {t('badges.medical')}
                                             </span>
                                         )}
 
                                         {student.specialEducationNeeds && (
                                             <span className="inline-flex items-center px-2 py-0.5 rounded-md border bg-blue-500/10 text-blue-600 border-blue-300/30 text-xs font-semibold">
-                                                Special needs
+                                                {t('badges.specialNeeds')}
                                             </span>
                                         )}
                                     </div>
@@ -378,7 +385,7 @@ export default function StudentList() {
                     <div className="col-span-full">
                         <Card className="card-elevated">
                             <CardContent className="p-12 text-center">
-                                <p className="text-muted-foreground">No students found matching your search.</p>
+                                <p className="text-muted-foreground">{t('empty')}</p>
                             </CardContent>
                         </Card>
                     </div>

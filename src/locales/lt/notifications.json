@@ -1,0 +1,61 @@
+{
+    "title": "Pranešimai",
+    "subtitle": "Peržiūrėkite ir tvarkykite dėmesio reikalaujančius įspėjimus",
+    "markAllRead": "Pažymėti visus skaitytais",
+    "markRead": "Pažymėti skaitytu",
+    "dismiss": "Pašalinti",
+    "viewStudent": "Peržiūrėti mokinį",
+    "summary": {
+        "total": "Iš viso",
+        "unread": "Neskaityti",
+        "critical": "Kritiniai",
+        "highPriority": "Aukšto prioriteto"
+    },
+    "tabs": {
+        "all": "Visi",
+        "unread": "Neskaityti",
+        "critical": "Kritiniai",
+        "high": "Aukšto prioriteto"
+    },
+    "priority": {
+        "critical": "Kritinis",
+        "high": "Aukštas",
+        "medium": "Vidutinis",
+        "low": "Žemas"
+    },
+    "daysRemaining_one": "liko {{count}} d.",
+    "daysRemaining_few": "liko {{count}} d.",
+    "daysRemaining_many": "liko {{count}} d.",
+    "daysRemaining_other": "liko {{count}} d.",
+    "empty": {
+        "title": "Pranešimų nėra",
+        "subtitle": "Viskas peržiūrėta."
+    },
+    "comingSoon": {
+        "title": "Netrukus",
+        "description": "Pranešimų funkcija dar neįgyvendinta. Tai planuojamos sąsajos peržiūra.",
+        "aria": "Funkcija dar neįgyvendinta"
+    },
+    "mock": {
+        "medicalExpiringSoon": {
+            "title": "Netrukus baigsis medicininės pažymos galiojimas",
+            "description": "Metinės medicininės pažymos galiojimas baigsis po 7 dienų. Būtina nedelsiant atnaujinti."
+        },
+        "medicalExpiring": {
+            "title": "Baigiasi medicininės pažymos galiojimas",
+            "description": "Metinės medicininės pažymos galiojimas baigsis po 14 dienų. Prašome pasirūpinti atnaujinimu."
+        },
+        "contractMissing": {
+            "title": "Nėra pasirašytos sutarties",
+            "description": "Mokinio priėmimo sutartis nepasirašyta. Būtina iki naujo semestro."
+        },
+        "agreementsMissing": {
+            "title": "Trūksta pasirašytų sutikimų",
+            "description": "Nepasirašyti sutikimai dėl nuotraukų ir duomenų tvarkymo. Būtina atitikčiai."
+        },
+        "activityConsentMissing": {
+            "title": "Trūksta pasirašytų sutikimų",
+            "description": "Trūksta sutikimo dėl popamokinės veiklos. Būtina dalyvavimui."
+        }
+    }
+}

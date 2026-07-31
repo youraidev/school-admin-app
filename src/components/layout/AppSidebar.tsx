@@ -1,18 +1,21 @@
 
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Home, Users, UserCog, FileCheck, Bell, Settings, School, Building2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const navItems = [
-    { to: '/', label: 'Dashboard', icon: Home },
-    { to: '/students', label: 'Students', icon: Users },
-    { to: '/staff', label: 'Staff', icon: UserCog },
-    { to: '/departments', label: 'Departments', icon: Building2 },
-    { to: '/compliance', label: 'Compliance', icon: FileCheck },
-];
+    { to: '/', labelKey: 'nav.dashboard', icon: Home },
+    { to: '/students', labelKey: 'nav.students', icon: Users },
+    { to: '/staff', labelKey: 'nav.staff', icon: UserCog },
+    { to: '/departments', labelKey: 'nav.departments', icon: Building2 },
+    { to: '/compliance', labelKey: 'nav.compliance', icon: FileCheck },
+] as const;
 
 export default function AppSidebar() {
     const location = useLocation();
+    const { t } = useTranslation();
 
     const isActive = (path: string) => {
         if (path === '/') {
@@ -30,8 +33,8 @@ export default function AppSidebar() {
                         <School className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-lg font-semibold text-sidebar-foreground">School Admin</h1>
-                        <p className="text-xs text-sidebar-foreground/60">Core</p>
+                        <h1 className="text-lg font-semibold text-sidebar-foreground">{t('appName')}</h1>
+                        <p className="text-xs text-sidebar-foreground/60">{t('appTagline')}</p>
                     </div>
                 </Link>
             </div>
@@ -52,7 +55,7 @@ export default function AppSidebar() {
                             )}
                         >
                             <Icon className="w-5 h-5" />
-                            <span>{item.label}</span>
+                            <span>{t(item.labelKey)}</span>
                         </Link>
                     );
                 })}
@@ -62,14 +65,15 @@ export default function AppSidebar() {
             <div className="p-3 border-t border-sidebar-accent space-y-1">
                 <Link to="/notifications" className={cn('nav-link w-full', isActive('/notifications') && 'nav-link-active')}>
                     <Bell className="w-5 h-5" />
-                    <span>Notifications</span>
+                    <span>{t('nav.notifications')}</span>
                     <span className="ml-auto bg-sidebar-primary text-white text-xs font-semibold px-2 py-0.5 rounded-full">
                         3
                     </span>
                 </Link>
+                <LanguageSwitcher />
                 <button className="nav-link w-full">
                     <Settings className="w-5 h-5" />
-                    <span>Settings</span>
+                    <span>{t('nav.settings')}</span>
                 </button>
             </div>
         </div>

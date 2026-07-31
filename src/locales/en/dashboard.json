@@ -1,0 +1,48 @@
+{
+    "title": "Dashboard",
+    "subtitle": "Overview of school administration",
+    "search": {
+        "placeholder": "Search students...",
+        "clear": "Clear search",
+        "noResults": "No students found"
+    },
+    "stats": {
+        "totalStudents": "Total Students",
+        "enrolledStudents": "Enrolled students",
+        "totalStaff": "Total Staff",
+        "teachersAndAdmin": "Teachers & admin",
+        "pendingContracts": "Pending Contracts",
+        "requiresAttention": "Requires attention",
+        "pendingSignatures": "Pending Signatures",
+        "complianceDocuments": "Compliance documents"
+    },
+    "allergies": {
+        "title": "Critical Allergy Alerts",
+        "affected_one": "{{count}} student affected",
+        "affected_other": "{{count}} students affected",
+        "empty": "No critical allergies on record",
+        "viewAll": "View all students"
+    },
+    "contracts": {
+        "title": "Contract Issues",
+        "found_one": "{{count}} issue found",
+        "found_other": "{{count}} issues found",
+        "empty": "No contract issues",
+        "viewAll": "View all contracts",
+        "issueLabels": {
+            "unpaid": "Unpaid Contract",
+            "pending": "Pending Contract",
+            "expired": "Expired Contract",
+            "other": "Contract Issue"
+        }
+    },
+    "signatures": {
+        "title": "Awaiting Signatures",
+        "pendingDocs_one": "{{count}} document pending",
+        "pendingDocs_other": "{{count}} documents pending",
+        "pendingChip_one": "{{count}} pending",
+        "pendingChip_other": "{{count}} pending",
+        "empty": "All documents signed",
+        "viewAll": "View all documents"
+    }
+}

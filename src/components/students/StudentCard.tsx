@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Phone, ExternalLink, User, CheckCircle2, Clock, CalendarDays, FileText, HeartPulse, ShieldAlert, Stethoscope, BookOpen, PhoneCall } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -8,7 +9,9 @@ import { StatusBadge } from '../ui/status-badge';
 import { SeverityBadge } from '../ui/severity-badge';
 import { PickupPersonCard, RELATION_COLORS } from './PickupPersonCard';
 import * as api from '../../lib/api';
-import { format } from 'date-fns';
+import { getErrorCode, useErrorMessage } from '../../i18n/errors';
+import { useLabels } from '../../i18n/labels';
+import { formatDate } from '../../i18n/format';
 import type { StudentWithDetails } from '../../../shared/types';
 
 interface StudentCardProps {
@@ -16,6 +19,10 @@ interface StudentCardProps {
 }
 
 export default function StudentCard({ studentId }: StudentCardProps) {
+    const { t } = useTranslation('students');
+    const { t: tc } = useTranslation('common');
+    const errorMessage = useErrorMessage();
+    const labels = useLabels();
     const navigate = useNavigate();
     const [student, setStudent] = React.useState<StudentWithDetails | null>(null);
     const [loading, setLoading] = React.useState(true);
@@ -27,7 +34,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                 const data = await api.getStudentById(studentId);
                 setStudent(data);
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to load student');
+                setError(getErrorCode(err));
             } finally {
                 setLoading(false);
             }
@@ -40,11 +47,11 @@ export default function StudentCard({ studentId }: StudentCardProps) {
             <div className="space-y-6 animate-fade-in">
                 <Button variant="ghost" onClick={() => navigate('/students')}>
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Students
+                    {t('detail.back')}
                 </Button>
                 <Card className="card-elevated">
                     <CardContent className="p-12 text-center">
-                        <p className="text-muted-foreground">Loading...</p>
+                        <p className="text-muted-foreground">{tc('states.loading')}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -56,11 +63,11 @@ export default function StudentCard({ studentId }: StudentCardProps) {
             <div className="space-y-6 animate-fade-in">
                 <Button variant="ghost" onClick={() => navigate('/students')}>
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Students
+                    {t('detail.back')}
                 </Button>
                 <Card className="card-elevated">
                     <CardContent className="p-12 text-center">
-                        <p className="text-destructive">{error}</p>
+                        <p className="text-destructive">{errorMessage(error)}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -72,11 +79,11 @@ export default function StudentCard({ studentId }: StudentCardProps) {
             <div className="space-y-6 animate-fade-in">
                 <Button variant="ghost" onClick={() => navigate('/students')}>
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Students
+                    {t('detail.back')}
                 </Button>
                 <Card className="card-elevated">
                     <CardContent className="p-12 text-center">
-                        <p className="text-muted-foreground">Student not found</p>
+                        <p className="text-muted-foreground">{t('detail.notFound')}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -90,7 +97,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
             {/* Back Button */}
             <Button variant="ghost" onClick={() => navigate('/students')}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Students
+                {t('detail.back')}
             </Button>
 
             {/* Student Header */}
@@ -103,26 +110,26 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                         <div className="flex-1 space-y-3">
                             <div className="flex items-center gap-3 flex-wrap">
                                 <h1 className="text-2xl font-semibold">{student.name}</h1>
-                                <StatusBadge variant={student.contractStatus}>{student.contractStatus}</StatusBadge>
+                                <StatusBadge variant={student.contractStatus}>{labels.contractStatus(student.contractStatus)}</StatusBadge>
                                 <StatusBadge variant={student.isPaid ? 'active' : 'pending'}>
-                                    {student.isPaid ? 'Paid' : 'Unpaid'}
+                                    {student.isPaid ? tc('status.paid') : tc('status.unpaid')}
                                 </StatusBadge>
                             </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm">
                                         <div>
-                                            <span className="data-label">Grade:</span> <span className="data-value">{student.className}</span>
+                                            <span className="data-label">{t('detail.grade')}</span> <span className="data-value">{student.className}</span>
                                         </div>
                                         <div>
-                                            <span className="data-label">Born:</span> <span className="data-value">{format(new Date(student.birthDate), 'MMMM d, yyyy')}</span>
+                                            <span className="data-label">{t('detail.born')}</span> <span className="data-value">{formatDate(student.birthDate, 'MMMM d, yyyy')}</span>
                                         </div>
                                         {primaryContact && (
                                             <div className="flex items-center gap-2">
                                                 <Phone className="w-4 h-4 text-muted-foreground" />
-                                                <span className="data-value">{primaryContact.name} ({primaryContact.relation})</span>
+                                                <span className="data-value">{primaryContact.name} ({labels.relation(primaryContact.relation)})</span>
                                             </div>
                                         )}
                                         <div className="flex items-center gap-2">
-                                            <span className="data-label">Tamo ID:</span>
+                                            <span className="data-label">{t('detail.tamoId')}</span>
                                             {student.tamoId ? (
                                                 <a
                                                     href={`https://tamo.eu/student/${encodeURIComponent(student.tamoId)}`}
@@ -134,7 +141,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                                     <ExternalLink className="w-3 h-3 opacity-60" />
                                                 </a>
                                             ) : (
-                                                <span className="text-muted-foreground text-xs italic">Not linked</span>
+                                                <span className="text-muted-foreground text-xs italic">{tc('states.notLinked')}</span>
                                             )}
                                         </div>
                                     </div>
@@ -146,10 +153,10 @@ export default function StudentCard({ studentId }: StudentCardProps) {
             {/* Tabs */}
             <Tabs defaultValue="medical" className="space-y-4">
                 <TabsList>
-                    <TabsTrigger value="medical">Medical & Health</TabsTrigger>
-                    <TabsTrigger value="documents">Documents</TabsTrigger>
-                    <TabsTrigger value="agreements">Agreements</TabsTrigger>
-                    <TabsTrigger value="pickup">Authorized Pickup</TabsTrigger>
+                    <TabsTrigger value="medical">{t('tabs.medical')}</TabsTrigger>
+                    <TabsTrigger value="documents">{t('tabs.documents')}</TabsTrigger>
+                    <TabsTrigger value="agreements">{t('tabs.agreements')}</TabsTrigger>
+                    <TabsTrigger value="pickup">{t('tabs.pickup')}</TabsTrigger>
                 </TabsList>
 
                 {/* Medical & Health Tab */}
@@ -164,16 +171,16 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                         <ShieldAlert className="w-4 h-4 text-red-500" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-base">Allergies</CardTitle>
+                                        <CardTitle className="text-base">{t('allergies.title')}</CardTitle>
                                         <p className="text-xs text-muted-foreground mt-0.5">
-                                            {student.allergies.length === 0 ? 'No known allergies' : `${student.allergies.length} recorded`}
+                                            {student.allergies.length === 0 ? t('allergies.none') : t('allergies.recorded', { count: student.allergies.length })}
                                         </p>
                                     </div>
                                 </div>
                             </CardHeader>
                             <CardContent className="p-0">
                                 {student.allergies.length === 0 ? (
-                                    <div className="px-5 py-8 text-center text-sm text-muted-foreground">No known allergies on record</div>
+                                    <div className="px-5 py-8 text-center text-sm text-muted-foreground">{t('allergies.noneOnRecord')}</div>
                                 ) : (
                                     <div className="divide-y divide-border/50">
                                         {student.allergies.map(allergy => {
@@ -182,7 +189,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                                 <div key={allergy.id} className={`px-5 py-3.5 flex flex-col gap-1.5 ${isLifeThreatening ? 'bg-red-50/50 dark:bg-red-950/10' : ''}`}>
                                                     <div className="flex items-center gap-2.5">
                                                         <SeverityBadge severity={allergy.severity}>{allergy.name}</SeverityBadge>
-                                                        <span className="text-xs text-muted-foreground capitalize font-medium">{allergy.severity.replace('-', ' ')}</span>
+                                                        <span className="text-xs text-muted-foreground font-medium">{labels.severity(allergy.severity)}</span>
                                                     </div>
                                                     {allergy.notes && (
                                                         <p className="text-sm text-muted-foreground leading-relaxed">{allergy.notes}</p>
@@ -203,8 +210,8 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                         <HeartPulse className="w-4 h-4 text-primary" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-base">Health Status</CardTitle>
-                                        <p className="text-xs text-muted-foreground mt-0.5">General health overview</p>
+                                        <CardTitle className="text-base">{t('health.title')}</CardTitle>
+                                        <p className="text-xs text-muted-foreground mt-0.5">{t('health.overview')}</p>
                                     </div>
                                 </div>
                             </CardHeader>
@@ -215,8 +222,8 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                             <Stethoscope className="w-3.5 h-3.5 text-muted-foreground" />
                                         </div>
                                         <div>
-                                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">Overall Health</p>
-                                            <p className="text-sm font-semibold text-foreground">{student.healthStatus}</p>
+                                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">{t('health.overall')}</p>
+                                            <p className="text-sm font-semibold text-foreground">{labels.healthStatus(student.healthStatus)}</p>
                                         </div>
                                     </div>
                                     {student.medicalSupport && (
@@ -225,7 +232,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                                 <ShieldAlert className="w-3.5 h-3.5 text-muted-foreground" />
                                             </div>
                                             <div>
-                                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">Medical Support</p>
+                                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">{t('health.medicalSupport')}</p>
                                                 <p className="text-sm font-semibold text-foreground">{student.medicalSupport}</p>
                                             </div>
                                         </div>
@@ -236,7 +243,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                                 <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
                                             </div>
                                             <div>
-                                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">Special Education Needs</p>
+                                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">{t('health.specialEducationNeeds')}</p>
                                                 <p className="text-sm font-semibold text-foreground">{student.specialEducationNeeds}</p>
                                             </div>
                                         </div>
@@ -254,8 +261,8 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                     <PhoneCall className="w-4 h-4 text-orange-500" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-base">Emergency Contacts</CardTitle>
-                                    <p className="text-xs text-muted-foreground mt-0.5">{student.emergencyContacts.length} contact{student.emergencyContacts.length !== 1 ? 's' : ''} on file</p>
+                                    <CardTitle className="text-base">{t('contacts.title')}</CardTitle>
+                                    <p className="text-xs text-muted-foreground mt-0.5">{t('contacts.onFile', { count: student.emergencyContacts.length })}</p>
                                 </div>
                             </div>
                         </CardHeader>
@@ -277,11 +284,11 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                                     <div className="flex items-center gap-2 flex-wrap mb-2">
                                                         <span className="font-semibold text-sm leading-tight">{contact.name}</span>
                                                         <span className={`inline-flex items-center px-2 py-0.5 rounded-md border text-xs font-semibold tracking-wide ${badgeClass}`}>
-                                                            {contact.relation}
+                                                            {labels.relation(contact.relation)}
                                                         </span>
                                                         {contact.isPrimary && (
                                                             <span className="inline-flex items-center px-2 py-0.5 rounded-md border bg-primary/10 text-primary border-primary/20 text-xs font-semibold">
-                                                                Primary
+                                                                {tc('states.primary')}
                                                             </span>
                                                         )}
                                                     </div>
@@ -312,9 +319,12 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                         <FileText className="w-4 h-4 text-primary" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-base">Document Checklist</CardTitle>
+                                        <CardTitle className="text-base">{t('documents.title')}</CardTitle>
                                         <p className="text-xs text-muted-foreground mt-0.5">
-                                            {student.documentChecklist.filter(d => d.isComplete).length} of {student.documentChecklist.length} complete
+                                            {t('documents.progress', {
+                                                completed: student.documentChecklist.filter(d => d.isComplete).length,
+                                                total: student.documentChecklist.length,
+                                            })}
                                         </p>
                                     </div>
                                 </div>
@@ -323,7 +333,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70'
                                         : 'bg-amber-50 text-amber-700 border border-amber-200/70'
                                 }`}>
-                                    {student.documentChecklist.every(d => d.isComplete) ? 'All complete' : 'Pending items'}
+                                    {student.documentChecklist.every(d => d.isComplete) ? t('documents.allComplete') : t('documents.pendingItems')}
                                 </span>
                             </div>
                         </CardHeader>
@@ -352,14 +362,14 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                                 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
                                                 : 'bg-muted text-muted-foreground'
                                         }`}>
-                                            {doc.isComplete ? 'Submitted' : 'Pending'}
+                                            {doc.isComplete ? t('documents.submitted') : tc('status.pending')}
                                         </span>
 
                                         {/* Due date */}
                                         {doc.dueDate && (
                                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-[110px] justify-end">
                                                 <CalendarDays className="w-3.5 h-3.5 flex-shrink-0" />
-                                                <span>{format(new Date(doc.dueDate), 'MMM d, yyyy')}</span>
+                                                <span>{formatDate(doc.dueDate, 'MMM d, yyyy')}</span>
                                             </div>
                                         )}
                                     </div>
@@ -373,7 +383,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                 <TabsContent value="agreements">
                     <Card className="card-elevated">
                         <CardHeader>
-                            <CardTitle className="text-lg">Agreements & Consents</CardTitle>
+                            <CardTitle className="text-lg">{t('agreements.title')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-3">
@@ -390,7 +400,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                                 </StatusBadge>
                                                 {agreement.signedDate && (
                                                     <p className="text-xs text-muted-foreground">
-                                                        Signed: {format(new Date(agreement.signedDate), 'MMM d, yyyy')}
+                                                        {t('agreements.signed', { date: formatDate(agreement.signedDate, 'MMM d, yyyy') })}
                                                     </p>
                                                 )}
                                             </div>
@@ -406,7 +416,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                 <TabsContent value="pickup">
                     <Card className="card-elevated">
                         <CardHeader>
-                            <CardTitle className="text-lg">Authorized Pickup Persons</CardTitle>
+                            <CardTitle className="text-lg">{t('pickup.title')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

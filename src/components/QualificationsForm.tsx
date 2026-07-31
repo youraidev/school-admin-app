@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, X, ChevronDown, ChevronUp, GraduationCap } from 'lucide-react';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -11,34 +12,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from './ui/select';
+import { useLabels } from '../i18n/labels';
 import type { StaffQualification, DegreeType } from '../../shared/types';
+import { DEGREE_TYPES_GROUPED } from '../../shared/types';
 
-export const DEGREE_TYPES_GROUPED = [
-    {
-        label: "Degrees",
-        options: [
-            'Diploma in Education',
-            'Bachelor of Education (B.Ed)',
-            'Bachelor’s Degree',
-            'PGDE / PGCE',
-            'Master of Education (M.Ed)',
-            'Master’s Degree',
-            'Doctor of Education (Ed.D)',
-            'PhD'
-        ] as DegreeType[]
-    },
-    {
-        label: "Teaching Certifications",
-        options: [
-            'Teaching License',
-            'QTS',
-            'Montessori Certification',
-            'Special Education Certification',
-            'TESOL / TEFL',
-            'IB Teacher Certification'
-        ] as DegreeType[]
-    }
-];
+// shared/types keeps canonical English group labels; map them to translation keys
+const GROUP_LABEL_KEYS: Record<string, 'degreeGroups.degrees' | 'degreeGroups.certifications'> = {
+    'Degrees': 'degreeGroups.degrees',
+    'Teaching Certifications': 'degreeGroups.certifications',
+};
 
 interface QualificationsFormProps {
     qualifications: StaffQualification[];
@@ -47,6 +29,9 @@ interface QualificationsFormProps {
 }
 
 export function QualificationsForm({ qualifications, onChange, suggestions }: QualificationsFormProps) {
+    const { t } = useTranslation('staff');
+    const { t: tc } = useTranslation('common');
+    const labels = useLabels();
     const [expandedIndices, setExpandedIndices] = React.useState<number[]>([]);
 
     const toggleExpand = (index: number) => {
@@ -104,12 +89,12 @@ export function QualificationsForm({ qualifications, onChange, suggestions }: Qu
                     const isExpanded = expandedIndices.includes(index);
                     const isYearValid = validateYear(qual.year);
 
-                    // Generate summary
-                    const summary = [
-                        qual.degreeType || 'Degree',
-                        qual.fieldOfStudy || 'Field',
-                        qual.year || 'Year'
-                    ].join(' — ');
+                    // Generate summary — the locale controls order and separators
+                    const summary = t('qualifications.summary', {
+                        degree: qual.degreeType ? labels.degree(qual.degreeType) : t('qualifications.summaryDegree'),
+                        field: qual.fieldOfStudy || t('qualifications.summaryField'),
+                        year: qual.year || t('qualifications.summaryYear'),
+                    });
 
                     return (
                         <div key={index} className="bg-white rounded-xl border border-slate-200 border-l-4 border-l-teal-400 shadow-sm overflow-hidden">
@@ -120,7 +105,7 @@ export function QualificationsForm({ qualifications, onChange, suggestions }: Qu
                             >
                                 <div className="flex items-center gap-2.5">
                                     <GraduationCap className="w-3.5 h-3.5 text-teal-600" />
-                                    <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">Qualification {index + 1}</span>
+                                    <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">{t('qualifications.itemTitle', { number: index + 1 })}</span>
                                     <span className="text-xs text-teal-700 font-medium truncate max-w-[260px]">&mdash; {summary}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5">
@@ -128,7 +113,7 @@ export function QualificationsForm({ qualifications, onChange, suggestions }: Qu
                                         type="button"
                                         className="text-red-400 hover:text-red-600 transition-colors p-0.5"
                                         onClick={(e) => { e.stopPropagation(); handleRemove(index); }}
-                                        title="Remove"
+                                        title={tc('actions.remove')}
                                     >
                                         <X className="h-3.5 w-3.5" />
                                     </button>
@@ -142,20 +127,20 @@ export function QualificationsForm({ qualifications, onChange, suggestions }: Qu
                                     <div className="grid gap-4 md:grid-cols-2">
 
                                         <div className="grid gap-2">
-                                            <Label className="text-xs font-medium text-slate-500">Degree Type / Certification *</Label>
+                                            <Label className="text-xs font-medium text-slate-500">{t('qualifications.degreeType')}</Label>
                                             <Select
                                                 value={qual.degreeType}
                                                 onValueChange={(val: DegreeType) => handleChange(index, 'degreeType', val)}
                                             >
                                                 <SelectTrigger className="bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-300 border-slate-200">
-                                                    <SelectValue placeholder="Select type" />
+                                                    <SelectValue placeholder={t('qualifications.selectType')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {DEGREE_TYPES_GROUPED.map(group => (
                                                         <SelectGroup key={group.label}>
-                                                            <SelectLabel>{group.label}</SelectLabel>
+                                                            <SelectLabel>{GROUP_LABEL_KEYS[group.label] ? tc(GROUP_LABEL_KEYS[group.label]) : group.label}</SelectLabel>
                                                             {group.options.map(opt => (
-                                                                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                                                <SelectItem key={opt} value={opt}>{labels.degree(opt)}</SelectItem>
                                                             ))}
                                                         </SelectGroup>
                                                     ))}
@@ -164,12 +149,12 @@ export function QualificationsForm({ qualifications, onChange, suggestions }: Qu
                                         </div>
 
                                         <div className="grid gap-2">
-                                            <Label className="text-xs font-medium text-slate-500">Field of Study *</Label>
+                                            <Label className="text-xs font-medium text-slate-500">{t('qualifications.fieldOfStudy')}</Label>
                                             <div className="relative">
                                                 <Input
                                                     value={qual.fieldOfStudy}
                                                     onChange={(e) => handleChange(index, 'fieldOfStudy', e.target.value)}
-                                                    placeholder="e.g. Mathematics"
+                                                    placeholder={t('qualifications.fieldPlaceholder')}
                                                     list={`fields-of-study-list-${index}`}
                                                     className="bg-slate-50 focus:bg-white focus-visible:ring-teal-300 border-slate-200"
                                                 />
@@ -180,12 +165,12 @@ export function QualificationsForm({ qualifications, onChange, suggestions }: Qu
                                         </div>
 
                                         <div className="grid gap-2">
-                                            <Label className="text-xs font-medium text-slate-500">Institution *</Label>
+                                            <Label className="text-xs font-medium text-slate-500">{t('qualifications.institution')}</Label>
                                             <div className="relative">
                                                 <Input
                                                     value={qual.institution}
                                                     onChange={(e) => handleChange(index, 'institution', e.target.value)}
-                                                    placeholder="e.g. University of Cambridge"
+                                                    placeholder={t('qualifications.institutionPlaceholder')}
                                                     list={`institutions-list-${index}`}
                                                     className="bg-slate-50 focus:bg-white focus-visible:ring-teal-300 border-slate-200"
                                                 />
@@ -196,7 +181,7 @@ export function QualificationsForm({ qualifications, onChange, suggestions }: Qu
                                         </div>
 
                                         <div className="grid gap-2">
-                                            <Label className="text-xs font-medium text-slate-500">Year</Label>
+                                            <Label className="text-xs font-medium text-slate-500">{t('qualifications.year')}</Label>
                                             <Input
                                                 type="number"
                                                 value={qual.year || ''}
@@ -204,13 +189,13 @@ export function QualificationsForm({ qualifications, onChange, suggestions }: Qu
                                                     const val = e.target.value;
                                                     handleChange(index, 'year', val ? parseInt(val, 10) : null);
                                                 }}
-                                                placeholder="e.g. 2020"
+                                                placeholder={t('qualifications.yearPlaceholder')}
                                                 min={1950}
                                                 max={2100}
                                                 className={`bg-slate-50 focus:bg-white focus-visible:ring-teal-300 border-slate-200 ${!isYearValid ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                                             />
                                             {!isYearValid && (
-                                                <span className="text-xs text-destructive">Year must be between 1950 and 2100.</span>
+                                                <span className="text-xs text-destructive">{t('qualifications.yearInvalid')}</span>
                                             )}
                                         </div>
                                     </div>
@@ -221,7 +206,7 @@ export function QualificationsForm({ qualifications, onChange, suggestions }: Qu
                                             onClick={() => handleClear(index)}
                                             className="text-xs text-slate-400 hover:text-red-500 font-medium transition-colors"
                                         >
-                                            Clear Fields
+                                            {tc('actions.clearFields')}
                                         </button>
                                     </div>
                                 </div>
@@ -237,12 +222,12 @@ export function QualificationsForm({ qualifications, onChange, suggestions }: Qu
                 className="w-full mt-1 py-2.5 rounded-xl border-2 border-dashed border-teal-200 text-sm font-semibold text-teal-600 hover:border-teal-400 hover:bg-teal-50 transition-colors flex items-center justify-center gap-1.5"
             >
                 <Plus className="h-4 w-4" />
-                Add Qualification
+                {t('qualifications.addQualification')}
             </button>
 
             {qualifications.length === 0 && (
                 <p className="text-sm text-slate-400 text-center py-4">
-                    No qualifications added yet. Click above to add one.
+                    {t('qualifications.emptyHint')}
                 </p>
             )}
         </div>
