@@ -1,6 +1,11 @@
 {
     "title": "Valdymo skydas",
     "subtitle": "Mokyklos administravimo apžvalga",
+    "search": {
+        "placeholder": "Ieškoti mokinių...",
+        "clear": "Išvalyti paiešką",
+        "noResults": "Mokinių nerasta"
+    },
     "stats": {
         "totalStudents": "Iš viso mokinių",
         "enrolledStudents": "Užregistruoti mokiniai",

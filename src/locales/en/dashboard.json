@@ -1,6 +1,11 @@
 {
     "title": "Dashboard",
     "subtitle": "Overview of school administration",
+    "search": {
+        "placeholder": "Search students...",
+        "clear": "Clear search",
+        "noResults": "No students found"
+    },
     "stats": {
         "totalStudents": "Total Students",
         "enrolledStudents": "Enrolled students",
