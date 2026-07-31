@@ -12,6 +12,35 @@ function handleStaffError(error: unknown, res: import('express').Response): bool
     return false;
 }
 
+function isNonEmptyString(value: unknown): value is string {
+    return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
+}
+
+// Returns an error code for an invalid staff payload, or null if valid
+function validateStaffBody(body: Record<string, unknown>): string | null {
+    const { firstName, lastName, email, role, department, position, startDate, qualifications } = body;
+    if (![firstName, lastName, email, role, department, position, startDate].every(isNonEmptyString)) {
+        return 'MISSING_REQUIRED_FIELDS';
+    }
+    if (qualifications !== undefined && qualifications !== null) {
+        if (!Array.isArray(qualifications)) return 'QUALIFICATIONS_INVALID';
+        for (const qual of qualifications) {
+            if (!isRecord(qual)) return 'QUALIFICATION_FIELDS_REQUIRED';
+            if (!qual.degreeType || !qual.fieldOfStudy || !qual.institution) {
+                return 'QUALIFICATION_FIELDS_REQUIRED';
+            }
+            if (qual.year && (typeof qual.year !== 'number' || qual.year < 1950 || qual.year > 2100)) {
+                return 'QUALIFICATION_YEAR_INVALID';
+            }
+        }
+    }
+    return null;
+}
+
 router.get('/', async (req, res, next) => {
     try {
         res.json(await queries.getAllStaff(req.user!.schoolId));
@@ -36,20 +65,8 @@ router.post('/', requireRole('school_admin', 'super_admin'), async (req, res, ne
     try {
         const { firstName, lastName, email, role, department, position, rank, photoUrl, startDate, qualifications } = req.body;
 
-        if (!firstName || !lastName || !email || !role || !department || !startDate || !position) {
-            return res.status(400).json({ error: 'MISSING_REQUIRED_FIELDS' });
-        }
-
-        if (qualifications && Array.isArray(qualifications)) {
-            for (const qual of qualifications) {
-                if (!qual.degreeType || !qual.fieldOfStudy || !qual.institution) {
-                    return res.status(400).json({ error: 'QUALIFICATION_FIELDS_REQUIRED' });
-                }
-                if (qual.year && (qual.year < 1950 || qual.year > 2100)) {
-                    return res.status(400).json({ error: 'QUALIFICATION_YEAR_INVALID' });
-                }
-            }
-        }
+        const invalid = validateStaffBody(req.body);
+        if (invalid) return res.status(400).json({ error: invalid });
 
         const newStaff = await queries.addStaff(req.user!.schoolId, {
             firstName: firstName.trim(),
@@ -69,20 +86,8 @@ router.put('/:id', requireRole('school_admin', 'super_admin'), async (req, res, 
     try {
         const { firstName, lastName, email, role, department, position, rank, photoUrl, startDate, qualifications } = req.body;
 
-        if (!firstName || !lastName || !email || !role || !department || !startDate || !position) {
-            return res.status(400).json({ error: 'MISSING_REQUIRED_FIELDS' });
-        }
-
-        if (qualifications && Array.isArray(qualifications)) {
-            for (const qual of qualifications) {
-                if (!qual.degreeType || !qual.fieldOfStudy || !qual.institution) {
-                    return res.status(400).json({ error: 'QUALIFICATION_FIELDS_REQUIRED' });
-                }
-                if (qual.year && (qual.year < 1950 || qual.year > 2100)) {
-                    return res.status(400).json({ error: 'QUALIFICATION_YEAR_INVALID' });
-                }
-            }
-        }
+        const invalid = validateStaffBody(req.body);
+        if (invalid) return res.status(400).json({ error: invalid });
 
         const updatedStaff = await queries.updateStaff(req.user!.schoolId, req.params.id as string, {
             firstName: firstName.trim(),
@@ -107,7 +112,7 @@ router.put('/:id/certificates', requireRole('school_admin', 'super_admin'), asyn
             return res.status(400).json({ error: 'CERTIFICATES_INVALID' });
         }
         for (const cert of certificates) {
-            if (!cert.name || !cert.issuer || !cert.date) {
+            if (!isRecord(cert) || !cert.name || !cert.issuer || !cert.date) {
                 return res.status(400).json({ error: 'CERTIFICATE_FIELDS_REQUIRED' });
             }
         }
@@ -125,10 +130,10 @@ router.put('/:id/evaluations', requireRole('school_admin', 'super_admin'), async
             return res.status(400).json({ error: 'EVALUATIONS_INVALID' });
         }
         for (const ev of evaluations) {
-            if (!ev.courseName || ev.rating == null || !ev.date) {
+            if (!isRecord(ev) || !ev.courseName || ev.rating == null || !ev.date) {
                 return res.status(400).json({ error: 'EVALUATION_FIELDS_REQUIRED' });
             }
-            if (ev.rating < 0 || ev.rating > 5) {
+            if (typeof ev.rating !== 'number' || ev.rating < 0 || ev.rating > 5) {
                 return res.status(400).json({ error: 'RATING_OUT_OF_RANGE' });
             }
         }

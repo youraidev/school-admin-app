@@ -101,10 +101,11 @@ export function PickupPersonCard({ person, studentId }: Props) {
                     {isEditing ? (
                         /* Edit mode */
                         <div className="flex flex-col gap-2">
-                            <label className="text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-400">
+                            <label htmlFor={`pickup-note-${person.id}`} className="text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-400">
                                 {t('pickup.importantNote')}
                             </label>
                             <textarea
+                                id={`pickup-note-${person.id}`}
                                 rows={3}
                                 maxLength={NOTES_MAX}
                                 value={draftValue}

@@ -76,7 +76,7 @@ export default function AddStaffPage() {
                 role: formData.role,
                 department: formData.department,
                 position: formData.position as Position,
-                rank: formData.rank ? (formData.rank as Rank) : undefined,
+                rank: (formData.rank && formData.rank !== 'none') ? (formData.rank as Rank) : undefined,
                 startDate: formData.startDate,
                 // Qualifications will ideally be managed after creation
                 qualifications: [],

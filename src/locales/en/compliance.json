@@ -8,6 +8,10 @@
     "complete": "Complete",
     "uploaded": "Uploaded {{date}}",
     "allStaff": "All Staff",
+    "audience": {
+        "department": "Department",
+        "individual": "Individuals"
+    },
     "signatures": "Signatures",
     "remind_one": "Remind {{count}} pending user",
     "remind_other": "Remind {{count}} pending users",

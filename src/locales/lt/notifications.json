@@ -23,7 +23,10 @@
         "medium": "Vidutinis",
         "low": "Žemas"
     },
-    "daysRemaining": "liko {{count}} d.",
+    "daysRemaining_one": "liko {{count}} d.",
+    "daysRemaining_few": "liko {{count}} d.",
+    "daysRemaining_many": "liko {{count}} d.",
+    "daysRemaining_other": "liko {{count}} d.",
     "empty": {
         "title": "Pranešimų nėra",
         "subtitle": "Viskas peržiūrėta."

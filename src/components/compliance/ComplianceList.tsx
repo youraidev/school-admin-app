@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Upload, Search, FileText, CheckCircle2, Clock, Bell, Users, AlertCircle, CalendarDays, Tag } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { Progress } from '../ui/progress';
 import * as api from '../../lib/api';
 import { formatDate } from '../../i18n/format';
 import type { ComplianceDocumentWithSignatures } from '../../../shared/types';
@@ -53,6 +52,12 @@ function SignerChip({ staffName, status, signedAt }: { staffName: string; status
 export default function ComplianceList() {
     const { t } = useTranslation('compliance');
     const { t: tc } = useTranslation('common');
+    // targetAudience is a DB enum ('all' | 'department' | 'individual') — translate for display
+    const audienceLabels: Record<string, string> = {
+        all: t('allStaff'),
+        department: t('audience.department'),
+        individual: t('audience.individual'),
+    };
     const [searchTerm, setSearchTerm] = React.useState('');
     const [documents, setDocuments] = React.useState<ComplianceDocumentWithSignatures[]>([]);
     const [loading, setLoading] = React.useState(true);
@@ -172,7 +177,7 @@ export default function ComplianceList() {
                                             <span className="text-muted-foreground/40 text-xs">·</span>
                                             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                                                 <Users className="w-3 h-3" />
-                                                {doc.targetAudience === 'all' ? t('allStaff') : doc.targetAudience}
+                                                {audienceLabels[doc.targetAudience] ?? doc.targetAudience}
                                             </span>
                                         </div>
                                     </div>

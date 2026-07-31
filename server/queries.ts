@@ -103,8 +103,8 @@ export async function updateUserPassword(userId: string, passwordHash: string): 
     await db.execute(sql`UPDATE users SET password_hash = ${passwordHash} WHERE id = ${userId}`);
 }
 
-export async function updateUserPreferredLanguage(userId: string, language: 'en' | 'lt'): Promise<void> {
-    await db.execute(sql`UPDATE users SET preferred_language = ${language} WHERE id = ${userId}`);
+export async function updateUserPreferredLanguage(schoolId: string, userId: string, language: 'en' | 'lt'): Promise<void> {
+    await db.execute(sql`UPDATE users SET preferred_language = ${language} WHERE id = ${userId} AND school_id = ${schoolId}`);
 }
 
 // ===== DASHBOARD QUERIES =====

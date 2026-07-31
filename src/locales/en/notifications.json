@@ -23,7 +23,8 @@
         "medium": "Medium",
         "low": "Low"
     },
-    "daysRemaining": "{{count}}d remaining",
+    "daysRemaining_one": "{{count}}d remaining",
+    "daysRemaining_other": "{{count}}d remaining",
     "empty": {
         "title": "No notifications",
         "subtitle": "You are all caught up."

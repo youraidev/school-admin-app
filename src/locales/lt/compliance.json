@@ -8,6 +8,10 @@
     "complete": "Užbaigta",
     "uploaded": "Įkelta {{date}}",
     "allStaff": "Visi darbuotojai",
+    "audience": {
+        "department": "Skyrius",
+        "individual": "Atskiri asmenys"
+    },
     "signatures": "Parašai",
     "remind_one": "Priminti {{count}} laukiančiam naudotojui",
     "remind_few": "Priminti {{count}} laukiantiems naudotojams",

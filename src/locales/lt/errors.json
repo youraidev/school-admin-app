@@ -38,6 +38,7 @@
     "EVALUATIONS_INVALID": "Vertinimai turi būti sąrašas",
     "EVALUATION_FIELDS_REQUIRED": "Kiekvienas vertinimas turi turėti kurso pavadinimą, įvertinimą ir datą",
     "RATING_OUT_OF_RANGE": "Įvertinimas turi būti tarp 0 ir 5",
+    "QUALIFICATIONS_INVALID": "Kvalifikacijos turi būti sąrašas",
     "QUALIFICATION_FIELDS_REQUIRED": "Kiekviena kvalifikacija turi turėti laipsnio tipą, studijų kryptį ir instituciją",
     "QUALIFICATION_YEAR_INVALID": "Kvalifikacijos metai turi būti tarp 1950 ir 2100"
 }

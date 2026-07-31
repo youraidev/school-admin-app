@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Users, UserCog, FileText, FileCheck, AlertCircle, FileWarning, ArrowRight, ShieldAlert, ClipboardList } from 'lucide-react';
+import { Users, UserCog, FileText, FileCheck, FileWarning, ArrowRight, ShieldAlert, ClipboardList } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../ui/card';
 import { StatusBadge } from '../ui/status-badge';
 import * as api from '../../lib/api';

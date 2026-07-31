@@ -14,33 +14,13 @@ import {
 } from './ui/select';
 import { useLabels } from '../i18n/labels';
 import type { StaffQualification, DegreeType } from '../../shared/types';
+import { DEGREE_TYPES_GROUPED } from '../../shared/types';
 
-export const DEGREE_TYPES_GROUPED = [
-    {
-        labelKey: 'degreeGroups.degrees' as const,
-        options: [
-            'Diploma in Education',
-            'Bachelor of Education (B.Ed)',
-            'Bachelor’s Degree',
-            'PGDE / PGCE',
-            'Master of Education (M.Ed)',
-            'Master’s Degree',
-            'Doctor of Education (Ed.D)',
-            'PhD'
-        ] as DegreeType[]
-    },
-    {
-        labelKey: 'degreeGroups.certifications' as const,
-        options: [
-            'Teaching License',
-            'QTS',
-            'Montessori Certification',
-            'Special Education Certification',
-            'TESOL / TEFL',
-            'IB Teacher Certification'
-        ] as DegreeType[]
-    }
-];
+// shared/types keeps canonical English group labels; map them to translation keys
+const GROUP_LABEL_KEYS: Record<string, 'degreeGroups.degrees' | 'degreeGroups.certifications'> = {
+    'Degrees': 'degreeGroups.degrees',
+    'Teaching Certifications': 'degreeGroups.certifications',
+};
 
 interface QualificationsFormProps {
     qualifications: StaffQualification[];
@@ -157,8 +137,8 @@ export function QualificationsForm({ qualifications, onChange, suggestions }: Qu
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {DEGREE_TYPES_GROUPED.map(group => (
-                                                        <SelectGroup key={group.labelKey}>
-                                                            <SelectLabel>{tc(group.labelKey)}</SelectLabel>
+                                                        <SelectGroup key={group.label}>
+                                                            <SelectLabel>{GROUP_LABEL_KEYS[group.label] ? tc(GROUP_LABEL_KEYS[group.label]) : group.label}</SelectLabel>
                                                             {group.options.map(opt => (
                                                                 <SelectItem key={opt} value={opt}>{labels.degree(opt)}</SelectItem>
                                                             ))}

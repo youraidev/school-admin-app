@@ -34,7 +34,7 @@ router.post('/login', loginRateLimit, async (req, res, next) => {
         // Keep the stored preference in sync with the UI language used at login
         const lang = normalizeLanguage(language);
         if (lang && lang !== user.preferredLanguage) {
-            await queries.updateUserPreferredLanguage(user.id, lang);
+            await queries.updateUserPreferredLanguage(user.schoolId, user.id, lang);
         }
 
         const token = signToken({ userId: user.id, schoolId: user.schoolId, role: user.role });
@@ -74,8 +74,8 @@ router.post('/register', async (req, res, next) => {
 
         const token = signToken({ userId: user.id, schoolId: school.id, role: user.role });
         res.status(201).json({ token, user: { id: user.id, email: user.email, role: user.role, schoolId: school.id } });
-    } catch (error: any) {
-        if (error.message === 'SLUG_CONFLICT') {
+    } catch (error) {
+        if (error instanceof Error && error.message === 'SLUG_CONFLICT') {
             return res.status(409).json({ error: 'SCHOOL_NAME_TAKEN' });
         }
         next(error);
@@ -89,7 +89,7 @@ router.patch('/language', authenticate, async (req, res, next) => {
         if (!lang) {
             return res.status(400).json({ error: 'LANGUAGE_INVALID' });
         }
-        await queries.updateUserPreferredLanguage(req.user!.userId, lang);
+        await queries.updateUserPreferredLanguage(req.user!.schoolId, req.user!.userId, lang);
         res.json({ language: lang });
     } catch (error) {
         next(error);

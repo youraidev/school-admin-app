@@ -38,6 +38,7 @@
     "EVALUATIONS_INVALID": "Evaluations must be a list",
     "EVALUATION_FIELDS_REQUIRED": "Each evaluation must have a course name, rating, and date",
     "RATING_OUT_OF_RANGE": "Rating must be between 0 and 5",
+    "QUALIFICATIONS_INVALID": "Qualifications must be a list",
     "QUALIFICATION_FIELDS_REQUIRED": "Each qualification must include a degree type, field of study, and institution",
     "QUALIFICATION_YEAR_INVALID": "Qualification year must be between 1950 and 2100"
 }
