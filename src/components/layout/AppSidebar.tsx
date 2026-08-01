@@ -1,8 +1,9 @@
 
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Home, Users, UserCog, FileCheck, Bell, Settings, Building2 } from 'lucide-react';
+import { Home, Users, UserCog, FileCheck, Bell, Settings, Building2, LogOut } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { useAuth } from '../../contexts/AuthContext';
 import LanguageSwitcher from './LanguageSwitcher';
 
 const navItems = [
@@ -16,6 +17,7 @@ const navItems = [
 export default function AppSidebar() {
     const location = useLocation();
     const { t } = useTranslation();
+    const { user, logout } = useAuth();
 
     const isActive = (path: string) => {
         if (path === '/') {
@@ -78,6 +80,19 @@ export default function AppSidebar() {
                     <Settings className="w-5 h-5" />
                     <span>{t('nav.settings')}</span>
                 </button>
+
+                {user && (
+                    <div className="mt-2 pt-2 border-t border-sidebar-accent">
+                        <div className="px-3 py-2">
+                            <p className="text-sm font-medium text-sidebar-foreground truncate">{user.email}</p>
+                            <p className="text-xs text-sidebar-foreground/60 capitalize">{user.role}</p>
+                        </div>
+                        <button onClick={logout} className="nav-link w-full">
+                            <LogOut className="w-5 h-5" />
+                            <span>{t('nav.logout')}</span>
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

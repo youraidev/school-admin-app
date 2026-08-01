@@ -13,7 +13,8 @@
         "departments": "Padaliniai",
         "compliance": "Atitiktis",
         "notifications": "Pranešimai",
-        "settings": "Nustatymai"
+        "settings": "Nustatymai",
+        "logout": "Atsijungti"
     },
     "actions": {
         "save": "Išsaugoti",

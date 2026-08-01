@@ -13,7 +13,8 @@
         "departments": "Departments",
         "compliance": "Compliance",
         "notifications": "Notifications",
-        "settings": "Settings"
+        "settings": "Settings",
+        "logout": "Sign out"
     },
     "actions": {
         "save": "Save",
