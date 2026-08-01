@@ -7,12 +7,18 @@ function makeMiddleware(limiter: Ratelimit | null) {
         if (!limiter) { next(); return; }
         const ip = (req.headers['x-forwarded-for'] as string | undefined)
             ?.split(',')[0].trim() ?? req.socket.remoteAddress ?? 'unknown';
-        const { success, limit, remaining } = await limiter.limit(ip);
-        res.setHeader('X-RateLimit-Limit', limit);
-        res.setHeader('X-RateLimit-Remaining', remaining);
-        if (!success) {
-            res.status(429).json({ error: 'RATE_LIMITED' });
-            return;
+        try {
+            const { success, limit, remaining } = await limiter.limit(ip);
+            res.setHeader('X-RateLimit-Limit', limit);
+            res.setHeader('X-RateLimit-Remaining', remaining);
+            if (!success) {
+                res.status(429).json({ error: 'RATE_LIMITED' });
+                return;
+            }
+        } catch (err) {
+            // Fail open: if the rate-limit backend (Upstash) is unreachable, never block
+            // authentication. Log and allow the request through instead of returning 500.
+            console.error('[v0] Rate limiter unavailable, failing open:', err instanceof Error ? err.message : err);
         }
         next();
     };

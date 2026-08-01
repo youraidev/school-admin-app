@@ -34,11 +34,10 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-    console.error('[v0] Error:', err?.message, err?.stack);
+    console.error('Error:', err);
     res.status(500).json({
         error: 'INTERNAL_ERROR',
-        // [v0] Temporarily expose error message in all envs to diagnose production issue
-        message: err?.message,
+        message: process.env.NODE_ENV === 'development' ? err.message : undefined,
     });
 });
 
