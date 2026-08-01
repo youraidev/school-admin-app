@@ -1,7 +1,7 @@
 
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Home, Users, UserCog, FileCheck, Bell, Settings, School, Building2 } from 'lucide-react';
+import { Home, Users, UserCog, FileCheck, Bell, Settings, Building2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -29,9 +29,12 @@ export default function AppSidebar() {
             {/* Logo */}
             <div className="p-6 border-b border-sidebar-accent">
                 <Link to="/" className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-sidebar-primary rounded-lg flex items-center justify-center">
-                        <School className="w-6 h-6 text-white" />
-                    </div>
+                    <img
+                        src="/icon-192.png"
+                        alt=""
+                        aria-hidden="true"
+                        className="w-10 h-10 rounded-lg shadow-sm"
+                    />
                     <div>
                         <h1 className="text-lg font-semibold text-sidebar-foreground">{t('appName')}</h1>
                         <p className="text-xs text-sidebar-foreground/60">{t('appTagline')}</p>
