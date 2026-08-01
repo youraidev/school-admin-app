@@ -14,7 +14,10 @@ i18n
         nonExplicitSupportedLngs: true, // "lt-LT" in the browser resolves to "lt"
         interpolation: { escapeValue: false }, // React already escapes
         detection: {
-            order: ['localStorage', 'navigator'],
+            // navigator first so the browser locale wins on the first ever visit.
+            // localStorage then takes over once the user has made an explicit choice
+            // (or logged in, which writes their saved preference via i18n.changeLanguage).
+            order: ['navigator', 'localStorage'],
             caches: ['localStorage'],
             lookupLocalStorage: 'language',
         },
