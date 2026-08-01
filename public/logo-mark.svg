@@ -1,5 +1,9 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Open book logo">
   <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14524a"/>
+      <stop offset="1" stop-color="#0d3b35"/>
+    </linearGradient>
     <linearGradient id="page" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#e6f4ef"/>
       <stop offset="1" stop-color="#bfe0d3"/>
@@ -9,6 +13,9 @@
       <stop offset="1" stop-color="#e09a1a"/>
     </linearGradient>
   </defs>
+
+  <!-- Teal squircle background -->
+  <rect x="0" y="0" width="512" height="512" rx="112" ry="112" fill="url(#bg)"/>
 
   <!-- Left page -->
   <path d="M256 150
@@ -54,5 +61,5 @@
            C408 150 400 158 398 178
            C396 158 388 150 368 148
            C388 146 396 138 398 118 Z"
-        fill="#1f7a6d"/>
+        fill="#ffffff"/>
 </svg>
