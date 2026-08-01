@@ -329,6 +329,7 @@ export interface AuthUser {
     email: string;
     role: UserRole;
     schoolId: string;
+    preferredLanguage?: PreferredLanguage;
 }
 
 export interface AuthResponse {
