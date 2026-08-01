@@ -1,7 +1,7 @@
 {
-  "name": "School Admin Core",
-  "short_name": "School Admin",
-  "description": "Administration platform for schools.",
+  "name": "Our school",
+  "short_name": "Our school",
+  "description": "Where young minds grow.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0d3b35",
