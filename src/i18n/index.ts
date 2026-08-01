@@ -14,6 +14,12 @@ i18n
         nonExplicitSupportedLngs: true, // "lt-LT" in the browser resolves to "lt"
         interpolation: { escapeValue: false }, // React already escapes
         detection: {
+            // localStorage first — respects a manual choice made on this PC.
+            // navigator is the fallback for first-ever visits with no stored value.
+            // On login, AuthContext calls i18n.changeLanguage() which overwrites
+            // localStorage with the user's server-saved preference.
+            // On logout, AuthContext clears the key so the next user starts fresh
+            // from their browser locale.
             order: ['localStorage', 'navigator'],
             caches: ['localStorage'],
             lookupLocalStorage: 'language',

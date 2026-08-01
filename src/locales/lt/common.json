@@ -10,7 +10,7 @@
         "dashboard": "Valdymo skydas",
         "students": "Mokiniai",
         "staff": "Darbuotojai",
-        "departments": "Skyriai",
+        "departments": "Padaliniai",
         "compliance": "Atitiktis",
         "notifications": "Pranešimai",
         "settings": "Nustatymai"
@@ -73,7 +73,7 @@
         "senior_teacher": "Vyresnysis mokytojas",
         "lead_teacher": "Mokytojas metodininkas",
         "master_teacher": "Mokytojas ekspertas",
-        "department_head": "Skyriaus vedėjas",
+        "department_head": "Padalinio vedėjas",
         "vice_principal": "Direktoriaus pavaduotojas",
         "principal": "Direktorius"
     },

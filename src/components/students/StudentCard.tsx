@@ -381,32 +381,53 @@ export default function StudentCard({ studentId }: StudentCardProps) {
 
                 {/* Agreements Tab */}
                 <TabsContent value="agreements">
-                    <Card className="card-elevated">
-                        <CardHeader>
-                            <CardTitle className="text-lg">{t('agreements.title')}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3">
-                                {student.agreements.map(agreement => (
-                                    <div key={agreement.id} className="p-4 rounded-lg border bg-card">
-                                        <div className="flex items-start justify-between">
-                                            <div className="space-y-1">
-                                                <p className="font-medium">{agreement.name}</p>
-                                                <p className="text-sm text-muted-foreground capitalize">{agreement.type}</p>
-                                            </div>
-                                            <div className="text-right space-y-1">
-                                                <StatusBadge variant={agreement.status.includes('allow') ? 'active' : 'pending'}>
-                                                    {agreement.status}
-                                                </StatusBadge>
-                                                {agreement.signedDate && (
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {t('agreements.signed', { date: formatDate(agreement.signedDate, 'MMM d, yyyy') })}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
+                    <Card className="card-elevated overflow-hidden">
+                        <CardHeader className="pb-4 border-b border-border/60">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                        <FileText className="w-4 h-4 text-primary" />
                                     </div>
-                                ))}
+                                    <div>
+                                        <CardTitle className="text-base">{t('agreements.title')}</CardTitle>
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                            {student.agreements.filter(a => a.status === 'galioja').length} {t('agreements.status.galioja').toLowerCase()} · {student.agreements.filter(a => a.status === 'nepasirašyta').length} {t('agreements.status.nepasirašyta').toLowerCase()}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <div className="divide-y divide-border/50">
+                                {student.agreements.map(agreement => {
+                                    const isSigned = agreement.status === 'galioja';
+                                    return (
+                                        <div key={agreement.id} className={`flex items-center gap-4 px-5 py-3.5 transition-colors ${isSigned ? 'bg-emerald-50/40 dark:bg-emerald-950/10' : 'bg-card hover:bg-muted/30'}`}>
+                                            <div className="flex-shrink-0">
+                                                {isSigned
+                                                    ? <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                                    : <Clock className="w-5 h-5 text-muted-foreground/40" />
+                                                }
+                                            </div>
+                                            <span className={`flex-1 text-sm font-medium ${isSigned ? 'text-foreground' : 'text-foreground/80'}`}>
+                                                {agreement.name}
+                                            </span>
+                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-md flex-shrink-0 ${
+                                                isSigned
+                                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
+                                                    : 'bg-muted text-muted-foreground'
+                                            }`}>
+                                                {t(`agreements.status.${agreement.status}`) || agreement.status}
+                                            </span>
+                                            {agreement.signedDate && (
+                                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-[110px] justify-end">
+                                                    <CalendarDays className="w-3.5 h-3.5 flex-shrink-0" />
+                                                    <span>{formatDate(agreement.signedDate, 'MMM d, yyyy')}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </CardContent>
                     </Card>

@@ -1,36 +1,36 @@
 {
-    "title": "Skyriai",
-    "subtitle": "Tvarkykite mokyklos skyrius ir jų aprašymus",
-    "addDepartment": "Pridėti skyrių",
+    "title": "Padaliniai",
+    "subtitle": "Tvarkykite mokyklos padalinius ir jų aprašymus",
+    "addDepartment": "Pridėti padalinį",
     "staffCount_one": "{{count}} darbuotojas",
     "staffCount_few": "{{count}} darbuotojai",
     "staffCount_many": "{{count}} darbuotojo",
     "staffCount_other": "{{count}} darbuotojų",
-    "empty": "Skyrių nėra. Sukurkite pirmąjį.",
+    "empty": "Padalinių nėra. Sukurkite pirmąjį.",
     "deleteDialog": {
         "title": "Ar tikrai?",
-        "description": "Šio veiksmo negalima atšaukti. Skyrius bus ištrintas visam laikui. Negalima ištrinti skyriaus, kuriam priskirta darbuotojų."
+        "description": "Šio veiksmo negalima atšaukti. Padalinys bus ištrintas visam laikui. Negalima ištrinti padalinio, kuriam priskirta darbuotojų."
     },
     "fields": {
-        "name": "Skyriaus pavadinimas *",
+        "name": "Padalinio pavadinimas *",
         "namePlaceholder": "pvz., Matematika",
         "nameHint": "Turi būti unikalus. Iki 100 simbolių.",
         "description": "Aprašymas",
-        "descriptionPlaceholder": "Neprivalomas skyriaus aprašymas...",
+        "descriptionPlaceholder": "Neprivalomas padalinio aprašymas...",
         "descriptionHint": "Iki 500 simbolių."
     },
     "addPage": {
-        "title": "Naujas skyrius",
-        "subtitle": "Sukurkite naują skyrių darbuotojams",
-        "cardTitle": "Skyriaus informacija",
-        "cardDescription": "Užpildykite naujo skyriaus duomenis. Pavadinimas privalomas.",
-        "submit": "Sukurti skyrių",
+        "title": "Naujas padalinys",
+        "subtitle": "Sukurkite naują padalinį darbuotojams",
+        "cardTitle": "Padalinio informacija",
+        "cardDescription": "Užpildykite naujo padalinio duomenis. Pavadinimas privalomas.",
+        "submit": "Sukurti padalinį",
         "submitting": "Kuriama..."
     },
     "editPage": {
-        "title": "Redaguoti skyrių",
-        "subtitle": "Atnaujinkite skyriaus duomenis",
-        "cardDescription": "Atnaujinkite šio skyriaus duomenis."
+        "title": "Redaguoti padalinį",
+        "subtitle": "Atnaujinkite padalinio duomenis",
+        "cardDescription": "Atnaujinkite šio padalinio duomenis."
     },
-    "invalidId": "Neteisingas skyriaus ID"
+    "invalidId": "Neteisingas padalinio ID"
 }
