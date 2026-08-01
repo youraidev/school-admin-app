@@ -30,10 +30,10 @@ export default function AppSidebar() {
             <div className="p-6 border-b border-sidebar-accent">
                 <Link to="/" className="flex items-center gap-3">
                     <img
-                        src="/icon-192.png"
+                        src="/logo-mark.svg"
                         alt=""
                         aria-hidden="true"
-                        className="w-10 h-10 rounded-lg shadow-sm"
+                        className="w-10 h-10 object-contain"
                     />
                     <div>
                         <h1 className="text-lg font-semibold text-sidebar-foreground">{t('appName')}</h1>

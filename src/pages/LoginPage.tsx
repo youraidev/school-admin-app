@@ -47,10 +47,10 @@ export default function LoginPage() {
             <LanguageSwitcher variant="floating" />
             <div className="bg-white p-8 rounded-xl shadow-sm border w-full max-w-sm">
                 <img
-                    src="/icon-192.png"
+                    src="/logo-mark.svg"
                     alt=""
                     aria-hidden="true"
-                    className="w-14 h-14 rounded-xl shadow-sm mb-5"
+                    className="w-14 h-14 object-contain mb-4"
                 />
                 <h1 className="text-2xl font-bold mb-1">
                     {mode === 'login' ? t('signIn') : t('createAccount')}
