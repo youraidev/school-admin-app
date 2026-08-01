@@ -92,6 +92,12 @@ export default function StudentCard({ studentId }: StudentCardProps) {
 
     const primaryContact = student.emergencyContacts.find(c => c.isPrimary);
 
+    // Agreement statuses are stored as Lithuanian enum values; unknown values render as-is
+    const agreementStatusLabels: Record<string, string> = {
+        'galioja': t('agreements.status.galioja'),
+        'nepasirašyta': t('agreements.status.nepasirašyta'),
+    };
+
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Back Button */}
@@ -417,7 +423,7 @@ export default function StudentCard({ studentId }: StudentCardProps) {
                                                     ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
                                                     : 'bg-muted text-muted-foreground'
                                             }`}>
-                                                {t(`agreements.status.${agreement.status}`) || agreement.status}
+                                                {agreementStatusLabels[agreement.status] ?? agreement.status}
                                             </span>
                                             {agreement.signedDate && (
                                                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-[110px] justify-end">

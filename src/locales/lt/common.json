@@ -13,8 +13,7 @@
         "departments": "Padaliniai",
         "compliance": "Atitiktis",
         "notifications": "Pranešimai",
-        "settings": "Nustatymai",
-        "logout": "Atsijungti"
+        "settings": "Nustatymai"
     },
     "actions": {
         "save": "Išsaugoti",
@@ -61,6 +60,14 @@
         "mother": "Mama",
         "guardian": "Globėjas",
         "sibling": "Brolis / sesuo"
+    },
+    "account": {
+        "signOut": "Atsijungti"
+    },
+    "roles": {
+        "school_admin": "Mokyklos administratorius",
+        "super_admin": "Sistemos administratorius",
+        "staff": "Darbuotojas"
     },
     "seniority": {
         "expert": "Ekspertas",

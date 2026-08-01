@@ -382,7 +382,7 @@ export default function Dashboard() {
                                                 <div className="min-w-0">
                                                     <p className="text-sm font-medium truncate group-hover:text-primary transition-colors line-clamp-1">{doc.documentTitle}</p>
                                                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 text-[11px] font-semibold mt-0.5">
-                                                        {t('signatures.pendingChip', { count: doc.pendingCount })}
+                                                        {t('signatures.pendingChip', { count: doc.totalCount - doc.signedCount })}
                                                     </span>
                                                 </div>
                                             </div>

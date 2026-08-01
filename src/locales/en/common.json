@@ -13,8 +13,7 @@
         "departments": "Departments",
         "compliance": "Compliance",
         "notifications": "Notifications",
-        "settings": "Settings",
-        "logout": "Sign out"
+        "settings": "Settings"
     },
     "actions": {
         "save": "Save",
@@ -61,6 +60,14 @@
         "mother": "Mother",
         "guardian": "Guardian",
         "sibling": "Sibling"
+    },
+    "account": {
+        "signOut": "Sign out"
+    },
+    "roles": {
+        "school_admin": "School admin",
+        "super_admin": "Super admin",
+        "staff": "Staff"
     },
     "seniority": {
         "expert": "Expert",
