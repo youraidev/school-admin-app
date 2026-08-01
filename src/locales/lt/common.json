@@ -1,6 +1,6 @@
 {
-    "appName": "School Admin",
-    "appTagline": "Core",
+    "appName": "Mūsų mokykla",
+    "appTagline": "Kur auga jaunieji protai",
     "language": {
         "label": "Kalba",
         "en": "English",
@@ -13,7 +13,8 @@
         "departments": "Padaliniai",
         "compliance": "Atitiktis",
         "notifications": "Pranešimai",
-        "settings": "Nustatymai"
+        "settings": "Nustatymai",
+        "logout": "Atsijungti"
     },
     "actions": {
         "save": "Išsaugoti",

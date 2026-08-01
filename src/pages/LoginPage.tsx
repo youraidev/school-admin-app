@@ -46,6 +46,12 @@ export default function LoginPage() {
         <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
             <LanguageSwitcher variant="floating" />
             <div className="bg-white p-8 rounded-xl shadow-sm border w-full max-w-sm">
+                <img
+                    src="/logo-mark.svg"
+                    alt=""
+                    aria-hidden="true"
+                    className="w-14 h-14 object-contain mb-4"
+                />
                 <h1 className="text-2xl font-bold mb-1">
                     {mode === 'login' ? t('signIn') : t('createAccount')}
                 </h1>

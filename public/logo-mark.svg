@@ -1,0 +1,65 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Open book logo">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14524a"/>
+      <stop offset="1" stop-color="#0d3b35"/>
+    </linearGradient>
+    <linearGradient id="page" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e6f4ef"/>
+      <stop offset="1" stop-color="#bfe0d3"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6c453"/>
+      <stop offset="1" stop-color="#e09a1a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Teal squircle background -->
+  <rect x="0" y="0" width="512" height="512" rx="112" ry="112" fill="url(#bg)"/>
+
+  <!-- Left page -->
+  <path d="M256 150
+           C214 122 168 114 120 120
+           C110 121 104 129 104 139
+           L104 356
+           C104 366 111 373 121 372
+           C165 367 216 375 256 400
+           Z"
+        fill="url(#page)" stroke="#1f7a6d" stroke-width="14" stroke-linejoin="round"/>
+
+  <!-- Right page -->
+  <path d="M256 150
+           C298 122 344 114 392 120
+           C402 121 408 129 408 139
+           L408 356
+           C408 366 401 373 391 372
+           C347 367 296 375 256 400
+           Z"
+        fill="url(#page)" stroke="#1f7a6d" stroke-width="14" stroke-linejoin="round"/>
+
+  <!-- Page lines left -->
+  <g stroke="#8fc4b3" stroke-width="9" stroke-linecap="round" opacity="0.9">
+    <line x1="150" y1="250" x2="222" y2="258"/>
+    <line x1="150" y1="284" x2="222" y2="292"/>
+  </g>
+  <!-- Page lines right -->
+  <g stroke="#8fc4b3" stroke-width="9" stroke-linecap="round" opacity="0.9">
+    <line x1="290" y1="258" x2="362" y2="250"/>
+    <line x1="290" y1="292" x2="362" y2="284"/>
+  </g>
+
+  <!-- Center spine -->
+  <path d="M256 150 L256 400" stroke="#1f7a6d" stroke-width="14" stroke-linecap="round"/>
+
+  <!-- Bookmark ribbon -->
+  <path d="M236 150 L276 150 L276 434 L256 410 L236 434 Z"
+        fill="url(#ribbon)" stroke="#c8830f" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- Sparkle -->
+  <path d="M398 118
+           C400 138 408 146 428 148
+           C408 150 400 158 398 178
+           C396 158 388 150 368 148
+           C388 146 396 138 398 118 Z"
+        fill="#ffffff"/>
+</svg>
