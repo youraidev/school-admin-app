@@ -2,9 +2,7 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from './schema.js';
 
-// NEON_POSTGRES_URL is the primary Neon connection string (All Environments).
-// DATABASE_URL is the legacy fallback kept for backwards compatibility only.
-const DATABASE_URL = process.env.NEON_POSTGRES_URL || process.env.NEON_DATABASE_URL || process.env.DATABASE_URL;
+const DATABASE_URL = process.env.NEON_POSTGRES_URL || process.env.DATABASE_URL;
 if (!DATABASE_URL) throw new Error('DATABASE_URL environment variable is required');
 
 // Works with both local Docker PostgreSQL and Neon in production.
