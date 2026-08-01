@@ -47,9 +47,16 @@ router.post('/login', loginRateLimit, async (req, res, next) => {
     }
 });
 
-// POST /api/auth/register — creates a new school + school_admin user
+// POST /api/auth/register — creates a new school + school_admin user.
+// Self-service registration is disabled: schools are onboarded manually
+// (the login page points new schools to the support email). Set
+// ALLOW_SELF_REGISTRATION=true to re-enable, e.g. for local development.
 router.post('/register', async (req, res, next) => {
     try {
+        if (process.env.ALLOW_SELF_REGISTRATION !== 'true') {
+            return res.status(403).json({ error: 'REGISTRATION_DISABLED' });
+        }
+
         const { schoolName, email, password, language } = req.body;
         if (!schoolName || !email || !password) {
             return res.status(400).json({ error: 'REGISTER_FIELDS_REQUIRED' });

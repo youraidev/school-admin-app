@@ -10,6 +10,7 @@
     "INVALID_EMAIL": "Neteisingas el. pašto formatas",
     "INVALID_CREDENTIALS": "Neteisingi prisijungimo duomenys",
     "REGISTER_FIELDS_REQUIRED": "Mokyklos pavadinimas, el. paštas ir slaptažodis yra privalomi",
+    "REGISTRATION_DISABLED": "Savarankiška registracija išjungta. Dėl naujos mokyklos registracijos kreipkitės: arturas@aicoding.lt",
     "PASSWORD_TOO_SHORT": "Slaptažodį turi sudaryti bent 8 simboliai",
     "PASSWORD_TOO_LONG": "Slaptažodis negali būti ilgesnis nei 72 simboliai",
     "PASSWORDS_DO_NOT_MATCH": "Slaptažodžiai nesutampa",

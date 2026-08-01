@@ -10,6 +10,7 @@
     "INVALID_EMAIL": "Invalid email format",
     "INVALID_CREDENTIALS": "Invalid credentials",
     "REGISTER_FIELDS_REQUIRED": "School name, email, and password are required",
+    "REGISTRATION_DISABLED": "Self-registration is disabled. To register a new school, contact arturas@aicoding.lt",
     "PASSWORD_TOO_SHORT": "Password must be at least 8 characters",
     "PASSWORD_TOO_LONG": "Password must be 72 characters or fewer",
     "PASSWORDS_DO_NOT_MATCH": "Passwords do not match",
