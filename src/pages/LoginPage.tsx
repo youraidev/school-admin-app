@@ -5,6 +5,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { loginUser, registerSchool } from '../lib/api';
 import { getErrorCode, useErrorMessage } from '../i18n/errors';
+import { hasExplicitLanguageChoice } from '../i18n';
 import LanguageSwitcher from '../components/layout/LanguageSwitcher';
 
 type Mode = 'login' | 'register';
@@ -29,10 +30,12 @@ export default function LoginPage() {
         setError('');
         setLoading(true);
         try {
-            const language = i18n.resolvedLanguage;
+            // Only an explicit device choice may overwrite the account's stored
+            // preference; otherwise the server's value wins (applied in AuthContext).
+            // Registration always records the language the user signed up in.
             const data = mode === 'login'
-                ? await loginUser(email, password, language)
-                : await registerSchool(schoolName, email, password, language);
+                ? await loginUser(email, password, hasExplicitLanguageChoice() ? i18n.resolvedLanguage : undefined)
+                : await registerSchool(schoolName, email, password, i18n.resolvedLanguage);
             login(data.token, data.user);
             navigate('/');
         } catch (err) {
@@ -81,7 +84,7 @@ export default function LoginPage() {
                                 onChange={e => setSchoolName(e.target.value)}
                                 required
                                 placeholder={t('schoolNamePlaceholder')}
-                                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
                             />
                         </div>
                     )}
@@ -93,14 +96,14 @@ export default function LoginPage() {
                             onChange={e => setEmail(e.target.value)}
                             required
                             placeholder={t('emailPlaceholder')}
-                            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
                         />
                     </div>
                     <div>
                         <div className="flex items-center justify-between mb-1">
                             <label className="block text-sm font-medium">{t('password')}</label>
                             {mode === 'login' && (
-                                <Link to="/forgot-password" className="text-xs text-blue-600 hover:underline">
+                                <Link to="/forgot-password" className="text-xs text-primary hover:underline">
                                     {t('forgotPasswordLink')}
                                 </Link>
                             )}
@@ -113,7 +116,7 @@ export default function LoginPage() {
                                 required
                                 minLength={mode === 'register' ? 8 : undefined}
                                 placeholder={mode === 'register' ? t('passwordMinPlaceholder') : ''}
-                                className="w-full border rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full border rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
                             />
                             <button
                                 type="button"
@@ -128,7 +131,7 @@ export default function LoginPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                        className="w-full bg-primary text-primary-foreground py-2 rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
                     >
                         {loading ? (mode === 'login' ? t('signingIn') : t('creatingAccount')) : (mode === 'login' ? t('signIn') : t('createAccount'))}
                     </button>
@@ -137,13 +140,13 @@ export default function LoginPage() {
                 <p className="text-sm text-center text-gray-500 mt-6">
                     {mode === 'login' ? (
                         <>{t('noAccount')}{' '}
-                            <button onClick={() => { setMode('register'); setError(''); setShowPassword(false); }} className="text-blue-600 hover:underline font-medium">
+                            <button onClick={() => { setMode('register'); setError(''); setShowPassword(false); }} className="text-primary hover:underline font-medium">
                                 {t('registerSchool')}
                             </button>
                         </>
                     ) : (
                         <>{t('haveAccount')}{' '}
-                            <button onClick={() => { setMode('login'); setError(''); setShowPassword(false); }} className="text-blue-600 hover:underline font-medium">
+                            <button onClick={() => { setMode('login'); setError(''); setShowPassword(false); }} className="text-primary hover:underline font-medium">
                                 {t('signIn')}
                             </button>
                         </>

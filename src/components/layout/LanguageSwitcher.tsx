@@ -3,6 +3,7 @@ import { Languages } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { updatePreferredLanguage } from '../../lib/api';
 import { getToken } from '../../lib/auth';
+import { markLanguageExplicit } from '../../i18n';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../i18n/resources';
 
 interface LanguageSwitcherProps {
@@ -16,6 +17,7 @@ export default function LanguageSwitcher({ variant = 'sidebar' }: LanguageSwitch
 
     function changeLanguage(lng: SupportedLanguage) {
         if (lng === current) return;
+        markLanguageExplicit(); // a clicked choice outranks geo/browser/account defaults
         i18n.changeLanguage(lng);
         // Persist for server-sent emails; best-effort, only when signed in
         if (getToken()) updatePreferredLanguage(lng).catch(() => {});
@@ -34,7 +36,7 @@ export default function LanguageSwitcher({ variant = 'sidebar' }: LanguageSwitch
                         ? 'bg-sidebar-primary text-white'
                         : 'text-sidebar-foreground/60 hover:text-sidebar-foreground'
                     : current === lng
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-primary text-primary-foreground'
                         : 'text-gray-500 hover:text-gray-800'
             )}
         >

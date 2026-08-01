@@ -31,14 +31,17 @@ router.post('/login', loginRateLimit, async (req, res, next) => {
             return res.status(401).json({ error: 'INVALID_CREDENTIALS' });
         }
 
-        // Keep the stored preference in sync with the UI language used at login
+        // The client sends `language` only when the user explicitly chose one on this
+        // device — that choice updates the stored preference. Otherwise the stored
+        // preference is returned so the client adopts it (e.g. logging in on a new device).
         const lang = normalizeLanguage(language);
         if (lang && lang !== user.preferredLanguage) {
             await queries.updateUserPreferredLanguage(user.schoolId, user.id, lang);
         }
+        const preferredLanguage = lang ?? normalizeLanguage(user.preferredLanguage) ?? 'en';
 
         const token = signToken({ userId: user.id, schoolId: user.schoolId, role: user.role });
-        res.json({ token, user: { id: user.id, email: user.email, role: user.role, schoolId: user.schoolId, preferredLanguage: user.preferredLanguage ?? 'en' } });
+        res.json({ token, user: { id: user.id, email: user.email, role: user.role, schoolId: user.schoolId, preferredLanguage } });
     } catch (error) {
         next(error);
     }

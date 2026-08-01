@@ -22,16 +22,25 @@ app.use(express.json());
 
 app.use('/api/auth', authRouter);
 
+// Public endpoints (no auth): health check and visitor country for language detection.
+// The country comes from the hosting platform's edge headers (Vercel / Cloudflare);
+// locally neither header exists and country is null, so the client falls back to
+// browser-language detection.
+app.get('/api/health', (_req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/geo', (req, res) => {
+    const country = req.headers['x-vercel-ip-country'] ?? req.headers['cf-ipcountry'] ?? null;
+    res.json({ country: typeof country === 'string' ? country.toUpperCase() : null });
+});
+
 app.use('/api', authenticate);
 app.use('/api/dashboard',   dashboardRouter);
 app.use('/api/students',    studentsRouter);
 app.use('/api/staff',       staffRouter);
 app.use('/api/departments', departmentsRouter);
 app.use('/api/compliance',  complianceRouter);
-
-app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error('Error:', err);

@@ -56,13 +56,13 @@ export default function ForgotPasswordPage() {
                                     onChange={e => setEmail(e.target.value)}
                                     required
                                     placeholder={t('emailPlaceholder')}
-                                    className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
                                 />
                             </div>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                                className="w-full bg-primary text-primary-foreground py-2 rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
                             >
                                 {loading ? t('forgot.sending') : t('forgot.sendLink')}
                             </button>
@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
                 )}
 
                 <p className="text-sm text-center text-gray-500 mt-6">
-                    <Link to="/login" className="text-blue-600 hover:underline font-medium">
+                    <Link to="/login" className="text-primary hover:underline font-medium">
                         {t('forgot.backToSignIn')}
                     </Link>
                 </p>
