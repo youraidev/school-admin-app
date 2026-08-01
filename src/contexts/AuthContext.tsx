@@ -26,6 +26,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = useCallback(() => {
         clearAuth();
         setUser(null);
+        // Clear the stored language so the next user on this PC starts from
+        // their browser locale rather than the previous user's preference.
+        localStorage.removeItem('language');
+        i18n.changeLanguage(navigator.language);
     }, []);
 
     // Handle 401 responses dispatched by the API layer — clears state so
