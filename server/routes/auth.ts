@@ -38,7 +38,7 @@ router.post('/login', loginRateLimit, async (req, res, next) => {
         }
 
         const token = signToken({ userId: user.id, schoolId: user.schoolId, role: user.role });
-        res.json({ token, user: { id: user.id, email: user.email, role: user.role, schoolId: user.schoolId } });
+        res.json({ token, user: { id: user.id, email: user.email, role: user.role, schoolId: user.schoolId, preferredLanguage: user.preferredLanguage ?? 'en' } });
     } catch (error) {
         next(error);
     }
@@ -73,7 +73,7 @@ router.post('/register', async (req, res, next) => {
         });
 
         const token = signToken({ userId: user.id, schoolId: school.id, role: user.role });
-        res.status(201).json({ token, user: { id: user.id, email: user.email, role: user.role, schoolId: school.id } });
+        res.status(201).json({ token, user: { id: user.id, email: user.email, role: user.role, schoolId: school.id, preferredLanguage: user.preferredLanguage ?? 'en' } });
     } catch (error) {
         if (error instanceof Error && error.message === 'SLUG_CONFLICT') {
             return res.status(409).json({ error: 'SCHOOL_NAME_TAKEN' });
