@@ -4,8 +4,15 @@
     "upload": "Įkelti dokumentą",
     "uploadComingSoon": "Netrukus — įkėlimas dar neįgyvendintas",
     "searchPlaceholder": "Ieškoti dokumentų...",
+    "filters": {
+        "all": "Visi",
+        "inProgress": "Vykdoma",
+        "overdue": "Vėluojama",
+        "complete": "Užbaigta"
+    },
     "overdue": "Vėluojama",
     "complete": "Užbaigta",
+    "noResults": "Pagal jūsų paiešką dokumentų nerasta",
     "uploaded": "Įkelta {{date}}",
     "allStaff": "Visi darbuotojai",
     "audience": {

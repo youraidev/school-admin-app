@@ -4,8 +4,15 @@
     "upload": "Upload Document",
     "uploadComingSoon": "Coming soon — upload is not yet implemented",
     "searchPlaceholder": "Search documents...",
+    "filters": {
+        "all": "All",
+        "inProgress": "In Progress",
+        "overdue": "Overdue",
+        "complete": "Complete"
+    },
     "overdue": "Overdue",
     "complete": "Complete",
+    "noResults": "No documents match your search",
     "uploaded": "Uploaded {{date}}",
     "allStaff": "All Staff",
     "audience": {
