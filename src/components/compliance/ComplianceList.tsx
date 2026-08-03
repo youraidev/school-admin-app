@@ -121,13 +121,19 @@ function StatPill({ label, count, active, onClick, icon: Icon, tone }: StatPillP
         success: 'text-success',
         primary: 'text-primary',
     };
+    const activeClasses: Record<StatPillProps['tone'], string> = {
+        default: 'border-foreground/30 bg-muted/60',
+        destructive: 'border-destructive/40 bg-destructive/10',
+        success: 'border-success/40 bg-success/10',
+        primary: 'border-primary/40 bg-primary/10',
+    };
 
     return (
         <button
             onClick={onClick}
             className={cn(
                 'flex items-center gap-2.5 px-4 py-2.5 rounded-lg border text-left transition-colors flex-1 min-w-0',
-                active ? 'bg-accent border-primary/40' : 'bg-card border-border/60 hover:bg-accent/50'
+                active ? activeClasses[tone] : 'bg-card border-border/60 hover:bg-muted/40'
             )}
         >
             <Icon className={cn('w-4 h-4 flex-shrink-0', toneClasses[tone])} />
